@@ -1,195 +1,190 @@
 <!DOCTYPE html>
-<html lang="ru" class="scroll-smooth">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>InvestPro | Infinite Feed v4</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>InvestPro | iOS Edition</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400&display=swap" rel="stylesheet">
+    <!-- Подключаем Merriweather для ридера, остальное на системных шрифтах -->
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,400&display=swap" rel="stylesheet">
     
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        dark: '#0b1120', darker: '#020617', card: '#1e293b',
-                        accent: '#3b82f6', up: '#10b981', down: '#ef4444', donate: '#f59e0b'
+                        ios: { bg: '#000000', card: '#1C1C1E', gray: '#8E8E93', sep: '#38383A', blue: '#0A84FF', green: '#30D158', red: '#FF453A' },
+                        accent: '#0A84FF'
                     },
-                    fontFamily: { sans: ['Inter', 'sans-serif'], serif: ['Merriweather', 'serif'] }
+                    fontFamily: { 
+                        sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'], 
+                        serif: ['Merriweather', 'serif'] 
+                    }
                 }
             }
         }
     </script>
     
     <style>
-        #app-preloader { position: fixed; inset: 0; z-index: 9999; background-color: #0b1120; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.6s ease, visibility 0.6s ease; }
-        #app-preloader.loaded { opacity: 0; visibility: hidden; pointer-events: none; }
-        .preloader-spinner { width: 48px; height: 48px; border: 4px solid rgba(59, 130, 246, 0.2); border-top-color: #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        /* iOS SPECIFIC STYLES */
+        body { background-color: #000; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; }
+        
+        /* Safe Area Insets for iPhone Notch etc */
+        .safe-top { padding-top: env(safe-area-inset-top); }
+        .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
 
-        .feed-container { overflow-y: auto; overflow-x: hidden; height: calc(100vh - 64px); scroll-behavior: smooth; -webkit-overflow-scrolling: touch; position: relative; contain: strict; }
-        .feed-item { min-height: 85vh; padding: 1.5rem; margin-bottom: 0; border-radius: 0; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; justify-content: flex-end; position: relative; overflow: hidden; }
+        /* HORIZONTAL TIKTOK FEED */
+        .feed-scroll {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            height: calc(100vh - 84px); /* Вычет таббара */
+            scroll-padding-left: 2rem;
+        }
+        
+        .feed-card {
+            flex: 0 0 90vw; /* На мобильном 90% ширины */
+            max-width: 400px; /* Ограничение на ПК */
+            height: 100%;
+            scroll-snap-align: center;
+            margin-right: 1rem;
+            border-radius: 24px;
+            position: relative;
+            overflow: hidden;
+            transform-origin: center;
+            transition: transform 0.3s ease;
+        }
+
         @media (min-width: 768px) {
-            .feed-container { padding: 2rem; background: #020617; }
-            .feed-item { max-width: 600px; margin: 0 auto 1.5rem auto; min-height: 500px; border-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.05); padding: 2rem; }
+            .feed-scroll { justify-content: flex-start; padding: 2rem; height: calc(100vh - 100px); }
+            .feed-card { flex: 0 0 380px; margin-right: 1.5rem; }
         }
 
-        .fade-up { animation: fadeUp 0.5s ease-out forwards; opacity: 0; transform: translateY(20px); }
-        @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
-        .glass-header { backdrop-filter: blur(16px); background: rgba(11, 17, 32, 0.9); border-bottom: 1px solid rgba(255,255,255,0.05); }
-        
-        .reader-overlay { position: fixed; inset: 0; z-index: 100; overflow-y: auto; }
-        .reader-paper { font-family: 'Merriweather', serif; line-height: 1.9; min-height: 100vh; padding-bottom: 4rem; transition: background 0.3s, color 0.3s; }
-        .reader-header { position: sticky; top: 0; backdrop-filter: blur(12px); z-index: 10; transition: background 0.3s, border-color 0.3s; }
-        
-        .reader-paper.light { background: #fdfbf7; color: #2d3748; }
-        .reader-paper.light .prose-reader p { color: #4a5568; }
-        .reader-paper.light .prose-reader h2 { color: #1a202c; }
-        .reader-paper.light .prose-reader blockquote { background: #f7fafc; border-left-color: #3b82f6; color: #4a5568; }
-        .reader-paper.light .reader-header { background: rgba(253, 251, 247, 0.95); border-bottom: 1px solid rgba(0,0,0,0.05); }
-        .reader-paper.light .reader-btn { background: white; border-color: #e2e8f0; color: #4a5568; }
-        .reader-paper.light .reader-btn:hover { background: #f7fafc; border-color: #cbd5e0; }
-        .reader-paper.light .meta-tag { background: rgba(0,0,0,0.06); color: #4a5568; }
-        .reader-paper.light .comment-box { background: #fff; border-color: #e2e8f0; }
-        .reader-paper.light .comment-input { background: #f7fafc; border-color: #e2e8f0; color: #2d3748; }
-        .reader-paper.light .source-link { background: #1a202c; color: white; }
-        .reader-paper.light .source-link:hover { background: #2d3748; }
-        
-        .reader-paper.dark { background: #1a202c; color: #cbd5e1; }
-        .reader-paper.dark .prose-reader p { color: #a0aec0; }
-        .reader-paper.dark .prose-reader h2 { color: #f7fafc; }
-        .reader-paper.dark .prose-reader blockquote { background: #2d3748; border-left-color: #63b3ed; color: #a0aec0; }
-        .reader-paper.dark .reader-header { background: rgba(26, 32, 44, 0.95); border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .reader-paper.dark .reader-btn { background: #2d3748; border-color: #4a5568; color: #e2e8f0; }
-        .reader-paper.dark .reader-btn:hover { background: #4a5568; border-color: #718096; }
-        .reader-paper.dark .meta-tag { background: rgba(255,255,255,0.08); color: #a0aec0; }
-        .reader-paper.dark .comment-box { background: #2d3748; border-color: #4a5568; }
-        .reader-paper.dark .comment-input { background: #1a202c; border-color: #4a5568; color: #e2e8f0; }
-        .reader-paper.dark .source-link { background: #f7fafc; color: #1a202c; }
-        .reader-paper.dark .source-link:hover { background: #e2e8f0; }
+        /* Скрытие скроллбара */
+        .feed-scroll::-webkit-scrollbar { display: none; }
+        .feed-scroll { -ms-overflow-style: none; scrollbar-width: none; }
 
-        .prose-reader { max-width: 68ch; margin: 0 auto; padding: 0 1.5rem; }
-        .prose-reader p { margin-bottom: 1.8em; font-size: 1.15rem; }
-        .prose-reader h2 { font-family: 'Inter', sans-serif; font-weight: 800; font-size: 1.6rem; margin-top: 2.5em; margin-bottom: 1em; letter-spacing: -0.02em; line-height: 1.3; }
-        .prose-reader strong { font-weight: 700; color: inherit; }
-        .prose-reader blockquote { padding: 1.5em 2em; margin: 2.5em 0; border-radius: 0 12px 12px 0; font-style: italic; border-left-width: 4px; font-size: 1.2rem; line-height: 1.7; }
-        .prose-reader ul { list-style: none; padding-left: 0; margin-bottom: 1.8em; }
-        .prose-reader ul li { position: relative; padding-left: 1.5em; margin-bottom: 0.8em; }
-        .prose-reader ul li::before { content: ''; position: absolute; left: 0; top: 0.7em; width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: 0.5; }
-        
-        @media (max-width: 640px) {
-            .prose-reader { padding: 0 1rem; }
-            .prose-reader p { font-size: 1.05rem; line-height: 1.8; }
+        /* GLASSMORPHISM TAB BAR */
+        .tab-bar {
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            background-color: rgba(28, 28, 30, 0.85);
+            border-top: 0.5px solid rgba(255,255,255,0.1);
         }
 
-        .reader-progress { position: fixed; top: 0; left: 0; height: 3px; background: #3b82f6; z-index: 200; width: 0%; transition: width 0.1s; }
-        .feed-loader { padding: 2rem; text-align: center; color: #64748b; font-size: 0.875rem; }
+        /* READER STYLES */
+        .reader-overlay { position: fixed; inset: 0; z-index: 100; background: #000; overflow-y: auto; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        .reader-overlay.active { opacity: 1; pointer-events: auto; }
+        .reader-paper.light { background: #F2F2F7; color: #1C1C1E; }
+        .reader-paper.dark { background: #1C1C1E; color: #F2F2F7; }
         
-        #toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(100px); background: #1e293b; color: white; padding: 0.75rem 1.5rem; border-radius: 999px; font-size: 0.875rem; font-weight: 600; box-shadow: 0 10px 25px rgba(0,0,0,0.3); z-index: 9999; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: none; border: 1px solid rgba(255,255,255,0.1); }
-        #toast.show { transform: translateX(-50%) translateY(0); }
-        @keyframes likePop { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
-        .like-animate { animation: likePop 0.3s ease-out; }
+        .prose-ios p { margin-bottom: 1.6em; font-size: 1.1rem; line-height: 1.7; }
+        .prose-ios h2 { font-weight: 800; font-size: 1.5rem; margin-top: 2em; margin-bottom: 0.8em; letter-spacing: -0.02em; }
+        .prose-ios blockquote { border-left: 3px solid #0A84FF; padding-left: 1em; margin: 1.5em 0; font-style: italic; opacity: 0.8; }
+
+        /* ANIMATIONS */
+        @keyframes likePop { 0% { transform: scale(1); } 50% { transform: scale(1.4); } 100% { transform: scale(1); } }
+        .like-animate { animation: likePop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        
+        #toast { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8); background: rgba(50,50,50,0.9); color: white; padding: 1.5rem; border-radius: 16px; z-index: 9999; opacity: 0; pointer-events: none; transition: all 0.2s; text-align: center; backdrop-filter: blur(10px); }
+        #toast.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
     </style>
 </head>
-<body class="bg-dark text-gray-300 antialiased h-screen flex flex-col overflow-hidden selection:bg-accent selection:text-white">
+<body class="text-gray-100 antialiased selection:bg-accent selection:text-white">
 
-    <div id="app-preloader">
-        <div class="preloader-spinner"></div>
-        <p style="color:#94a3b8; margin-top:1.5rem; font-family:'Inter',sans-serif; font-size:.875rem; letter-spacing:.1em; text-transform:uppercase; font-weight:600;">Загрузка InvestPro...</p>
-    </div>
+    <!-- TOAST -->
+    <div id="toast"><i class="fas fa-check-circle text-3xl mb-2 text-green-500"></i><br><span id="toast-msg">Готово</span></div>
 
-    <div id="toast"><i class="fas fa-check-circle mr-2 text-accent"></i><span id="toast-msg">Скопировано!</span></div>
-    <div id="reading-progress" class="reader-progress hidden"></div>
-
-    <header class="glass-header h-16 flex items-center justify-between px-4 md:px-8 z-50 shrink-0">
-        <div onclick="app.nav('main')" class="flex items-center gap-2 cursor-pointer group">
-            <div class="w-8 h-8 rounded bg-gradient-to-tr from-accent to-blue-500 flex items-center justify-center text-white text-xs shadow-lg shadow-accent/20"><i class="fas fa-chart-line"></i></div>
-            <span class="text-lg font-bold text-white tracking-tight">Invest<span class="text-accent">Pro</span></span>
+    <!-- HEADER (Minimalist iOS Style) -->
+    <header class="fixed top-0 w-full z-40 safe-top bg-black/80 backdrop-blur-md border-b border-white/5">
+        <div class="h-14 flex items-center justify-between px-4">
+            <div class="font-bold text-xl tracking-tight">Invest<span class="text-accent">Pro</span></div>
+            <button onclick="app.toggleAdmin()" class="w-8 h-8 rounded-full bg-ios-card flex items-center justify-center text-ios-gray"><i class="fas fa-cog text-xs"></i></button>
         </div>
-        <nav class="hidden md:flex items-center gap-1 bg-white/5 p-1 rounded-full border border-white/5">
-            <button onclick="app.nav('main')" id="btn-main" class="nav-btn px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-accent text-white shadow-lg shadow-accent/25">Главная</button>
-            <button onclick="app.nav('feed')" id="btn-feed" class="nav-btn px-4 py-1.5 rounded-full text-xs font-medium text-gray-400 hover:text-white hover:bg-white/10 transition-all">Лента</button>
-            <button onclick="app.nav('ideas')" id="btn-ideas" class="nav-btn px-4 py-1.5 rounded-full text-xs font-medium text-gray-400 hover:text-white hover:bg-white/10 transition-all">Мнения</button>
-        </nav>
-        <button onclick="app.toggleAdmin()" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition border border-white/5"><i class="fas fa-cog text-xs"></i></button>
     </header>
 
-    <main class="flex-grow relative w-full bg-black overflow-hidden">
-        <section id="view-feed" class="absolute inset-0 feed-container bg-dark hidden">
-            <div id="feed-content"></div>
-            <div id="feed-loader" class="feed-loader hidden"><i class="fas fa-circle-notch fa-spin mr-2"></i>Загрузка свежих новостей...</div>
-            <div id="feed-end" class="feed-loader hidden">Вы достигли конца ленты</div>
-        </section>
-
-        <section id="view-main" class="absolute inset-0 overflow-y-auto p-4 md:p-8 space-y-8 bg-dark hidden">
-            <div class="max-w-4xl mx-auto">
-                <h2 class="text-2xl font-bold text-white mb-6 flex items-center gap-3"><span class="w-1 h-8 bg-yellow-500 rounded-full"></span> Главное за сегодня</h2>
-                <div id="classic-news-list" class="grid md:grid-cols-2 gap-4"></div>
-                <div class="mt-12 pt-8 border-t border-white/10">
-                    <h3 class="text-xl font-bold text-white mb-6">Авторская аналитика</h3>
-                    <div id="sidebar-ideas" class="space-y-4"></div>
-                </div>
+    <!-- MAIN CONTENT AREA -->
+    <main class="pt-[calc(env(safe-area-inset-top)+3.5rem)] pb-24 h-screen overflow-hidden relative">
+        
+        <!-- VIEW: FEED (Horizontal Swipe) -->
+        <section id="view-feed" class="absolute inset-0 pt-[calc(env(safe-area-inset-top)+3.5rem)] pb-20">
+            <div id="feed-container" class="feed-scroll pl-4 md:pl-8">
+                <!-- Cards injected by JS -->
             </div>
+            <div id="feed-loader" class="absolute right-4 top-1/2 -translate-y-1/2 text-ios-gray text-sm hidden"><i class="fas fa-circle-notch fa-spin mr-2"></i></div>
         </section>
 
-        <section id="view-ideas" class="absolute inset-0 overflow-y-auto p-4 md:p-8 bg-dark hidden">
-            <div class="max-w-3xl mx-auto">
-                <h2 class="text-3xl font-bold text-white mb-8 border-b border-white/10 pb-4">Мнения и Идеи</h2>
-                <div id="ideas-list" class="space-y-8"></div>
-            </div>
+        <!-- VIEW: IDEAS (Vertical List) -->
+        <section id="view-ideas" class="absolute inset-0 pt-[calc(env(safe-area-inset-top)+3.5rem)] pb-24 overflow-y-auto px-4 hidden">
+            <h2 class="text-3xl font-bold mb-6 mt-2">Мнения</h2>
+            <div id="ideas-list" class="space-y-4"></div>
         </section>
 
-        <section id="view-admin" class="absolute inset-0 overflow-y-auto p-4 bg-dark z-50 hidden">
-            <div class="max-w-lg mx-auto bg-card p-8 rounded-2xl border border-white/10 shadow-2xl mt-10">
-                <h2 class="text-2xl font-bold text-white mb-6 flex items-center gap-2"><i class="fas fa-user-shield text-accent"></i> Редактор</h2>
+        <!-- VIEW: ADMIN -->
+        <section id="view-admin" class="absolute inset-0 pt-[calc(env(safe-area-inset-top)+3.5rem)] pb-24 overflow-y-auto px-4 bg-black hidden z-50">
+            <div class="max-w-lg mx-auto space-y-6 mt-4">
+                <h2 class="text-2xl font-bold">Редактор</h2>
                 <div id="admin-auth" class="space-y-4">
-                    <input type="password" id="adm-pass" class="w-full bg-darker border border-white/10 rounded-lg px-4 py-3 text-white focus:border-accent outline-none" placeholder="Пароль (admin)">
-                    <button onclick="app.login()" class="w-full bg-accent hover:bg-blue-600 py-3 rounded-lg font-bold text-white transition">Войти</button>
+                    <input type="password" id="adm-pass" class="w-full bg-ios-card border border-ios-sep rounded-xl px-4 py-3 text-white outline-none focus:border-accent" placeholder="Пароль (admin)">
+                    <button onclick="app.login()" class="w-full bg-accent py-3 rounded-xl font-bold text-white">Войти</button>
                 </div>
-                <div id="admin-editor" class="hidden space-y-6">
-                    <select id="new-tag" class="w-full bg-darker border border-white/10 rounded-lg px-4 py-3 text-white outline-none"><option value="news">Короткая новость</option><option value="idea">Статья / Мнение</option></select>
-                    <input type="text" id="new-title" placeholder="Заголовок" class="w-full bg-darker border-b border-white/10 text-xl font-bold text-white py-3 outline-none focus:border-accent transition">
-                    <textarea id="new-body" rows="8" placeholder="Полный текст..." class="w-full bg-darker border border-white/10 rounded-lg p-4 font-mono text-sm text-gray-300 outline-none focus:border-accent transition"></textarea>
-                    <button onclick="app.addNews()" class="w-full bg-emerald-600 hover:bg-emerald-700 py-4 rounded-xl font-bold text-white transition shadow-lg shadow-emerald-900/20 flex items-center justify-center gap-2"><i class="fas fa-paper-plane"></i> Опубликовать</button>
+                <div id="admin-editor" class="hidden space-y-4">
+                    <select id="new-tag" class="w-full bg-ios-card border border-ios-sep rounded-xl px-4 py-3 text-white outline-none"><option value="news">Новость</option><option value="idea">Мнение</option></select>
+                    <input type="text" id="new-title" placeholder="Заголовок" class="w-full bg-ios-card border border-ios-sep rounded-xl px-4 py-3 text-white outline-none">
+                    <textarea id="new-body" rows="6" placeholder="Текст..." class="w-full bg-ios-card border border-ios-sep rounded-xl px-4 py-3 text-white outline-none"></textarea>
+                    <button onclick="app.addNews()" class="w-full bg-green-600 py-3 rounded-xl font-bold text-white">Опубликовать</button>
                 </div>
             </div>
         </section>
+
     </main>
 
+    <!-- iOS TAB BAR -->
+    <nav class="fixed bottom-0 w-full tab-bar safe-bottom z-50 flex justify-around items-center h-[84px] md:hidden">
+        <button onclick="app.nav('feed')" class="flex flex-col items-center gap-1 w-full py-2 text-accent transition" id="tab-feed">
+            <i class="fas fa-newspaper text-xl"></i>
+            <span class="text-[10px] font-medium">Лента</span>
+        </button>
+        <button onclick="app.nav('ideas')" class="flex flex-col items-center gap-1 w-full py-2 text-ios-gray transition" id="tab-ideas">
+            <i class="fas fa-lightbulb text-xl"></i>
+            <span class="text-[10px] font-medium">Мнения</span>
+        </button>
+    </nav>
+
+    <!-- DESKTOP NAV (Visible only on PC) -->
+    <nav class="hidden md:flex fixed bottom-8 left-1/2 -translate-x-1/2 bg-ios-card/90 backdrop-blur-xl border border-white/10 rounded-full px-6 py-3 gap-8 z-50 shadow-2xl">
+        <button onclick="app.nav('feed')" class="text-sm font-bold hover:text-accent transition" id="desk-feed">Лента</button>
+        <button onclick="app.nav('ideas')" class="text-sm font-bold text-ios-gray hover:text-accent transition" id="desk-ideas">Мнения</button>
+    </nav>
+
     <!-- READER MODAL -->
-    <div id="reader-modal" class="reader-overlay hidden">
-        <div id="reader-paper" class="reader-paper light">
-            <div class="reader-header px-4 py-3 flex justify-between items-center font-sans">
-                <button onclick="app.closeReader()" class="flex items-center gap-2 text-current opacity-70 hover:opacity-100 transition font-bold text-sm px-3 py-1.5 rounded-lg hover:bg-black/5"><i class="fas fa-arrow-left"></i> <span class="hidden sm:inline">Назад</span></button>
-                <div class="flex items-center gap-3">
-                    <button onclick="app.toggleReaderTheme()" class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-black/5 transition text-current opacity-70 hover:opacity-100" title="Сменить тему"><i id="theme-icon" class="fas fa-moon"></i></button>
-                </div>
+    <div id="reader-modal" class="reader-overlay">
+        <div id="reader-paper" class="reader-paper light min-h-screen pb-20">
+            <div class="sticky top-0 z-10 flex justify-between items-center px-4 py-3 bg-inherit/90 backdrop-blur border-b border-black/5">
+                <button onclick="app.closeReader()" class="flex items-center gap-2 text-accent font-medium"><i class="fas fa-chevron-left"></i> Назад</button>
+                <button onclick="app.toggleReaderTheme()" class="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center"><i id="theme-icon" class="fas fa-moon text-xs"></i></button>
             </div>
-            <article id="reader-content" class="pt-12 pb-16"></article>
-            <div class="max-w-[68ch] mx-auto px-6 pb-20 font-sans border-t border-current/10 mt-8">
-                <div class="py-8 mb-8">
-                    <p class="text-sm opacity-60 mb-4 uppercase tracking-wider font-bold">Действия</p>
-                    <div class="flex gap-3">
-                        <button id="reader-like-btn" onclick="app.handleReaderLike()" class="reader-btn flex-1 py-3 rounded-xl font-bold transition flex items-center justify-center gap-2 shadow-sm border"><i class="fas fa-heart"></i> <span id="reader-like-count">0</span></button>
-                        <button id="reader-share-btn" onclick="app.handleReaderShare()" class="reader-btn flex-1 py-3 rounded-xl font-bold transition shadow-lg border"><i class="fas fa-share-alt mr-2"></i> Поделиться</button>
-                    </div>
-                    <a id="reader-source-link" href="#" target="_blank" rel="noopener noreferrer" class="source-link mt-4 w-full py-3 rounded-xl font-bold transition flex items-center justify-center gap-2 no-underline hidden">
-                        <i class="fas fa-external-link-alt"></i> Перейти к источнику
-                    </a>
+            <article id="reader-content" class="prose-ios max-w-2xl mx-auto px-6 py-8"></article>
+            
+            <!-- Actions & Comments -->
+            <div class="max-w-2xl mx-auto px-6 mt-8 border-t border-black/10 dark:border-white/10 pt-8 font-sans">
+                <div class="flex gap-3 mb-8">
+                    <button id="reader-like-btn" onclick="app.handleReaderLike()" class="flex-1 py-3 rounded-xl font-bold border border-black/10 dark:border-white/10 flex items-center justify-center gap-2 transition active:scale-95"><i class="far fa-heart"></i> <span id="reader-like-count">0</span></button>
+                    <button onclick="app.handleReaderShare()" class="flex-1 py-3 rounded-xl font-bold bg-accent text-white flex items-center justify-center gap-2 transition active:scale-95"><i class="fas fa-share-alt"></i> Поделиться</button>
                 </div>
-                <div>
-                    <h3 class="text-xl font-bold mb-6 font-sans">Комментарии (<span id="comments-count">0</span>)</h3>
-                    <div class="space-y-3 mb-8">
-                        <input type="text" id="comment-nick" class="comment-input w-full px-4 py-3 rounded-xl border outline-none focus:border-accent transition text-sm font-bold" placeholder="Ваш никнейм">
-                        <div class="flex gap-3">
-                            <input type="text" id="comment-input" class="comment-input flex-1 px-4 py-3 rounded-xl border outline-none focus:border-accent transition text-sm" placeholder="Написать комментарий...">
-                            <button onclick="app.postComment()" class="bg-accent text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-blue-600 transition"><i class="fas fa-paper-plane"></i></button>
-                        </div>
-                    </div>
-                    <div id="comments-list" class="space-y-4"></div>
+                
+                <a id="reader-source-link" href="#" target="_blank" class="block w-full py-3 mb-8 rounded-xl font-bold text-center bg-black text-white dark:bg-white dark:text-black no-underline hidden">Перейти к источнику</a>
+
+                <h3 class="text-lg font-bold mb-4">Комментарии (<span id="comments-count">0</span>)</h3>
+                <div class="flex gap-2 mb-6">
+                    <input type="text" id="comment-nick" class="bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-lg px-3 py-2 text-sm w-1/3 outline-none" placeholder="Ник">
+                    <input type="text" id="comment-input" class="flex-1 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-lg px-3 py-2 text-sm outline-none" placeholder="Комментарий...">
+                    <button onclick="app.postComment()" class="bg-accent text-white w-10 h-10 rounded-lg flex items-center justify-center"><i class="fas fa-paper-plane text-xs"></i></button>
                 </div>
+                <div id="comments-list" class="space-y-3"></div>
             </div>
         </div>
     </div>
@@ -198,335 +193,221 @@
 const app = {
     data: { 
         news: [], posts: [], feedPage: 0, feedLoading: false, feedHasMore: true, allFetchedNews: [],
-        readerTheme: localStorage.getItem('ip_reader_theme') || 'light',
-        likes: JSON.parse(localStorage.getItem('ip_likes_v4') || '{}'),
-        comments: JSON.parse(localStorage.getItem('ip_comments_v4') || '{}'),
-        userNick: localStorage.getItem('ip_user_nick') || '',
-        currentItem: null, 
-        rssSources: [],
-        sourceIndex: 0 // Для конвейерной загрузки
+        readerTheme: localStorage.getItem('ip_theme') || 'light',
+        likes: JSON.parse(localStorage.getItem('ip_likes_ios') || '{}'),
+        comments: JSON.parse(localStorage.getItem('ip_comments_ios') || '{}'),
+        userNick: localStorage.getItem('ip_nick') || '',
+        currentItem: null, rssSources: [], sourceIndex: 0
     },
 
     init() {
         this.generateRSSSources();
-        
-        // Мгновенная заготовка новостей (чтобы не было пусто при старте)
         this.seedInitialNews();
-
-        const savedPosts = localStorage.getItem('ip_posts_v11');
+        
+        const savedPosts = localStorage.getItem('ip_posts_ios');
         this.data.posts = savedPosts ? JSON.parse(savedPosts) : [
-            { id: 101, title: "Почему я покупаю нефтянку прямо сейчас", body: "Многие боятся рецессии, но я вижу точку входа.", full: "<p>Многие инвесторы сейчас паникуют из-за макроэкономических показателей, но я вижу отличную точку входа. Энергетический кризис только начинается.</p><h2>Фундаментальные причины</h2><p>Во-первых, глобальные инвестиции в добычу упали до минимумов за 10 лет. Во-вторых, спрос со стороны Азии растет опережающими темпами.</p><blockquote>Инвестируй тогда, когда льется кровь на улицах.</blockquote><p>Я наращиваю позиции в Лукойле и Роснефти. Дивидендная доходность превышает 15% годовых.</p>", tag: "Мнение", date: "2ч назад", isPost: true, sourceUrl: "#" }
+            { id: 101, title: "Почему я покупаю нефтянку", body: "Энергетический кризис только начинается.", full: "<p>Многие боятся рецессии, но я вижу точку входа.</p><h2>Причины</h2><p>Дефицит инвестиций в добычу.</p>", tag: "Мнение", date: "2ч назад", isPost: true, sourceUrl: "#" }
         ];
 
         if(this.data.userNick) document.getElementById('comment-nick').value = this.data.userNick;
-
         this.rebuildIndex();
-        this.renderClassic();
         this.renderIdeas();
-        this.nav('main');
         
-        // Настройка бесконечного скролла
-        const feedContainer = document.getElementById('view-feed');
-        feedContainer.addEventListener('scroll', () => {
+        // Рендерим первую партию ленты
+        this.renderFeedChunk(this.data.allFetchedNews.slice(0, 5));
+        this.data.feedPage = 1;
+
+        // Слушатель скролла для бесконечной ленты (горизонтальный!)
+        const feed = document.getElementById('feed-container');
+        feed.addEventListener('scroll', () => {
             if (this.data.currentView !== 'feed') return;
-            const { scrollTop, scrollHeight, clientHeight } = feedContainer;
-            if (scrollTop + clientHeight >= scrollHeight - 600 && !this.data.feedLoading && this.data.feedHasMore) {
+            const { scrollLeft, scrollWidth, clientWidth } = feed;
+            if (scrollLeft + clientWidth >= scrollWidth - 300 && !this.data.feedLoading && this.data.feedHasMore) {
                 this.loadMoreFeed();
             }
         });
 
-        setTimeout(() => document.getElementById('app-preloader')?.classList.add('loaded'), 600);
+        // Прелоадер не нужен, т.к. старт мгновенный
     },
 
     seedInitialNews() {
         this.data.news = [
-            { id: 'seed_1', title: "Сбербанк бьет рекорды по прибыли: детальный разбор", body: "Чистая прибыль за квартал превысила 400 млрд руб.", full: "<p>Сбербанк опубликовал сильную отчетность. Чистая прибыль превысила прогнозы на 15%.</p><h2>Что это значит?</h2><p>Банк может направить на дивиденды до 50% прибыли.</p><ul><li>Маржа выросла до 5.8%</li><li>Кредитный портфель +12%</li></ul>", tag: "Акции", source: "РБК", date: "1ч назад", sourceUrl: "https://rbc.ru" },
-            { id: 'seed_2', title: "Биткоин пробил отметку $70,000: что дальше?", body: "Криптовалюта обновила исторический максимум.", full: "<p>Рынок криптовалют ликует. Биткоин преодолел психологическую отметку в $70k.</p><p>Аналитики предсказывают рост до $100k к концу года.</p>", tag: "Крипто", source: "Bloomberg", date: "3ч назад", sourceUrl: "https://bloomberg.com" },
-            { id: 'seed_3', title: "ЦБ сохранил ключевую ставку: полный обзор", body: "Регулятор сохранил жесткую риторику.", full: "<p>Эльвира Набиуллина заявила о необходимости сохранения жесткой ДКП.</p><blockquote>Мы видим риски перегрева экономики.</blockquote>", tag: "Макро", source: "Интерфакс", date: "5ч назад", sourceUrl: "https://interfax.ru" },
-            { id: 'seed_4', title: "Газпром завершил строительство нового НПЗ", body: "Инвестиции составили более 300 млрд рублей.", full: "<p>Новый завод позволит увеличить переработку нефти на 15 млн тонн в год.</p>", tag: "Сырье", source: "Ведомости", date: "6ч назад", sourceUrl: "https://vedomosti.ru" },
-            { id: 'seed_5', title: "Яндекс представил новую модель нейросети", body: "YandexGPT 5 показывает результаты лучше GPT-4.", full: "<p>Компания сделала ставку на мультимодальность и работу с видео.</p>", tag: "IT", source: "Habr", date: "7ч назад", sourceUrl: "https://habr.com" }
+            { id: 's1', title: "Сбербанк: рекордная прибыль", body: "Чистая прибыль превысила 400 млрд руб.", full: "<p>Сбербанк опубликовал сильную отчетность.</p><h2>Детали</h2><p>Маржа выросла до 5.8%.</p>", tag: "Акции", source: "РБК", date: "1ч", sourceUrl: "https://rbc.ru" },
+            { id: 's2', title: "Биткоин > $70,000", body: "Крипта обновила максимум.", full: "<p>Рынок ликует на фоне ETF.</p>", tag: "Крипто", source: "Bloomberg", date: "3ч", sourceUrl: "https://bloomberg.com" },
+            { id: 's3', title: "ЦБ держит ставку", body: "Жесткая риторика сохраняется.", full: "<p>Набиуллина предупредила о рисках.</p>", tag: "Макро", source: "Интерфакс", date: "5ч", sourceUrl: "https://interfax.ru" },
+            { id: 's4', title: "Газпром: новый НПЗ", body: "Инвестиции 300 млрд.", full: "<p>Увеличение переработки.</p>", tag: "Сырье", source: "Ведомости", date: "6ч", sourceUrl: "https://vedomosti.ru" },
+            { id: 's5', title: "Яндекс GPT 5", body: "Лучше чем GPT-4?", full: "<p>Ставка на мультимодальность.</p>", tag: "IT", source: "Habr", date: "7ч", sourceUrl: "https://habr.com" }
         ];
-        // Сразу рендерим первую порцию в ленту
         this.data.allFetchedNews = [...this.data.news];
     },
 
-    // ГЕНЕРАТОР 100+ УНИКАЛЬНЫХ ИСТОЧНИКОВ
     generateRSSSources() {
-        const tickers = ['SBER', 'GAZP', 'LKOH', 'YNDX', 'VTBR', 'ROSN', 'GMKN', 'PLZL', 'MGNT', 'TCSG', 'NVTK', 'MTSS', 'POLY', 'ALRS', 'CHMF', 'NLMK', 'TATN', 'MOEX', 'IRAO', 'FLOT'];
-        const sectors = ['нефть', 'газ', 'золото', 'серебро', 'банки', 'финтех', 'IT', 'криптовалюта', 'биткоин', 'эфир', 'облигации', 'ОФЗ', 'дивиденды', 'IPO', 'акции', 'фондовый рынок'];
-        const macro = ['ключевая ставка', 'инфляция', 'ВВП', 'курс доллара', 'курс юаня', 'санкции', 'импорт', 'экспорт', 'безработица', 'потребительские цены'];
-        const companies = ['Сбербанк', 'Лукойл', 'Газпром', 'Яндекс', 'Тинькофф', 'Магнит', 'Норникель', 'Полюс', 'Аэрофлот', 'Сургутнефтегаз'];
-        
-        const allQueries = [...tickers, ...sectors, ...macro, ...companies];
-        
-        // Создаем массив URL
-        this.data.rssSources = allQueries.map(q => 
-            `https://news.google.com/rss/search?q=${encodeURIComponent(q)}+инвестиции+рынок&hl=ru&gl=RU&ceid=RU:ru`
-        );
-        
-        // Перемешиваем для разнообразия
-        this.data.rssSources.sort(() => Math.random() - 0.5);
-        console.log(`[InvestPro] Подготовлено ${this.data.rssSources.length} уникальных источников`);
+        const q = ['SBER','GAZP','LKOH','YNDX','VTBR','ROSN','GMKN','PLZL','MGNT','TCSG','нефть','газ','золото','банки','крипта','биткоин','дивиденды','IPO','ставка','инфляция'];
+        this.data.rssSources = q.map(k => `https://news.google.com/rss/search?q=${k}+инвестиции&hl=ru&gl=RU&ceid=RU:ru`).sort(() => Math.random() - 0.5);
     },
 
-    rebuildIndex() { 
-        this.data.allItemsMap = {}; 
-        [...this.data.news, ...this.data.posts, ...this.data.allFetchedNews].forEach(item => { 
-            this.data.allItemsMap[item.id] = item; 
-        }); 
-    },
-    
+    rebuildIndex() { this.data.allItemsMap = {}; [...this.data.news, ...this.data.posts, ...this.data.allFetchedNews].forEach(i => this.data.allItemsMap[i.id] = i); },
     getItemById(id) { return this.data.allItemsMap[id] || [...this.data.news, ...this.data.posts, ...this.data.allFetchedNews].find(i => i.id == id); },
 
     nav(view) {
         this.data.currentView = view;
         document.querySelectorAll('main > section').forEach(el => el.classList.add('hidden'));
-        document.getElementById(`view-${view}`)?.classList.remove('hidden');
-        document.querySelectorAll('.nav-btn').forEach(b => b.className = 'nav-btn px-4 py-1.5 rounded-full text-xs font-medium text-gray-400 hover:text-white hover:bg-white/10 transition-all');
-        const activeBtn = document.getElementById(`btn-${view}`);
-        if(activeBtn) activeBtn.className = 'nav-btn px-4 py-1.5 rounded-full text-xs font-bold bg-accent text-white shadow-lg shadow-accent/25 transition-all';
+        document.getElementById(`view-${view}`).classList.remove('hidden');
         
-        // При первом входе в ленту рендерим то, что уже есть, и запускаем фоновую загрузку
-        if(view === 'feed') {
-            const container = document.getElementById('feed-content');
-            if(container.children.length === 0 && this.data.allFetchedNews.length > 0) {
-                this.renderFeedChunk(this.data.allFetchedNews.slice(0, 10));
-                this.data.feedPage = 1;
+        // Обновление таббара
+        ['feed', 'ideas'].forEach(v => {
+            const mob = document.getElementById(`tab-${v}`);
+            const desk = document.getElementById(`desk-${v}`);
+            if(v === view) {
+                mob?.classList.replace('text-ios-gray', 'text-accent');
+                desk?.classList.replace('text-ios-gray', 'text-white');
+            } else {
+                mob?.classList.replace('text-accent', 'text-ios-gray');
+                desk?.classList.replace('text-white', 'text-ios-gray');
             }
-            if(this.data.allFetchedNews.length < 20) this.loadMoreFeed();
-        }
+        });
     },
 
-    showToast(msg) { const t = document.getElementById('toast'); document.getElementById('toast-msg').innerText = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2500); },
+    showToast(msg) { const t = document.getElementById('toast'); document.getElementById('toast-msg').innerText = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000); },
 
     toggleLike(btn, id) {
         if (!id) return;
         const isLiked = this.data.likes[id];
-        if (isLiked) { delete this.data.likes[id]; btn.classList.remove('text-red-500'); btn.querySelector('i').classList.replace('fas', 'far'); } 
-        else { this.data.likes[id] = true; btn.classList.add('text-red-500'); btn.querySelector('i').classList.replace('far', 'fas'); btn.querySelector('i').classList.add('like-animate'); setTimeout(() => btn.querySelector('i').classList.remove('like-animate'), 300); }
-        localStorage.setItem('ip_likes_v4', JSON.stringify(this.data.likes));
+        if (isLiked) { delete this.data.likes[id]; btn.classList.remove('text-ios-red'); btn.querySelector('i').classList.replace('fas', 'far'); } 
+        else { this.data.likes[id] = true; btn.classList.add('text-ios-red'); btn.querySelector('i').classList.replace('far', 'fas'); btn.querySelector('i').classList.add('like-animate'); setTimeout(() => btn.querySelector('i').classList.remove('like-animate'), 300); }
+        localStorage.setItem('ip_likes_ios', JSON.stringify(this.data.likes));
         this.updateLikeUI(id);
     },
 
     updateLikeUI(id) {
         const isLiked = this.data.likes[id];
-        const baseLikes = Math.abs(String(id).split('').reduce((a,b)=>a+b.charCodeAt(0),0)) % 150;
-        const total = isLiked ? baseLikes + 1 : baseLikes;
-        const counter = document.getElementById('reader-like-count');
-        if (counter) counter.innerText = total;
-        const btn = document.getElementById('reader-like-btn');
-        if (btn) { if (isLiked) { btn.classList.add('text-red-500'); btn.querySelector('i').className = 'fas fa-heart'; } else { btn.classList.remove('text-red-500'); btn.querySelector('i').className = 'far fa-heart'; } }
+        const base = Math.abs(String(id).split('').reduce((a,b)=>a+b.charCodeAt(0),0)) % 150;
+        const total = isLiked ? base + 1 : base;
+        const c = document.getElementById('reader-like-count'); if(c) c.innerText = total;
+        const b = document.getElementById('reader-like-btn'); 
+        if(b) { if(isLiked) { b.classList.add('text-ios-red'); b.querySelector('i').className='fas fa-heart'; } else { b.classList.remove('text-ios-red'); b.querySelector('i').className='far fa-heart'; } }
     },
 
     async shareItem(title, id) {
-        const url = `${window.location.origin}${window.location.pathname}?news=${id}`;
-        try { if (navigator.share) await navigator.share({ title: `InvestPro: ${title}`, url }); else { await navigator.clipboard.writeText(url); this.showToast('Ссылка скопирована!'); } } catch (err) { if (err.name !== 'AbortError') this.showToast('Ошибка шеринга'); }
+        try { if(navigator.share) await navigator.share({title, url: location.href}); else { await navigator.clipboard.writeText(location.href); this.showToast('Ссылка скопирована'); } } catch(e){}
     },
 
-    handleReaderLike() { if (this.data.currentItem) this.toggleLike(document.getElementById('reader-like-btn'), this.data.currentItem.id); },
-    handleReaderShare() { if (this.data.currentItem) this.shareItem(this.data.currentItem.title, this.data.currentItem.id); },
+    handleReaderLike() { if(this.data.currentItem) this.toggleLike(document.getElementById('reader-like-btn'), this.data.currentItem.id); },
+    handleReaderShare() { if(this.data.currentItem) this.shareItem(this.data.currentItem.title, this.data.currentItem.id); },
 
-    getComments(id) { return this.data.comments[id] || []; },
-    
     postComment() {
-        if (!this.data.currentItem) return;
-        const nickInput = document.getElementById('comment-nick');
-        const input = document.getElementById('comment-input');
-        const nick = nickInput.value.trim() || 'Аноним';
-        const text = input.value.trim();
-        if (!text) return;
-
-        this.data.userNick = nick;
-        localStorage.setItem('ip_user_nick', nick);
-
+        if(!this.data.currentItem) return;
+        const nick = document.getElementById('comment-nick').value.trim() || 'Аноним';
+        const text = document.getElementById('comment-input').value.trim();
+        if(!text) return;
+        localStorage.setItem('ip_nick', nick);
         const id = this.data.currentItem.id;
-        if (!this.data.comments[id]) this.data.comments[id] = [];
-        this.data.comments[id].unshift({ text, date: new Date().toLocaleString('ru-RU', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'}), author: nick });
-        localStorage.setItem('ip_comments_v4', JSON.stringify(this.data.comments));
-        input.value = '';
+        if(!this.data.comments[id]) this.data.comments[id] = [];
+        this.data.comments[id].unshift({text, author: nick, date: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})});
+        localStorage.setItem('ip_comments_ios', JSON.stringify(this.data.comments));
+        document.getElementById('comment-input').value = '';
         this.renderComments(id);
-        this.showToast('Комментарий добавлен');
+        this.showToast('Отправлено');
     },
 
     renderComments(id) {
         const list = document.getElementById('comments-list');
-        const countSpan = document.getElementById('comments-count');
-        const comments = this.getComments(id);
-        countSpan.innerText = comments.length;
-        if (comments.length === 0) { list.innerHTML = '<p class="text-sm opacity-50 italic text-center py-4">Будьте первым, кто оставит комментарий</p>'; return; }
-        list.innerHTML = comments.map(c => `<div class="comment-box p-4 rounded-xl border transition"><div class="flex justify-between items-center mb-2"><span class="font-bold text-sm">${c.author}</span><span class="text-xs opacity-50">${c.date}</span></div><p class="text-sm leading-relaxed opacity-90">${c.text}</p></div>`).join('');
+        const count = document.getElementById('comments-count');
+        const coms = this.data.comments[id] || [];
+        count.innerText = coms.length;
+        list.innerHTML = coms.map(c => `<div class="bg-black/5 dark:bg-white/5 p-3 rounded-xl"><div class="flex justify-between text-xs font-bold mb-1 opacity-70"><span>${c.author}</span><span>${c.date}</span></div><p class="text-sm">${c.text}</p></div>`).join('');
     },
 
     openReader(id) {
-        const item = this.getItemById(id);
-        if (!item) return;
+        const item = this.getItemById(id); if(!item) return;
         this.data.currentItem = item;
         const modal = document.getElementById('reader-modal');
         const paper = document.getElementById('reader-paper');
         const content = document.getElementById('reader-content');
-        const progress = document.getElementById('reading-progress');
-        const themeIcon = document.getElementById('theme-icon');
-        const sourceLink = document.getElementById('reader-source-link');
+        const srcLink = document.getElementById('reader-source-link');
 
-        paper.className = `reader-paper ${this.data.readerTheme}`;
-        themeIcon.className = this.data.readerTheme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
-
-        if (item.sourceUrl && item.sourceUrl !== '#') {
-            sourceLink.href = item.sourceUrl;
-            sourceLink.classList.remove('hidden');
-        } else {
-            sourceLink.classList.add('hidden');
-        }
+        paper.className = `reader-paper ${this.data.readerTheme} min-h-screen pb-20`;
+        document.getElementById('theme-icon').className = this.data.readerTheme === 'light' ? 'fas fa-moon text-xs' : 'fas fa-sun text-xs';
+        
+        if(item.sourceUrl && item.sourceUrl !== '#') { srcLink.href = item.sourceUrl; srcLink.classList.remove('hidden'); } else { srcLink.classList.add('hidden'); }
 
         content.innerHTML = `
-            <div class="prose-reader">
-                <div class="font-sans text-xs opacity-50 uppercase tracking-widest mb-6 flex items-center gap-3">
-                    <span class="meta-tag px-2 py-1 rounded font-bold">${item.tag}</span>
-                    <span>${item.source || 'Автор'} • ${item.date}</span>
-                </div>
-                <h1 class="text-3xl md:text-5xl font-black mb-8 leading-[1.1] font-sans tracking-tight">${item.title}</h1>
-                <div class="mb-10">${item.full || item.body}</div>
-            </div>
+            <div class="font-sans text-xs opacity-50 uppercase tracking-wider mb-4 flex gap-2"><span class="bg-black/5 dark:bg-white/10 px-2 py-1 rounded">${item.tag}</span><span>${item.source} • ${item.date}</span></div>
+            <h1 class="text-3xl font-black mb-6 leading-tight tracking-tight">${item.title}</h1>
+            <div>${item.full || item.body}</div>
         `;
-
         this.updateLikeUI(id);
         this.renderComments(id);
-        modal.classList.remove('hidden');
-        progress.classList.remove('hidden');
+        modal.classList.add('active');
         document.body.style.overflow = 'hidden';
-        modal.onscroll = () => { const w = modal.scrollTop; const h = modal.scrollHeight - modal.clientHeight; progress.style.width = (h > 0 ? (w / h) * 100 : 0) + "%"; };
     },
 
-    // КОНВЕЙЕРНАЯ ЗАГРУЗКА (Быстрая и неблокирующая)
+    closeReader() {
+        document.getElementById('reader-modal').classList.remove('active');
+        document.body.style.overflow = '';
+        this.data.currentItem = null;
+    },
+
+    toggleReaderTheme() {
+        this.data.readerTheme = this.data.readerTheme === 'light' ? 'dark' : 'light';
+        document.getElementById('reader-paper').className = `reader-paper ${this.data.readerTheme} min-h-screen pb-20`;
+        document.getElementById('theme-icon').className = this.data.readerTheme === 'light' ? 'fas fa-moon text-xs' : 'fas fa-sun text-xs';
+        localStorage.setItem('ip_theme', this.data.readerTheme);
+    },
+
     async loadMoreFeed() {
-        if (this.data.feedLoading || !this.data.feedHasMore) return;
+        if(this.data.feedLoading || !this.data.feedHasMore) return;
         this.data.feedLoading = true;
         document.getElementById('feed-loader').classList.remove('hidden');
-
         try {
-            // Берем следующую партию источников (по 4 штуки за раз)
-            const batchSize = 4;
-            const batch = this.data.rssSources.slice(this.data.sourceIndex, this.data.sourceIndex + batchSize);
-            
-            if (batch.length > 0) {
-                const promises = batch.map(url => 
-                    fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`)
-                        .then(r => r.text())
-                        .then(xml => {
-                            const doc = new DOMParser().parseFromString(xml, "text/xml");
-                            return Array.from(doc.querySelectorAll("item")).map(item => ({
-                                id: 'rss_' + Math.random().toString(36).substr(2, 9),
-                                title: item.querySelector("title")?.textContent || "",
-                                body: (item.querySelector("description")?.textContent || "").replace(/<[^>]*>/g, '').substring(0, 200),
-                                full: item.querySelector("description")?.textContent || "",
-                                source: item.querySelector("source")?.textContent || "Google News",
-                                date: new Date(item.querySelector("pubDate")?.textContent || Date.now()).toLocaleString('ru-RU', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'}),
-                                tag: ["Акции","Крипто","Макро","Сырье","IT","Облигации"][Math.floor(Math.random()*6)],
-                                sourceUrl: item.querySelector("link")?.textContent || "#"
-                            }));
-                        })
-                        .catch(() => [])
-                );
-                
-                const results = await Promise.all(promises);
-                let newItems = results.flat();
-                
-                // Дедупликация: убираем новости, которые уже есть в ленте
-                newItems = newItems.filter(n => !this.data.allItemsMap[n.title]); // Грубая проверка по заголовку для скорости
-                
-                if (newItems.length > 0) {
+            const batch = this.data.rssSources.slice(this.data.sourceIndex, this.data.sourceIndex + 3);
+            if(batch.length > 0) {
+                const res = await Promise.all(batch.map(u => fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`).then(r=>r.text()).then(x=>{const d=new DOMParser().parseFromString(x,"text/xml"); return Array.from(d.querySelectorAll("item")).map(i=>({id:'r'+Math.random().toString(36).substr(2,5), title:i.querySelector("title")?.textContent||"", body:(i.querySelector("description")?.textContent||"").replace(/<[^>]*>/g,'').substring(0,150), full:i.querySelector("description")?.textContent||"", source:i.querySelector("source")?.textContent||"News", date:new Date(i.querySelector("pubDate")?.textContent||Date.now()).toLocaleDateString('ru',{day:'numeric',month:'short'}), tag:["Акции","Крипто","Макро"][Math.floor(Math.random()*3)], sourceUrl:i.querySelector("link")?.textContent||"#"}))}).catch(()=>[])));
+                let newItems = res.flat().filter(n => !this.data.allItemsMap[n.title]);
+                if(newItems.length) {
                     this.data.allFetchedNews = [...this.data.allFetchedNews, ...newItems];
                     this.rebuildIndex();
-                    
-                    // Рендерим только новые добавленные новости
-                    // Но чтобы лента была красивой, берем хвост массива
-                    const startRender = this.data.feedPage * 10;
-                    const chunk = this.data.allFetchedNews.slice(startRender, startRender + 10);
-                    if(chunk.length > 0) {
-                        this.renderFeedChunk(chunk);
-                        this.data.feedPage++;
-                    }
+                    this.renderFeedChunk(newItems.slice(0,5)); // Рендерим порцию
                 }
-                
-                this.data.sourceIndex += batchSize;
-                if (this.data.sourceIndex >= this.data.rssSources.length) {
-                    // Круг замкнулся, можно остановиться или начать заново
-                    this.data.feedHasMore = false; 
-                    document.getElementById('feed-end').classList.remove('hidden');
-                }
-            } else {
-                this.data.feedHasMore = false;
-                document.getElementById('feed-end').classList.remove('hidden');
-            }
-        } catch (e) { 
-            console.error("Feed Error:", e); 
-        } finally { 
-            this.data.feedLoading = false; 
-            document.getElementById('feed-loader').classList.add('hidden'); 
-        }
+                this.data.sourceIndex += 3;
+            } else { this.data.feedHasMore = false; }
+        } catch(e){} finally { this.data.feedLoading = false; document.getElementById('feed-loader').classList.add('hidden'); }
     },
 
     renderFeedChunk(items) {
-        const container = document.getElementById('feed-content');
-        const getGradient = (id) => ['from-blue-900 via-slate-900 to-black','from-indigo-900 via-purple-900 to-black','from-emerald-900 via-teal-900 to-black','from-rose-900 via-pink-900 to-black','from-amber-900 via-orange-900 to-black'][Math.abs(String(id).split('').reduce((a,b)=>a+b.charCodeAt(0),0)) % 5];
-        
-        const html = items.map((item, i) => { 
-            const isLiked = this.data.likes[item.id]; 
-            const baseLikes = Math.abs(String(item.id).split('').reduce((a,b)=>a+b.charCodeAt(0),0)) % 150; 
-            const displayLikes = isLiked ? baseLikes + 1 : baseLikes; 
-            
+        const c = document.getElementById('feed-container');
+        const grads = ['from-blue-900 to-black','from-indigo-900 to-black','from-emerald-900 to-black','from-rose-900 to-black','from-amber-900 to-black'];
+        const html = items.map(i => {
+            const liked = this.data.likes[i.id];
+            const g = grads[Math.abs(String(i.id).split('').reduce((a,b)=>a+b.charCodeAt(0),0)) % grads.length];
             return `
-            <div class="feed-item bg-gradient-to-br ${getGradient(item.id)} group shadow-2xl border-b border-white/5 md:border md:border-white/5">
-                <div class="absolute inset-0 opacity-20 pointer-events-none" style="background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.15) 1px, transparent 0); background-size: 20px 20px;"></div>
-                <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none"></div>
-                
+            <div class="feed-card bg-gradient-to-br ${g} shadow-2xl border border-white/5 flex flex-col justify-end p-6 group">
+                <div class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent pointer-events-none"></div>
                 <div class="absolute top-4 right-4 flex gap-2 z-20">
-                    <button onclick="app.toggleLike(this, '${item.id}')" class="w-10 h-10 rounded-full bg-black/20 backdrop-blur-md flex items-center justify-center ${isLiked ? 'text-red-500' : 'text-white/70'} hover:text-red-500 hover:bg-white/20 transition active:scale-90 border border-white/10">
-                        <i class="${isLiked ? 'fas' : 'far'} fa-heart text-sm"></i>
-                    </button>
-                    <button onclick="app.shareItem('${item.title.replace(/'/g, "\\'")}', '${item.id}')" class="w-10 h-10 rounded-full bg-black/20 backdrop-blur-md flex items-center justify-center text-white/70 hover:text-accent hover:bg-white/20 transition active:scale-90 border border-white/10">
-                        <i class="fas fa-share-alt text-sm"></i>
-                    </button>
+                    <button onclick="event.stopPropagation(); app.toggleLike(this, '${i.id}')" class="w-10 h-10 rounded-full bg-white/10 backdrop-blur flex items-center justify-center ${liked?'text-ios-red':'text-white/80'} transition active:scale-90"><i class="${liked?'fas':'far'} fa-heart"></i></button>
                 </div>
-
-                <div class="relative z-10 flex flex-col justify-end h-full fade-up" style="animation-delay: ${i * 0.05}s">
-                    <div class="flex items-center gap-2 mb-3">
-                        <span class="px-2.5 py-0.5 rounded-full bg-white/10 backdrop-blur border border-white/10 text-[10px] font-bold text-white uppercase tracking-wider">#${item.tag}</span>
-                        <span class="text-white/50 text-[10px] font-medium">${item.date} • ${item.source}</span>
-                    </div>
-                    <h2 class="text-2xl md:text-4xl font-extrabold text-white leading-[1.15] mb-3 drop-shadow-lg tracking-tight pr-12">${item.title}</h2>
-                    <p class="text-base md:text-lg text-gray-200 mb-5 line-clamp-3 drop-shadow-md font-light leading-relaxed max-w-lg">${item.body}</p>
-                    
-                    <div class="flex items-center gap-3">
-                        <button onclick="app.openReader('${item.id}')" class="self-start inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-wide hover:bg-accent hover:border-accent transition-all duration-300 group/btn">
-                            <span>Читать полностью</span>
-                            <i class="fas fa-arrow-right text-[10px] group-hover/btn:translate-x-1 transition-transform"></i>
-                        </button>
-                        <span class="text-xs text-white/40 font-medium">${displayLikes} ❤️</span>
-                    </div>
+                <div class="relative z-10 cursor-pointer" onclick="app.openReader('${i.id}')">
+                    <div class="flex items-center gap-2 mb-3"><span class="px-2 py-0.5 rounded bg-white/20 text-[10px] font-bold uppercase tracking-wide">#${i.tag}</span><span class="text-white/60 text-xs">${i.date}</span></div>
+                    <h2 class="text-2xl font-bold text-white leading-tight mb-3 drop-shadow-md">${i.title}</h2>
+                    <p class="text-gray-300 text-sm line-clamp-3 mb-4">${i.body}</p>
+                    <div class="flex items-center gap-2 text-xs font-bold text-white/80 uppercase tracking-wider group-hover:text-accent transition">Читать далее <i class="fas fa-arrow-right text-[10px]"></i></div>
                 </div>
-            </div>
-        `}).join('');
-        container.insertAdjacentHTML('beforeend', html);
+            </div>`;
+        }).join('');
+        c.insertAdjacentHTML('beforeend', html);
     },
 
-    toggleReaderTheme() { const p = document.getElementById('reader-paper'); const i = document.getElementById('theme-icon'); this.data.readerTheme = this.data.readerTheme === 'light' ? 'dark' : 'light'; p.className = `reader-paper ${this.data.readerTheme}`; i.className = this.data.readerTheme === 'light' ? 'fas fa-moon' : 'fas fa-sun'; localStorage.setItem('ip_reader_theme', this.data.readerTheme); },
     toggleAdmin() { this.nav('admin'); },
-    login() { if(document.getElementById('adm-pass').value === 'admin') { document.getElementById('admin-auth').classList.add('hidden'); document.getElementById('admin-editor').classList.remove('hidden'); } else alert('Неверный пароль'); },
+    login() { if(document.getElementById('adm-pass').value==='admin') { document.getElementById('admin-auth').classList.add('hidden'); document.getElementById('admin-editor').classList.remove('hidden'); } else alert('Неверно'); },
     addNews() {
-        const title = document.getElementById('new-title').value; const body = document.getElementById('new-body').value; const type = document.getElementById('new-tag').value;
-        if(!title || !body) return alert('Заполните все поля');
-        const newItem = { id: Date.now(), title, body: body.substring(0, 150) + '...', full: `<p>${body.replace(/\n/g, '</p><p>')}</p>`, tag: type === 'idea' ? 'Мнение' : 'Новости', source: 'Автор', date: 'Только что', isPost: type === 'idea', sourceUrl: '#' };
-        if(type === 'idea') { this.data.posts.unshift(newItem); localStorage.setItem('ip_posts_v11', JSON.stringify(this.data.posts)); this.renderIdeas(); } 
-        else { this.data.news.unshift(newItem); this.data.allFetchedNews.unshift(newItem); this.renderFeedChunk([newItem]); }
-        this.rebuildIndex(); this.renderClassic(); document.getElementById('new-title').value = ''; document.getElementById('new-body').value = ''; alert('Опубликовано!'); this.nav(type === 'idea' ? 'ideas' : 'feed');
+        const t=document.getElementById('new-title').value, b=document.getElementById('new-body').value, type=document.getElementById('new-tag').value;
+        if(!t||!b) return alert('Заполните');
+        const n={id:Date.now(), title:t, body:b.substring(0,150)+'...', full:`<p>${b.replace(/\n/g,'</p><p>')}</p>`, tag:type==='idea'?'Мнение':'Новости', source:'Автор', date:'Сейчас', isPost:type==='idea', sourceUrl:'#'};
+        if(type==='idea') { this.data.posts.unshift(n); localStorage.setItem('ip_posts_ios',JSON.stringify(this.data.posts)); this.renderIdeas(); }
+        else { this.data.news.unshift(n); this.data.allFetchedNews.unshift(n); this.renderFeedChunk([n]); }
+        this.rebuildIndex(); alert('OK'); this.nav(type==='idea'?'ideas':'feed');
     },
-    renderClassic() {
-        document.getElementById('classic-news-list').innerHTML = this.data.news.slice(0,6).map(n => `<div onclick="app.openReader('${n.id}')" class="bg-card/50 hover:bg-card border border-white/5 hover:border-accent/30 rounded-xl p-5 cursor-pointer transition-all group"><div class="flex justify-between mb-2"><span class="text-xs font-bold text-accent bg-accent/10 px-2 py-1 rounded">${n.tag}</span><span class="text-xs text-gray-500">${n.date}</span></div><h3 class="text-lg font-bold text-white group-hover:text-accent transition mb-2">${n.title}</h3><p class="text-sm text-gray-400 line-clamp-2">${n.body}</p></div>`).join('');
-        document.getElementById('sidebar-ideas').innerHTML = this.data.posts.slice(0,3).map(p => `<div onclick="app.openReader('${p.id}')" class="flex gap-4 items-start cursor-pointer group p-3 rounded-lg hover:bg-white/5 transition"><div class="w-10 h-10 rounded bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white shrink-0"><i class="fas fa-pen-nib text-xs"></i></div><div><h4 class="font-bold text-gray-200 group-hover:text-accent transition text-sm">${p.title}</h4><span class="text-xs text-gray-500">${p.date}</span></div></div>`).join('');
-    },
-    renderIdeas() { document.getElementById('ideas-list').innerHTML = this.data.posts.map(p => `<div onclick="app.openReader('${p.id}')" class="border-b border-white/10 pb-8 cursor-pointer group"><div class="text-xs font-bold text-purple-400 uppercase tracking-wider mb-3">Мнение автора • ${p.date}</div><h3 class="text-2xl font-bold text-white mb-3 group-hover:text-accent transition">${p.title}</h3><p class="text-gray-400 line-clamp-3 mb-4">${p.body}</p><span class="text-sm text-accent font-medium group-hover:underline">Читать статью →</span></div>`).join(''); },
-    closeReader() { document.getElementById('reader-modal').classList.add('hidden'); document.getElementById('reading-progress').classList.add('hidden'); document.body.style.overflow = ''; this.data.currentItem = null; }
+    renderIdeas() { document.getElementById('ideas-list').innerHTML = this.data.posts.map(p => `<div onclick="app.openReader('${p.id}')" class="bg-ios-card p-5 rounded-2xl border border-white/5 active:scale-95 transition"><div class="text-xs text-accent font-bold mb-2 uppercase">Мнение • ${p.date}</div><h3 class="text-xl font-bold mb-2">${p.title}</h3><p class="text-sm text-ios-gray line-clamp-2">${p.body}</p></div>`).join(''); }
 };
 
 document.addEventListener('DOMContentLoaded', () => app.init());
