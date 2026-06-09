@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>FUCH | Gewinn fixieren</title>
     
-    <!-- Иконки и Шрифты -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
     
@@ -91,6 +90,12 @@
         }
         .terminal-window.open { opacity: 1; transform: scale(1) translateY(0); pointer-events: auto; }
         @media (max-width: 640px) { .terminal-window { bottom: 0; right: 0; width: 100%; height: 100%; border-radius: 0; } }
+        
+        /* SNIPER CHART STYLES */
+        .sparkline { width: 100%; height: 40px; display: block; }
+        .bubble-map { position: relative; width: 100%; height: 400px; background: radial-gradient(circle at center, #1a1a1a 0%, #050505 100%); border-radius: 16px; overflow: hidden; border: 1px solid #262626; }
+        .bubble { position: absolute; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; transition: all 0.3s ease; opacity: 0.8; }
+        .bubble:hover { transform: scale(1.1); opacity: 1; z-index: 10; box-shadow: 0 0 20px rgba(255,255,255,0.2); }
         
         @media (min-width: 768px) {
             .md\:flex { display: flex; } .md\:hidden { display: none; } .md\:px-8 { padding-left: 2rem; padding-right: 2rem; }
@@ -184,6 +189,7 @@
         </div>
         <nav class="hidden md:flex items-center gap-1 bg-white/5 p-1 rounded-full border border-white/5">
             <button onclick="app.nav('feed')" id="btn-feed" class="nav-btn px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-[#2563eb] text-white shadow-lg shadow-blue-900/20">Главная</button>
+            <button onclick="app.nav('sniper')" id="btn-sniper" class="nav-btn px-4 py-1.5 rounded-full text-xs font-bold text-emerald-400 hover:bg-emerald-500/10 transition-all flex items-center gap-1.5"><i class="fas fa-crosshairs text-[10px]"></i> Снайпер</button>
             <button onclick="app.nav('banks')" id="btn-banks" class="nav-btn px-4 py-1.5 rounded-full text-xs font-bold text-[#d4af37] hover:bg-[#d4af37]/10 transition-all flex items-center gap-1.5"><i class="fas fa-university text-[10px]"></i> Банки</button>
             <button onclick="app.nav('zen')" id="btn-zen" class="nav-btn px-4 py-1.5 rounded-full text-xs font-medium text-gray-400 hover:text-white hover:bg-white/10 transition-all">Дзен</button>
             <button onclick="app.nav('essence')" id="btn-essence" class="nav-btn px-4 py-1.5 rounded-full text-xs font-medium text-gray-400 hover:text-[#ea580c] hover:bg-white/10 transition-all flex items-center gap-1.5"><i class="fas fa-bolt text-[10px]"></i> Суть</button>
@@ -204,6 +210,70 @@
         <section id="view-feed" class="absolute inset-0 overflow-y-auto h-[calc(100vh-128px)] p-4 md:p-8 bg-[#050505] hidden scroll-smooth">
             <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="standard-feed-container"></div>
             <div id="feed-loader" class="py-8 text-center text-gray-500 hidden"><i class="fas fa-circle-notch fa-spin mr-2"></i>Загрузка...</div>
+        </section>
+
+        <!-- SNIPER VIEW (NEW!) -->
+        <section id="view-sniper" class="absolute inset-0 overflow-y-auto h-[calc(100vh-128px)] p-4 md:p-8 bg-[#050505] hidden scroll-smooth">
+            <div class="max-w-6xl mx-auto space-y-8">
+                <!-- Header -->
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                    <div>
+                        <h2 class="text-3xl font-black text-white tracking-tight flex items-center gap-3">
+                            <i class="fas fa-crosshairs text-emerald-500"></i> FUCH SNIPER
+                        </h2>
+                        <p class="text-sm text-gray-400 mt-1">Контекстный терминал для мгновенных решений</p>
+                    </div>
+                    <div class="flex items-center gap-3 bg-[#121212] p-2 rounded-xl border border-[#262626]">
+                        <div class="px-3 py-1 rounded-lg bg-red-500/10 border border-red-500/20">
+                            <span class="text-[10px] text-red-400 uppercase font-bold block">Страх</span>
+                            <span class="text-sm font-bold text-white">24%</span>
+                        </div>
+                        <div class="w-px h-8 bg-[#262626]"></div>
+                        <div class="px-3 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                            <span class="text-[10px] text-emerald-400 uppercase font-bold block">Жадность</span>
+                            <span class="text-sm font-bold text-white">76%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bubble Map -->
+                <div class="bg-[#121212] border border-[#262626] rounded-2xl p-6">
+                    <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-2"><i class="fas fa-project-diagram"></i> Тепловая карта рынка</h3>
+                    <div id="bubble-map" class="bubble-map"></div>
+                    <p class="text-[10px] text-gray-600 mt-3 text-center">Размер = Капитализация • Цвет = Изменение за день • Клик = Анализ</p>
+                </div>
+
+                <!-- Quick Analysis Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-[#121212] border border-[#262626] rounded-2xl p-5">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="text-xs text-gray-500 uppercase font-bold">Лидер роста</div>
+                            <span class="text-xs text-emerald-500 font-bold bg-emerald-500/10 px-2 py-0.5 rounded">+4.2%</span>
+                        </div>
+                        <div class="text-2xl font-bold text-white mb-1">Полюс</div>
+                        <div class="text-sm text-gray-400 mb-4">PLZL • Золотодобыча</div>
+                        <canvas id="chart-plzl" class="sparkline"></canvas>
+                    </div>
+                    <div class="bg-[#121212] border border-[#262626] rounded-2xl p-5">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="text-xs text-gray-500 uppercase font-bold">Лидер падения</div>
+                            <span class="text-xs text-red-500 font-bold bg-red-500/10 px-2 py-0.5 rounded">-2.8%</span>
+                        </div>
+                        <div class="text-2xl font-bold text-white mb-1">Газпром</div>
+                        <div class="text-sm text-gray-400 mb-4">GAZP • Газовая отрасль</div>
+                        <canvas id="chart-gazp" class="sparkline"></canvas>
+                    </div>
+                    <div class="bg-[#121212] border border-[#262626] rounded-2xl p-5">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="text-xs text-gray-500 uppercase font-bold">Самый активный</div>
+                            <span class="text-xs text-blue-500 font-bold bg-blue-500/10 px-2 py-0.5 rounded">VOL 12B</span>
+                        </div>
+                        <div class="text-2xl font-bold text-white mb-1">Сбербанк</div>
+                        <div class="text-sm text-gray-400 mb-4">SBER • Финансы</div>
+                        <canvas id="chart-sber" class="sparkline"></canvas>
+                    </div>
+                </div>
+            </div>
         </section>
 
         <section id="view-banks" class="absolute inset-0 overflow-y-auto h-[calc(100vh-128px)] p-4 md:p-8 bg-[#050505] hidden scroll-smooth">
@@ -256,8 +326,8 @@
     <!-- MOBILE TAB BAR -->
     <nav class="md:hidden tab-bar safe-bottom z-50 flex justify-around items-center h-[64px] shrink-0">
         <button onclick="app.nav('feed')" class="flex flex-col items-center gap-1 w-full py-2 text-[#2563eb] transition" id="tab-feed"><i class="fas fa-newspaper text-lg"></i><span class="text-[10px] font-medium">Главная</span></button>
+        <button onclick="app.nav('sniper')" class="flex flex-col items-center gap-1 w-full py-2 text-gray-500 transition" id="tab-sniper"><i class="fas fa-crosshairs text-lg"></i><span class="text-[10px] font-medium">Снайпер</span></button>
         <button onclick="app.nav('banks')" class="flex flex-col items-center gap-1 w-full py-2 text-gray-500 transition" id="tab-banks"><i class="fas fa-university text-lg"></i><span class="text-[10px] font-medium">Банки</span></button>
-        <button onclick="app.nav('zen')" class="flex flex-col items-center gap-1 w-full py-2 text-gray-500 transition" id="tab-zen"><i class="fas fa-fire text-lg"></i><span class="text-[10px] font-medium">Дзен</span></button>
         <button onclick="app.nav('essence')" class="flex flex-col items-center gap-1 w-full py-2 text-gray-500 transition" id="tab-essence"><i class="fas fa-bolt text-lg"></i><span class="text-[10px] font-medium">Суть</span></button>
     </nav>
 
@@ -360,11 +430,11 @@
         data: { 
             news: [], banks: [], zen: [], posts: [], essenceFeed: [], generatedIds: new Set(),
             feedLoading: false, essenceLoading: false, 
-            likes: JSON.parse(localStorage.getItem('ip_likes_v22') || '{}'),
-            comments: JSON.parse(localStorage.getItem('ip_comments_v22') || '{}'),
+            likes: JSON.parse(localStorage.getItem('ip_likes_v23') || '{}'),
+            comments: JSON.parse(localStorage.getItem('ip_comments_v23') || '{}'),
             currentUser: JSON.parse(sessionStorage.getItem('fuch_guest') || 'null'),
             currentItem: null, terminalOpen: false,
-            rates: { USD: 92.5, EUR: 100.2, CNY: 12.8 } // Курсы из тикера
+            rates: { USD: 92.5, EUR: 100.2, CNY: 12.8 }
         },
 
         companies: ['Сбербанк', 'Газпром', 'Лукойл', 'Яндекс', 'Тинькофф', 'Магнит', 'Норникель', 'Полюс', 'Аэрофлот', 'Роснефть', 'МТС', 'Северсталь', 'НЛМК', 'Татнефть', 'Мосбиржа', 'VK', 'Ozon'],
@@ -429,7 +499,7 @@
         },
 
         init() {
-            const savedPosts = localStorage.getItem('ip_posts_v22');
+            const savedPosts = localStorage.getItem('ip_posts_v23');
             this.data.posts = savedPosts ? JSON.parse(savedPosts) : [{ id: 'post_1', title: "Нефтянка: покупать?", body: "Энергокризис начинается.", full: "<p>Дефицит инвестиций толкает цены вверх.</p>", tag: "Мнение", date: "2ч назад", isPost: true }];
             this.updateAuthUI(); this.initTicker(); this.renderIdeas();
             
@@ -442,29 +512,93 @@
             this.renderStandardFeed(this.data.banks, 'banks-feed-container', true);
             this.renderStandardFeed(this.data.zen, 'zen-feed-container');
             this.renderEssenceChunk(this.data.essenceFeed);
+            this.initSniper(); // Initialize Sniper Tab
             
             document.getElementById('view-feed').addEventListener('scroll', () => this.checkScroll('feed'));
             document.getElementById('view-banks').addEventListener('scroll', () => this.checkScroll('banks'));
             document.getElementById('view-zen').addEventListener('scroll', () => this.checkScroll('zen'));
             ['mobile', 'desktop'].forEach(dev => document.getElementById(`essence-${dev}`).addEventListener('scroll', () => this.checkEssenceScroll(dev)));
             
-            // Terminal Listener
             document.getElementById('conv-amount').addEventListener('input', () => this.convertCurrency());
             document.getElementById('conv-currency').addEventListener('change', () => this.convertCurrency());
             
             this.nav('feed');
         },
 
+        // --- SNIPER LOGIC ---
+        initSniper() {
+            this.renderBubbleMap();
+            this.drawSparkline('chart-plzl', [40, 42, 41, 45, 48, 47, 52], '#22c55e');
+            this.drawSparkline('chart-gazp', [120, 118, 115, 112, 110, 108, 105], '#ef4444');
+            this.drawSparkline('chart-sber', [250, 252, 251, 255, 258, 256, 260], '#3b82f6');
+        },
+
+        renderBubbleMap() {
+            const container = document.getElementById('bubble-map');
+            const bubbles = [
+                { name: 'SBER', size: 80, change: 1.2, x: 50, y: 50 },
+                { name: 'GAZP', size: 70, change: -2.8, x: 30, y: 40 },
+                { name: 'LKOH', size: 60, change: 0.5, x: 70, y: 30 },
+                { name: 'YNDX', size: 40, change: 3.1, x: 20, y: 70 },
+                { name: 'PLZL', size: 45, change: 4.2, x: 80, y: 60 },
+                { name: 'GMKN', size: 50, change: -1.5, x: 40, y: 20 },
+                { name: 'VTBR', size: 35, change: -0.8, x: 60, y: 80 },
+                { name: 'ROSN', size: 55, change: 0.2, x: 15, y: 30 },
+            ];
+
+            container.innerHTML = bubbles.map(b => {
+                const color = b.change >= 0 ? `rgba(34, 197, 94, ${0.3 + Math.abs(b.change)/10})` : `rgba(239, 68, 68, ${0.3 + Math.abs(b.change)/10})`;
+                const border = b.change >= 0 ? '#22c55e' : '#ef4444';
+                return `<div class="bubble" style="width:${b.size}px; height:${b.size}px; left:${b.x}%; top:${b.y}%; background:${color}; border:1px solid ${border}; font-size:${b.size > 50 ? '12px' : '10px'};">
+                    <div class="text-center leading-tight">
+                        <div class="font-bold text-white">${b.name}</div>
+                        <div style="color:${border}">${b.change > 0 ? '+' : ''}${b.change}%</div>
+                    </div>
+                </div>`;
+            }).join('');
+        },
+
+        drawSparkline(canvasId, data, color) {
+            const canvas = document.getElementById(canvasId);
+            if(!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width = canvas.offsetWidth;
+            const h = canvas.height = canvas.offsetHeight;
+            
+            const max = Math.max(...data);
+            const min = Math.min(...data);
+            const range = max - min || 1;
+            const step = w / (data.length - 1);
+            
+            ctx.beginPath();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            ctx.lineJoin = 'round';
+            
+            data.forEach((val, i) => {
+                const x = i * step;
+                const y = h - ((val - min) / range) * (h - 10) - 5;
+                if(i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            ctx.stroke();
+            
+            // Gradient fill
+            const gradient = ctx.createLinearGradient(0, 0, 0, h);
+            gradient.addColorStop(0, color + '40');
+            gradient.addColorStop(1, color + '00');
+            ctx.lineTo(w, h);
+            ctx.lineTo(0, h);
+            ctx.fillStyle = gradient;
+            ctx.fill();
+        },
+
         // --- TERMINAL LOGIC ---
         toggleTerminal() {
             this.data.terminalOpen = !this.data.terminalOpen;
             const win = document.getElementById('terminal-window');
-            if(this.data.terminalOpen) { 
-                win.classList.add('open'); 
-                this.convertCurrency(); // Обновить курс при открытии
-            } else { 
-                win.classList.remove('open'); 
-            }
+            if(this.data.terminalOpen) { win.classList.add('open'); this.convertCurrency(); } 
+            else { win.classList.remove('open'); }
         },
 
         calculatePosition() {
@@ -552,25 +686,27 @@
             document.querySelectorAll('main > section').forEach(el=>el.classList.add('hidden')); 
             document.getElementById(`view-${v}`).classList.remove('hidden'); 
             
-            ['feed','banks','zen','essence','ideas'].forEach(x=>{
+            ['feed','sniper','banks','zen','essence','ideas'].forEach(x=>{
                 const b=document.getElementById(`btn-${x}`);
                 if(b) {
                     if(x===v) {
-                        if(x==='banks') b.className = 'nav-btn px-4 py-1.5 rounded-full text-xs font-bold bg-[#d4af37]/20 text-[#d4af37] border border-[#d4af37]/50 shadow-[0_0_10px_rgba(212,175,55,0.1)]';
+                        if(x==='sniper') b.className = 'nav-btn px-4 py-1.5 rounded-full text-xs font-bold bg-emerald-500 text-white shadow-lg shadow-emerald-900/20';
+                        else if(x==='banks') b.className = 'nav-btn px-4 py-1.5 rounded-full text-xs font-bold bg-[#d4af37]/20 text-[#d4af37] border border-[#d4af37]/50 shadow-[0_0_10px_rgba(212,175,55,0.1)]';
                         else if(x==='essence') b.className = 'nav-btn px-4 py-1.5 rounded-full text-xs font-bold bg-[#ea580c] text-white shadow-lg shadow-orange-900/20';
                         else b.className = 'nav-btn px-4 py-1.5 rounded-full text-xs font-bold bg-[#2563eb] text-white shadow-lg shadow-blue-900/20';
                     } else {
-                        if(x==='banks') b.className = 'nav-btn px-4 py-1.5 rounded-full text-xs font-bold text-[#d4af37]/60 hover:text-[#d4af37] hover:bg-[#d4af37]/10 transition-all';
+                        if(x==='sniper') b.className = 'nav-btn px-4 py-1.5 rounded-full text-xs font-bold text-emerald-400 hover:bg-emerald-500/10 transition-all';
+                        else if(x==='banks') b.className = 'nav-btn px-4 py-1.5 rounded-full text-xs font-bold text-[#d4af37]/60 hover:text-[#d4af37] hover:bg-[#d4af37]/10 transition-all';
                         else b.className = 'nav-btn px-4 py-1.5 rounded-full text-xs font-medium text-gray-400 hover:text-white hover:bg-white/10 transition-all';
                     }
                 }
             });
 
-            ['feed','banks','zen','essence'].forEach(x=>{
+            ['feed','sniper','banks','zen','essence'].forEach(x=>{
                 const t=document.getElementById(`tab-${x}`);
                 if(t) {
-                    if(x===v) t.classList.replace('text-gray-500', x==='banks'?'text-[#d4af37]':x==='essence'?'text-[#ea580c]':'text-[#2563eb]');
-                    else t.classList.replace(x==='banks'?'text-[#d4af37]':x==='essence'?'text-[#ea580c]':'text-[#2563eb]', 'text-gray-500');
+                    if(x===v) t.classList.replace('text-gray-500', x==='sniper'?'text-emerald-400':x==='banks'?'text-[#d4af37]':x==='essence'?'text-[#ea580c]':'text-[#2563eb]');
+                    else t.classList.replace(x==='sniper'?'text-emerald-400':x==='banks'?'text-[#d4af37]':x==='essence'?'text-[#ea580c]':'text-[#2563eb]', 'text-gray-500');
                 }
             });
 
@@ -585,12 +721,12 @@
             setTimeout(()=>t.classList.add('opacity-0', 'translate-y-[100px]'),2000); 
         },
         
-        toggleLike(b,id) { if(!this.data.currentUser)return this.openAuth(); const l=this.data.likes[id]; if(l){delete this.data.likes[id];b.classList.remove('text-red-500');b.querySelector('i').classList.replace('fas','far');}else{this.data.likes[id]=true;b.classList.add('text-red-500');b.querySelector('i').classList.replace('far','fas');} localStorage.setItem('ip_likes_v22',JSON.stringify(this.data.likes));this.updateLikeUI(id); },
+        toggleLike(b,id) { if(!this.data.currentUser)return this.openAuth(); const l=this.data.likes[id]; if(l){delete this.data.likes[id];b.classList.remove('text-red-500');b.querySelector('i').classList.replace('fas','far');}else{this.data.likes[id]=true;b.classList.add('text-red-500');b.querySelector('i').classList.replace('far','fas');} localStorage.setItem('ip_likes_v23',JSON.stringify(this.data.likes));this.updateLikeUI(id); },
         updateLikeUI(id) { const l=this.data.likes[id]; document.getElementById('reader-like-count').innerText=l?151:150; const b=document.getElementById('reader-like-btn'); if(l){b.classList.add('text-red-500');b.querySelector('i').className='fas fa-heart';}else{b.classList.remove('text-red-500');b.querySelector('i').className='far fa-heart';} },
         handleReaderLike() { if(this.data.currentItem)this.toggleLike(document.getElementById('reader-like-btn'),this.data.currentItem.id); },
         handleReaderShare() { this.showToast('Ссылка скопирована'); },
         
-        postComment() { if(!this.data.currentUser)return this.openAuth(); const i=document.getElementById('comment-input'),t=i.value.trim(); if(!t)return; const id=this.data.currentItem.id; if(!this.data.comments[id])this.data.comments[id]=[]; this.data.comments[id].unshift({text:t,author:this.data.currentUser.name,date:new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}); localStorage.setItem('ip_comments_v22',JSON.stringify(this.data.comments)); i.value=''; this.renderComments(id); this.showToast('Отправлено'); },
+        postComment() { if(!this.data.currentUser)return this.openAuth(); const i=document.getElementById('comment-input'),t=i.value.trim(); if(!t)return; const id=this.data.currentItem.id; if(!this.data.comments[id])this.data.comments[id]=[]; this.data.comments[id].unshift({text:t,author:this.data.currentUser.name,date:new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}); localStorage.setItem('ip_comments_v23',JSON.stringify(this.data.comments)); i.value=''; this.renderComments(id); this.showToast('Отправлено'); },
         renderComments(id) { const l=document.getElementById('comments-list'); document.getElementById('comments-count').innerText=(this.data.comments[id]||[]).length; if(this.data.currentUser){document.getElementById('comment-section-logged-in').classList.remove('hidden');document.getElementById('comment-section-logged-out').classList.add('hidden');document.getElementById('comment-avatar').innerText=this.data.currentUser.name.charAt(0);}else{document.getElementById('comment-section-logged-in').classList.add('hidden');document.getElementById('comment-section-logged-out').classList.remove('hidden');} l.innerHTML=(this.data.comments[id]||[]).map(c=>`<div class="bg-black/5 dark:bg-white/5 p-4 rounded-xl border border-black/5 dark:border-white/5"><div class="flex justify-between text-xs font-bold mb-1.5 opacity-60"><span>${c.author}</span><span>${c.date}</span></div><p class="text-sm leading-relaxed">${c.text}</p></div>`).join(''); },
         
         openReader(id,isE=false) { 
@@ -676,7 +812,7 @@
         checkEssenceScroll(d) { if(this.data.currentView!=='essence'||this.data.essenceLoading)return; const e=document.getElementById(`essence-${d}`); const end=d==='mobile'?e.scrollLeft+e.clientWidth>=e.scrollWidth-300:e.scrollTop+e.clientHeight>=e.scrollHeight-300; if(end)this.loadMoreEssence(); },
         async loadMoreEssence() { this.data.essenceLoading=true; setTimeout(()=>{const n=[];for(let i=0;i<3;i++)n.push(this.generateEssenceItem());this.data.essenceFeed=[...this.data.essenceFeed,...n];this.renderEssenceChunk(n);this.data.essenceLoading=false;},800); },
         renderEssenceChunk(items) { const m=document.getElementById('essence-mobile'),d=document.getElementById('essence-desktop'); const g=['from-orange-900 to-black','from-amber-900 to-black','from-yellow-900 to-black']; items.forEach(i=>{const gr=g[Math.abs(String(i.id).split('').reduce((a,b)=>a+b.charCodeAt(0),0))%g.length]; const inner=`<div class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent z-10"></div><div class="relative z-20 h-full flex flex-col justify-end p-6 cursor-pointer" onclick="app.openReader('${i.id}',true)"><div class="flex items-center gap-2 mb-3"><span class="px-2.5 py-1 rounded-lg bg-[#ea580c]/20 backdrop-blur text-[10px] font-bold text-[#ea580c] uppercase tracking-wider border border-[#ea580c]/30">#${i.tag}</span></div><h2 class="text-2xl font-bold text-white mb-3 leading-tight">${i.title}</h2><div class="bg-black/40 backdrop-blur-md p-4 rounded-xl border border-white/10 mb-4 shadow-xl"><p class="text-sm text-gray-200 whitespace-pre-line leading-relaxed">${i.summary}</p></div><div class="mt-auto"><span class="block w-full py-3.5 rounded-xl font-bold text-center text-sm bg-[#ea580c] text-white shadow-lg shadow-orange-900/20 hover:bg-orange-600 transition">Читать источник</span></div></div>`; m.insertAdjacentHTML('beforeend',`<div class="flex-[0_0_90vw] h-full scroll-snap-align-center mr-4 rounded-3xl relative overflow-hidden border border-[#262626] bg-gradient-to-br ${gr} shadow-2xl" style="scroll-snap-align: center;">${inner}</div>`); d.insertAdjacentHTML('beforeend',`<div class="h-[500px] rounded-[20px] relative overflow-hidden transition-transform duration-200 flex flex-col border border-[#262626] hover:-translate-y-1 hover:border-[#ea580c] bg-gradient-to-br ${gr} shadow-xl">${inner}</div>`);}); },
-        addNews() { const b=document.getElementById('new-body').value; if(!b)return; const n={id:this.generateUniqueID(),title:"Новая идея",body:b,full:`<p>${b}</p>`,tag:"Мнение",source:'Автор',date:'Сейчас',isPost:true}; this.data.posts.unshift(n);localStorage.setItem('ip_posts_v22',JSON.stringify(this.data.posts));this.renderIdeas();this.nav('ideas'); },
+        addNews() { const b=document.getElementById('new-body').value; if(!b)return; const n={id:this.generateUniqueID(),title:"Новая идея",body:b,full:`<p>${b}</p>`,tag:"Мнение",source:'Автор',date:'Сейчас',isPost:true}; this.data.posts.unshift(n);localStorage.setItem('ip_posts_v23',JSON.stringify(this.data.posts));this.renderIdeas();this.nav('ideas'); },
         renderIdeas() { document.getElementById('ideas-list').innerHTML=this.data.posts.map(p=>`<div onclick="app.openReader('${p.id}')" class="bg-[#121212] p-6 rounded-2xl border border-[#262626] cursor-pointer hover:border-purple-500/30 hover:bg-zinc-900 transition-all group"><div class="text-xs text-purple-400 font-bold mb-3 uppercase tracking-wider flex items-center gap-2"><i class="fas fa-pen-nib"></i> Мнение • ${p.date}</div><h3 class="text-xl font-bold mb-3 group-hover:text-purple-400 transition">${p.title}</h3><p class="text-sm text-gray-400 leading-relaxed">${p.body}</p></div>`).join(''); }
     };
 
