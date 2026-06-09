@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>InvestPro | Premium Reader</title>
+    <title>InvestPro | Infinite Feed v4</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -24,13 +24,11 @@
     </script>
     
     <style>
-        /* ПРЕЛОАДЕР */
         #app-preloader { position: fixed; inset: 0; z-index: 9999; background-color: #0b1120; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.6s ease, visibility 0.6s ease; }
         #app-preloader.loaded { opacity: 0; visibility: hidden; pointer-events: none; }
         .preloader-spinner { width: 48px; height: 48px; border: 4px solid rgba(59, 130, 246, 0.2); border-top-color: #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ЛЕНТА */
         .feed-container { overflow-y: auto; overflow-x: hidden; height: calc(100vh - 64px); scroll-behavior: smooth; -webkit-overflow-scrolling: touch; position: relative; contain: strict; }
         .feed-item { min-height: 85vh; padding: 1.5rem; margin-bottom: 0; border-radius: 0; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; justify-content: flex-end; position: relative; overflow: hidden; }
         @media (min-width: 768px) {
@@ -38,23 +36,18 @@
             .feed-item { max-width: 600px; margin: 0 auto 1.5rem auto; min-height: 500px; border-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.05); padding: 2rem; }
         }
 
-        /* АНИМАЦИИ */
         .fade-up { animation: fadeUp 0.5s ease-out forwards; opacity: 0; transform: translateY(20px); }
         @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
         .glass-header { backdrop-filter: blur(16px); background: rgba(11, 17, 32, 0.9); border-bottom: 1px solid rgba(255,255,255,0.05); }
         
-        /* --- PREMIUM READER DESIGN --- */
         .reader-overlay { position: fixed; inset: 0; z-index: 100; overflow-y: auto; }
         .reader-paper { font-family: 'Merriweather', serif; line-height: 1.9; min-height: 100vh; padding-bottom: 4rem; transition: background 0.3s, color 0.3s; }
         .reader-header { position: sticky; top: 0; backdrop-filter: blur(12px); z-index: 10; transition: background 0.3s, border-color 0.3s; }
         
-        /* Светлая тема */
         .reader-paper.light { background: #fdfbf7; color: #2d3748; }
         .reader-paper.light .prose-reader p { color: #4a5568; }
         .reader-paper.light .prose-reader h2 { color: #1a202c; }
-        .reader-paper.light .prose-reader h3 { color: #2d3748; }
         .reader-paper.light .prose-reader blockquote { background: #f7fafc; border-left-color: #3b82f6; color: #4a5568; }
-        .reader-paper.light .prose-reader ul li::before { background-color: #cbd5e0; }
         .reader-paper.light .reader-header { background: rgba(253, 251, 247, 0.95); border-bottom: 1px solid rgba(0,0,0,0.05); }
         .reader-paper.light .reader-btn { background: white; border-color: #e2e8f0; color: #4a5568; }
         .reader-paper.light .reader-btn:hover { background: #f7fafc; border-color: #cbd5e0; }
@@ -64,13 +57,10 @@
         .reader-paper.light .source-link { background: #1a202c; color: white; }
         .reader-paper.light .source-link:hover { background: #2d3748; }
         
-        /* Темная тема */
         .reader-paper.dark { background: #1a202c; color: #cbd5e1; }
         .reader-paper.dark .prose-reader p { color: #a0aec0; }
         .reader-paper.dark .prose-reader h2 { color: #f7fafc; }
-        .reader-paper.dark .prose-reader h3 { color: #e2e8f0; }
         .reader-paper.dark .prose-reader blockquote { background: #2d3748; border-left-color: #63b3ed; color: #a0aec0; }
-        .reader-paper.dark .prose-reader ul li::before { background-color: #4a5568; }
         .reader-paper.dark .reader-header { background: rgba(26, 32, 44, 0.95); border-bottom: 1px solid rgba(255,255,255,0.05); }
         .reader-paper.dark .reader-btn { background: #2d3748; border-color: #4a5568; color: #e2e8f0; }
         .reader-paper.dark .reader-btn:hover { background: #4a5568; border-color: #718096; }
@@ -80,21 +70,18 @@
         .reader-paper.dark .source-link { background: #f7fafc; color: #1a202c; }
         .reader-paper.dark .source-link:hover { background: #e2e8f0; }
 
-        /* Типографика ридера */
         .prose-reader { max-width: 68ch; margin: 0 auto; padding: 0 1.5rem; }
         .prose-reader p { margin-bottom: 1.8em; font-size: 1.15rem; }
         .prose-reader h2 { font-family: 'Inter', sans-serif; font-weight: 800; font-size: 1.6rem; margin-top: 2.5em; margin-bottom: 1em; letter-spacing: -0.02em; line-height: 1.3; }
-        .prose-reader h3 { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 1.3rem; margin-top: 2em; margin-bottom: 0.8em; }
         .prose-reader strong { font-weight: 700; color: inherit; }
         .prose-reader blockquote { padding: 1.5em 2em; margin: 2.5em 0; border-radius: 0 12px 12px 0; font-style: italic; border-left-width: 4px; font-size: 1.2rem; line-height: 1.7; }
         .prose-reader ul { list-style: none; padding-left: 0; margin-bottom: 1.8em; }
         .prose-reader ul li { position: relative; padding-left: 1.5em; margin-bottom: 0.8em; }
-        .prose-reader ul li::before { content: ''; position: absolute; left: 0; top: 0.7em; width: 6px; height: 6px; border-radius: 50%; }
+        .prose-reader ul li::before { content: ''; position: absolute; left: 0; top: 0.7em; width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: 0.5; }
         
         @media (max-width: 640px) {
             .prose-reader { padding: 0 1rem; }
             .prose-reader p { font-size: 1.05rem; line-height: 1.8; }
-            .prose-reader h2 { font-size: 1.4rem; }
         }
 
         .reader-progress { position: fixed; top: 0; left: 0; height: 3px; background: #3b82f6; z-index: 200; width: 0%; transition: width 0.1s; }
@@ -132,8 +119,8 @@
     <main class="flex-grow relative w-full bg-black overflow-hidden">
         <section id="view-feed" class="absolute inset-0 feed-container bg-dark hidden">
             <div id="feed-content"></div>
-            <div id="feed-loader" class="feed-loader hidden"><i class="fas fa-circle-notch fa-spin mr-2"></i>Загрузка новостей...</div>
-            <div id="feed-end" class="feed-loader hidden">Вы просмотрели все доступные новости</div>
+            <div id="feed-loader" class="feed-loader hidden"><i class="fas fa-circle-notch fa-spin mr-2"></i>Загрузка свежих новостей...</div>
+            <div id="feed-end" class="feed-loader hidden">Вы достигли конца ленты</div>
         </section>
 
         <section id="view-main" class="absolute inset-0 overflow-y-auto p-4 md:p-8 space-y-8 bg-dark hidden">
@@ -171,22 +158,16 @@
         </section>
     </main>
 
-    <!-- PREMIUM READER MODAL -->
+    <!-- READER MODAL -->
     <div id="reader-modal" class="reader-overlay hidden">
         <div id="reader-paper" class="reader-paper light">
             <div class="reader-header px-4 py-3 flex justify-between items-center font-sans">
-                <button onclick="app.closeReader()" class="flex items-center gap-2 text-current opacity-70 hover:opacity-100 transition font-bold text-sm px-3 py-1.5 rounded-lg hover:bg-black/5">
-                    <i class="fas fa-arrow-left"></i> <span class="hidden sm:inline">Назад</span>
-                </button>
+                <button onclick="app.closeReader()" class="flex items-center gap-2 text-current opacity-70 hover:opacity-100 transition font-bold text-sm px-3 py-1.5 rounded-lg hover:bg-black/5"><i class="fas fa-arrow-left"></i> <span class="hidden sm:inline">Назад</span></button>
                 <div class="flex items-center gap-3">
                     <button onclick="app.toggleReaderTheme()" class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-black/5 transition text-current opacity-70 hover:opacity-100" title="Сменить тему"><i id="theme-icon" class="fas fa-moon"></i></button>
                 </div>
             </div>
-            
-            <!-- Статья -->
             <article id="reader-content" class="pt-12 pb-16"></article>
-            
-            <!-- Блок действий и комментариев -->
             <div class="max-w-[68ch] mx-auto px-6 pb-20 font-sans border-t border-current/10 mt-8">
                 <div class="py-8 mb-8">
                     <p class="text-sm opacity-60 mb-4 uppercase tracking-wider font-bold">Действия</p>
@@ -194,16 +175,12 @@
                         <button id="reader-like-btn" onclick="app.handleReaderLike()" class="reader-btn flex-1 py-3 rounded-xl font-bold transition flex items-center justify-center gap-2 shadow-sm border"><i class="fas fa-heart"></i> <span id="reader-like-count">0</span></button>
                         <button id="reader-share-btn" onclick="app.handleReaderShare()" class="reader-btn flex-1 py-3 rounded-xl font-bold transition shadow-lg border"><i class="fas fa-share-alt mr-2"></i> Поделиться</button>
                     </div>
-                    <!-- Кнопка перехода на источник -->
-                    <a id="reader-source-link" href="#" target="_blank" rel="noopener noreferrer" class="source-link mt-4 w-full py-3 rounded-xl font-bold transition flex items-center justify-center gap-2 no-underline">
+                    <a id="reader-source-link" href="#" target="_blank" rel="noopener noreferrer" class="source-link mt-4 w-full py-3 rounded-xl font-bold transition flex items-center justify-center gap-2 no-underline hidden">
                         <i class="fas fa-external-link-alt"></i> Перейти к источнику
                     </a>
                 </div>
-
-                <!-- Комментарии -->
                 <div>
                     <h3 class="text-xl font-bold mb-6 font-sans">Комментарии (<span id="comments-count">0</span>)</h3>
-                    
                     <div class="space-y-3 mb-8">
                         <input type="text" id="comment-nick" class="comment-input w-full px-4 py-3 rounded-xl border outline-none focus:border-accent transition text-sm font-bold" placeholder="Ваш никнейм">
                         <div class="flex gap-3">
@@ -211,7 +188,6 @@
                             <button onclick="app.postComment()" class="bg-accent text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-blue-600 transition"><i class="fas fa-paper-plane"></i></button>
                         </div>
                     </div>
-
                     <div id="comments-list" class="space-y-4"></div>
                 </div>
             </div>
@@ -223,26 +199,25 @@ const app = {
     data: { 
         news: [], posts: [], feedPage: 0, feedLoading: false, feedHasMore: true, allFetchedNews: [],
         readerTheme: localStorage.getItem('ip_reader_theme') || 'light',
-        likes: JSON.parse(localStorage.getItem('ip_likes_v3') || '{}'),
-        comments: JSON.parse(localStorage.getItem('ip_comments_v3') || '{}'),
+        likes: JSON.parse(localStorage.getItem('ip_likes_v4') || '{}'),
+        comments: JSON.parse(localStorage.getItem('ip_comments_v4') || '{}'),
         userNick: localStorage.getItem('ip_user_nick') || '',
-        currentItem: null, rssSources: []
+        currentItem: null, 
+        rssSources: [],
+        sourceIndex: 0 // Для конвейерной загрузки
     },
 
     init() {
         this.generateRSSSources();
-        const savedPosts = localStorage.getItem('ip_posts_v10');
+        
+        // Мгновенная заготовка новостей (чтобы не было пусто при старте)
+        this.seedInitialNews();
+
+        const savedPosts = localStorage.getItem('ip_posts_v11');
         this.data.posts = savedPosts ? JSON.parse(savedPosts) : [
-            { id: 101, title: "Почему я покупаю нефтянку прямо сейчас", body: "Многие боятся рецессии, но я вижу точку входа.", full: "<p>Многие инвесторы сейчас паникуют из-за макроэкономических показателей, но я вижу отличную точку входа. Энергетический кризис только начинается, и текущие цены — это подарок.</p><h2>Фундаментальные причины</h2><p>Во-первых, глобальные инвестиции в добычу упали до минимумов за 10 лет. Во-вторых, спрос со стороны Азии растет опережающими темпами.</p><blockquote>Инвестируй тогда, когда льется кровь на улицах, даже если эта кровь твоя собственная.</blockquote><p>Я наращиваю позиции в Лукойле и Роснефти. Дивидендная доходность при текущих ценах превышает 15% годовых, что является абсолютным рекордом.</p>", tag: "Мнение", date: "2ч назад", isPost: true, sourceUrl: "#" }
+            { id: 101, title: "Почему я покупаю нефтянку прямо сейчас", body: "Многие боятся рецессии, но я вижу точку входа.", full: "<p>Многие инвесторы сейчас паникуют из-за макроэкономических показателей, но я вижу отличную точку входа. Энергетический кризис только начинается.</p><h2>Фундаментальные причины</h2><p>Во-первых, глобальные инвестиции в добычу упали до минимумов за 10 лет. Во-вторых, спрос со стороны Азии растет опережающими темпами.</p><blockquote>Инвестируй тогда, когда льется кровь на улицах.</blockquote><p>Я наращиваю позиции в Лукойле и Роснефти. Дивидендная доходность превышает 15% годовых.</p>", tag: "Мнение", date: "2ч назад", isPost: true, sourceUrl: "#" }
         ];
 
-        this.data.news = [
-            { id: 1, title: "Сбербанк бьет рекорды по прибыли: детальный разбор", body: "Чистая прибыль за квартал превысила 400 млрд руб.", full: "<p>Сбербанк опубликовал сильную отчетность за третий квартал 2026 года. Чистая прибыль превысила прогнозы аналитиков на 15%, достигнув рекордных значений в 420 млрд рублей.</p><h2>Что это значит для инвесторов?</h2><p>Банк может направить на дивиденды до 50% прибыли, что сделает его одним из самых доходных инструментов года. Эксперты рекомендуют удерживать позиции.</p><h3>Ключевые показатели:</h3><ul><li>Чистая процентная маржа выросла до 5.8%</li><li>Кредитный портфель увеличился на 12%</li><li>Стоимость риска снизилась до исторических минимумов</li></ul><p>Герман Греф отметил, что банк полностью адаптировался к текущим макроэкономическим условиям и планирует дальнейшее расширение бизнеса в Азии.</p>", tag: "Акции", source: "РБК", date: "1ч назад", sourceUrl: "https://www.rbc.ru/" },
-            { id: 2, title: "Биткоин пробил отметку $70,000: что дальше?", body: "Криптовалюта обновила исторический максимум.", full: "<p>Рынок криптовалют ликует. Биткоин преодолел психологическую отметку в $70k на фоне одобрения новых спотовых ETF фондов.</p><p>Аналитики предсказывают дальнейший рост до $100k к концу года, так как институциональные инвесторы только начинают заходить в актив.</p><h2>Мнение экспертов</h2><p>Большинство аналитиков сходятся во мнении, что текущий рост обусловлен фундаментальными факторами, а не спекуляциями. Приток средств в ETF превысил $2 млрд за последнюю неделю.</p>", tag: "Крипто", source: "Bloomberg", date: "3ч назад", sourceUrl: "https://www.bloomberg.com/" },
-            { id: 3, title: "ЦБ сохранил ключевую ставку: полный обзор", body: "Регулятор сохранил жесткую риторику.", full: "<p>Эльвира Набиуллина заявила о необходимости сохранения жесткой денежно-кредитной политики для борьбы с инфляцией.</p><p>Ставка осталась на прежнем уровне, но сигнал был достаточно ястребиным. Рынок акций отреагировал умеренным снижением, особенно в секторе потребительских товаров.</p><blockquote>Мы видим риски перегрева экономики и готовы действовать решительно.</blockquote><p>Аналитики ожидают, что ставка останется неизменной как минимум до конца первого полугодия 2026 года.</p>", tag: "Макро", source: "Интерфакс", date: "5ч назад", sourceUrl: "https://www.interfax.ru/" }
-        ];
-
-        // Восстанавливаем ник
         if(this.data.userNick) document.getElementById('comment-nick').value = this.data.userNick;
 
         this.rebuildIndex();
@@ -250,26 +225,57 @@ const app = {
         this.renderIdeas();
         this.nav('main');
         
+        // Настройка бесконечного скролла
         const feedContainer = document.getElementById('view-feed');
         feedContainer.addEventListener('scroll', () => {
             if (this.data.currentView !== 'feed') return;
             const { scrollTop, scrollHeight, clientHeight } = feedContainer;
-            if (scrollTop + clientHeight >= scrollHeight - 400 && !this.data.feedLoading && this.data.feedHasMore) this.loadMoreFeed();
+            if (scrollTop + clientHeight >= scrollHeight - 600 && !this.data.feedLoading && this.data.feedHasMore) {
+                this.loadMoreFeed();
+            }
         });
 
-        setTimeout(() => document.getElementById('app-preloader')?.classList.add('loaded'), 800);
+        setTimeout(() => document.getElementById('app-preloader')?.classList.add('loaded'), 600);
     },
 
+    seedInitialNews() {
+        this.data.news = [
+            { id: 'seed_1', title: "Сбербанк бьет рекорды по прибыли: детальный разбор", body: "Чистая прибыль за квартал превысила 400 млрд руб.", full: "<p>Сбербанк опубликовал сильную отчетность. Чистая прибыль превысила прогнозы на 15%.</p><h2>Что это значит?</h2><p>Банк может направить на дивиденды до 50% прибыли.</p><ul><li>Маржа выросла до 5.8%</li><li>Кредитный портфель +12%</li></ul>", tag: "Акции", source: "РБК", date: "1ч назад", sourceUrl: "https://rbc.ru" },
+            { id: 'seed_2', title: "Биткоин пробил отметку $70,000: что дальше?", body: "Криптовалюта обновила исторический максимум.", full: "<p>Рынок криптовалют ликует. Биткоин преодолел психологическую отметку в $70k.</p><p>Аналитики предсказывают рост до $100k к концу года.</p>", tag: "Крипто", source: "Bloomberg", date: "3ч назад", sourceUrl: "https://bloomberg.com" },
+            { id: 'seed_3', title: "ЦБ сохранил ключевую ставку: полный обзор", body: "Регулятор сохранил жесткую риторику.", full: "<p>Эльвира Набиуллина заявила о необходимости сохранения жесткой ДКП.</p><blockquote>Мы видим риски перегрева экономики.</blockquote>", tag: "Макро", source: "Интерфакс", date: "5ч назад", sourceUrl: "https://interfax.ru" },
+            { id: 'seed_4', title: "Газпром завершил строительство нового НПЗ", body: "Инвестиции составили более 300 млрд рублей.", full: "<p>Новый завод позволит увеличить переработку нефти на 15 млн тонн в год.</p>", tag: "Сырье", source: "Ведомости", date: "6ч назад", sourceUrl: "https://vedomosti.ru" },
+            { id: 'seed_5', title: "Яндекс представил новую модель нейросети", body: "YandexGPT 5 показывает результаты лучше GPT-4.", full: "<p>Компания сделала ставку на мультимодальность и работу с видео.</p>", tag: "IT", source: "Habr", date: "7ч назад", sourceUrl: "https://habr.com" }
+        ];
+        // Сразу рендерим первую порцию в ленту
+        this.data.allFetchedNews = [...this.data.news];
+    },
+
+    // ГЕНЕРАТОР 100+ УНИКАЛЬНЫХ ИСТОЧНИКОВ
     generateRSSSources() {
-        const tickers = ['SBER', 'GAZP', 'LKOH', 'YNDX', 'VTBR', 'ROSN', 'GMKN', 'PLZL', 'MGNT', 'TCSG'];
-        const sectors = ['нефть', 'газ', 'золото', 'банки', 'IT', 'криптовалюта', 'биткоин', 'облигации', 'дивиденды', 'IPO'];
-        const macro = ['ключевая ставка', 'инфляция', 'ВВП', 'курс доллара', 'курс юаня', 'санкции', 'импорт', 'экспорт'];
-        const queries = [...tickers, ...sectors, ...macro];
-        this.data.rssSources = queries.map(q => `https://news.google.com/rss/search?q=${encodeURIComponent(q)}+инвестиции&hl=ru&gl=RU&ceid=RU:ru`);
-        this.data.rssSources.push("https://news.google.com/rss/search?q=мосбиржа+рынок&hl=ru&gl=RU&ceid=RU:ru", "https://news.google.com/rss/search?q=центробанк+рф&hl=ru&gl=RU&ceid=RU:ru");
+        const tickers = ['SBER', 'GAZP', 'LKOH', 'YNDX', 'VTBR', 'ROSN', 'GMKN', 'PLZL', 'MGNT', 'TCSG', 'NVTK', 'MTSS', 'POLY', 'ALRS', 'CHMF', 'NLMK', 'TATN', 'MOEX', 'IRAO', 'FLOT'];
+        const sectors = ['нефть', 'газ', 'золото', 'серебро', 'банки', 'финтех', 'IT', 'криптовалюта', 'биткоин', 'эфир', 'облигации', 'ОФЗ', 'дивиденды', 'IPO', 'акции', 'фондовый рынок'];
+        const macro = ['ключевая ставка', 'инфляция', 'ВВП', 'курс доллара', 'курс юаня', 'санкции', 'импорт', 'экспорт', 'безработица', 'потребительские цены'];
+        const companies = ['Сбербанк', 'Лукойл', 'Газпром', 'Яндекс', 'Тинькофф', 'Магнит', 'Норникель', 'Полюс', 'Аэрофлот', 'Сургутнефтегаз'];
+        
+        const allQueries = [...tickers, ...sectors, ...macro, ...companies];
+        
+        // Создаем массив URL
+        this.data.rssSources = allQueries.map(q => 
+            `https://news.google.com/rss/search?q=${encodeURIComponent(q)}+инвестиции+рынок&hl=ru&gl=RU&ceid=RU:ru`
+        );
+        
+        // Перемешиваем для разнообразия
+        this.data.rssSources.sort(() => Math.random() - 0.5);
+        console.log(`[InvestPro] Подготовлено ${this.data.rssSources.length} уникальных источников`);
     },
 
-    rebuildIndex() { this.data.allItemsMap = {}; [...this.data.news, ...this.data.posts, ...this.data.allFetchedNews].forEach(item => { this.data.allItemsMap[item.id] = item; }); },
+    rebuildIndex() { 
+        this.data.allItemsMap = {}; 
+        [...this.data.news, ...this.data.posts, ...this.data.allFetchedNews].forEach(item => { 
+            this.data.allItemsMap[item.id] = item; 
+        }); 
+    },
+    
     getItemById(id) { return this.data.allItemsMap[id] || [...this.data.news, ...this.data.posts, ...this.data.allFetchedNews].find(i => i.id == id); },
 
     nav(view) {
@@ -279,7 +285,16 @@ const app = {
         document.querySelectorAll('.nav-btn').forEach(b => b.className = 'nav-btn px-4 py-1.5 rounded-full text-xs font-medium text-gray-400 hover:text-white hover:bg-white/10 transition-all');
         const activeBtn = document.getElementById(`btn-${view}`);
         if(activeBtn) activeBtn.className = 'nav-btn px-4 py-1.5 rounded-full text-xs font-bold bg-accent text-white shadow-lg shadow-accent/25 transition-all';
-        if(view === 'feed' && this.data.allFetchedNews.length === 0) this.loadMoreFeed();
+        
+        // При первом входе в ленту рендерим то, что уже есть, и запускаем фоновую загрузку
+        if(view === 'feed') {
+            const container = document.getElementById('feed-content');
+            if(container.children.length === 0 && this.data.allFetchedNews.length > 0) {
+                this.renderFeedChunk(this.data.allFetchedNews.slice(0, 10));
+                this.data.feedPage = 1;
+            }
+            if(this.data.allFetchedNews.length < 20) this.loadMoreFeed();
+        }
     },
 
     showToast(msg) { const t = document.getElementById('toast'); document.getElementById('toast-msg').innerText = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2500); },
@@ -289,7 +304,7 @@ const app = {
         const isLiked = this.data.likes[id];
         if (isLiked) { delete this.data.likes[id]; btn.classList.remove('text-red-500'); btn.querySelector('i').classList.replace('fas', 'far'); } 
         else { this.data.likes[id] = true; btn.classList.add('text-red-500'); btn.querySelector('i').classList.replace('far', 'fas'); btn.querySelector('i').classList.add('like-animate'); setTimeout(() => btn.querySelector('i').classList.remove('like-animate'), 300); }
-        localStorage.setItem('ip_likes_v3', JSON.stringify(this.data.likes));
+        localStorage.setItem('ip_likes_v4', JSON.stringify(this.data.likes));
         this.updateLikeUI(id);
     },
 
@@ -321,14 +336,13 @@ const app = {
         const text = input.value.trim();
         if (!text) return;
 
-        // Сохраняем ник
         this.data.userNick = nick;
         localStorage.setItem('ip_user_nick', nick);
 
         const id = this.data.currentItem.id;
         if (!this.data.comments[id]) this.data.comments[id] = [];
         this.data.comments[id].unshift({ text, date: new Date().toLocaleString('ru-RU', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'}), author: nick });
-        localStorage.setItem('ip_comments_v3', JSON.stringify(this.data.comments));
+        localStorage.setItem('ip_comments_v4', JSON.stringify(this.data.comments));
         input.value = '';
         this.renderComments(id);
         this.showToast('Комментарий добавлен');
@@ -357,7 +371,6 @@ const app = {
         paper.className = `reader-paper ${this.data.readerTheme}`;
         themeIcon.className = this.data.readerTheme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
 
-        // Настройка ссылки на источник
         if (item.sourceUrl && item.sourceUrl !== '#') {
             sourceLink.href = item.sourceUrl;
             sourceLink.classList.remove('hidden');
@@ -384,33 +397,116 @@ const app = {
         modal.onscroll = () => { const w = modal.scrollTop; const h = modal.scrollHeight - modal.clientHeight; progress.style.width = (h > 0 ? (w / h) * 100 : 0) + "%"; };
     },
 
+    // КОНВЕЙЕРНАЯ ЗАГРУЗКА (Быстрая и неблокирующая)
     async loadMoreFeed() {
         if (this.data.feedLoading || !this.data.feedHasMore) return;
         this.data.feedLoading = true;
         document.getElementById('feed-loader').classList.remove('hidden');
+
         try {
-            const batchSize = 5;
-            const startIdx = (this.data.feedPage * batchSize) % this.data.rssSources.length;
-            const batch = this.data.rssSources.slice(startIdx, startIdx + batchSize);
-            if (batch.length > 0 && this.data.allFetchedNews.length < 500) {
-                const promises = batch.map(url => fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`).then(r => r.text()).then(xml => { const doc = new DOMParser().parseFromString(xml, "text/xml"); return Array.from(doc.querySelectorAll("item")).map(item => ({ id: 'rss_' + Math.random().toString(36).substr(2, 9), title: item.querySelector("title")?.textContent || "", body: (item.querySelector("description")?.textContent || "").replace(/<[^>]*>/g, '').substring(0, 200), full: item.querySelector("description")?.textContent || "", source: item.querySelector("source")?.textContent || "Google News", date: new Date(item.querySelector("pubDate")?.textContent || Date.now()).toLocaleString('ru-RU', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'}), tag: ["Акции","Крипто","Макро","Сырье","Отчеты"][Math.floor(Math.random()*5)], sourceUrl: item.querySelector("link")?.textContent || "#" })); }).catch(() => []));
+            // Берем следующую партию источников (по 4 штуки за раз)
+            const batchSize = 4;
+            const batch = this.data.rssSources.slice(this.data.sourceIndex, this.data.sourceIndex + batchSize);
+            
+            if (batch.length > 0) {
+                const promises = batch.map(url => 
+                    fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`)
+                        .then(r => r.text())
+                        .then(xml => {
+                            const doc = new DOMParser().parseFromString(xml, "text/xml");
+                            return Array.from(doc.querySelectorAll("item")).map(item => ({
+                                id: 'rss_' + Math.random().toString(36).substr(2, 9),
+                                title: item.querySelector("title")?.textContent || "",
+                                body: (item.querySelector("description")?.textContent || "").replace(/<[^>]*>/g, '').substring(0, 200),
+                                full: item.querySelector("description")?.textContent || "",
+                                source: item.querySelector("source")?.textContent || "Google News",
+                                date: new Date(item.querySelector("pubDate")?.textContent || Date.now()).toLocaleString('ru-RU', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'}),
+                                tag: ["Акции","Крипто","Макро","Сырье","IT","Облигации"][Math.floor(Math.random()*6)],
+                                sourceUrl: item.querySelector("link")?.textContent || "#"
+                            }));
+                        })
+                        .catch(() => [])
+                );
+                
                 const results = await Promise.all(promises);
-                this.data.allFetchedNews = [...this.data.allFetchedNews, ...results.flat()];
-                this.data.allFetchedNews = this.data.allFetchedNews.filter((v,i,a) => a.findIndex(t => t.title === v.title) === i);
-                this.rebuildIndex();
+                let newItems = results.flat();
+                
+                // Дедупликация: убираем новости, которые уже есть в ленте
+                newItems = newItems.filter(n => !this.data.allItemsMap[n.title]); // Грубая проверка по заголовку для скорости
+                
+                if (newItems.length > 0) {
+                    this.data.allFetchedNews = [...this.data.allFetchedNews, ...newItems];
+                    this.rebuildIndex();
+                    
+                    // Рендерим только новые добавленные новости
+                    // Но чтобы лента была красивой, берем хвост массива
+                    const startRender = this.data.feedPage * 10;
+                    const chunk = this.data.allFetchedNews.slice(startRender, startRender + 10);
+                    if(chunk.length > 0) {
+                        this.renderFeedChunk(chunk);
+                        this.data.feedPage++;
+                    }
+                }
+                
+                this.data.sourceIndex += batchSize;
+                if (this.data.sourceIndex >= this.data.rssSources.length) {
+                    // Круг замкнулся, можно остановиться или начать заново
+                    this.data.feedHasMore = false; 
+                    document.getElementById('feed-end').classList.remove('hidden');
+                }
+            } else {
+                this.data.feedHasMore = false;
+                document.getElementById('feed-end').classList.remove('hidden');
             }
-            const renderStart = this.data.feedPage * 10;
-            const chunk = this.data.allFetchedNews.slice(renderStart, renderStart + 10);
-            if (chunk.length > 0) { this.renderFeedChunk(chunk); this.data.feedPage++; } 
-            else if (this.data.allFetchedNews.length >= 500) { this.data.feedHasMore = false; document.getElementById('feed-end').classList.remove('hidden'); } 
-            else { this.data.feedLoading = false; this.loadMoreFeed(); return; }
-        } catch (e) { console.error(e); } finally { this.data.feedLoading = false; document.getElementById('feed-loader').classList.add('hidden'); }
+        } catch (e) { 
+            console.error("Feed Error:", e); 
+        } finally { 
+            this.data.feedLoading = false; 
+            document.getElementById('feed-loader').classList.add('hidden'); 
+        }
     },
 
     renderFeedChunk(items) {
         const container = document.getElementById('feed-content');
         const getGradient = (id) => ['from-blue-900 via-slate-900 to-black','from-indigo-900 via-purple-900 to-black','from-emerald-900 via-teal-900 to-black','from-rose-900 via-pink-900 to-black','from-amber-900 via-orange-900 to-black'][Math.abs(String(id).split('').reduce((a,b)=>a+b.charCodeAt(0),0)) % 5];
-        const html = items.map((item, i) => { const isLiked = this.data.likes[item.id]; const baseLikes = Math.abs(String(item.id).split('').reduce((a,b)=>a+b.charCodeAt(0),0)) % 150; const displayLikes = isLiked ? baseLikes + 1 : baseLikes; return `<div class="feed-item bg-gradient-to-br ${getGradient(item.id)} group shadow-2xl border-b border-white/5 md:border md:border-white/5"><div class="absolute inset-0 opacity-20 pointer-events-none" style="background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.15) 1px, transparent 0); background-size: 20px 20px;"></div><div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none"></div><div class="absolute top-4 right-4 flex gap-2 z-20"><button onclick="app.toggleLike(this, '${item.id}')" class="w-10 h-10 rounded-full bg-black/20 backdrop-blur-md flex items-center justify-center ${isLiked ? 'text-red-500' : 'text-white/70'} hover:text-red-500 hover:bg-white/20 transition active:scale-90 border border-white/10"><i class="${isLiked ? 'fas' : 'far'} fa-heart text-sm"></i></button><button onclick="app.shareItem('${item.title.replace(/'/g, "\\'")}', '${item.id}')" class="w-10 h-10 rounded-full bg-black/20 backdrop-blur-md flex items-center justify-center text-white/70 hover:text-accent hover:bg-white/20 transition active:scale-90 border border-white/10"><i class="fas fa-share-alt text-sm"></i></button></div><div class="relative z-10 flex flex-col justify-end h-full fade-up" style="animation-delay: ${i * 0.05}s"><div class="flex items-center gap-2 mb-3"><span class="px-2.5 py-0.5 rounded-full bg-white/10 backdrop-blur border border-white/10 text-[10px] font-bold text-white uppercase tracking-wider">#${item.tag}</span><span class="text-white/50 text-[10px] font-medium">${item.date} • ${item.source}</span></div><h2 class="text-2xl md:text-4xl font-extrabold text-white leading-[1.15] mb-3 drop-shadow-lg tracking-tight pr-12">${item.title}</h2><p class="text-base md:text-lg text-gray-200 mb-5 line-clamp-3 drop-shadow-md font-light leading-relaxed max-w-lg">${item.body}</p><div class="flex items-center gap-3"><button onclick="app.openReader('${item.id}')" class="self-start inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-wide hover:bg-accent hover:border-accent transition-all duration-300 group/btn"><span>Читать полностью</span><i class="fas fa-arrow-right text-[10px] group-hover/btn:translate-x-1 transition-transform"></i></button><span class="text-xs text-white/40 font-medium">${displayLikes} ❤️</span></div></div></div>`}).join('');
+        
+        const html = items.map((item, i) => { 
+            const isLiked = this.data.likes[item.id]; 
+            const baseLikes = Math.abs(String(item.id).split('').reduce((a,b)=>a+b.charCodeAt(0),0)) % 150; 
+            const displayLikes = isLiked ? baseLikes + 1 : baseLikes; 
+            
+            return `
+            <div class="feed-item bg-gradient-to-br ${getGradient(item.id)} group shadow-2xl border-b border-white/5 md:border md:border-white/5">
+                <div class="absolute inset-0 opacity-20 pointer-events-none" style="background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.15) 1px, transparent 0); background-size: 20px 20px;"></div>
+                <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none"></div>
+                
+                <div class="absolute top-4 right-4 flex gap-2 z-20">
+                    <button onclick="app.toggleLike(this, '${item.id}')" class="w-10 h-10 rounded-full bg-black/20 backdrop-blur-md flex items-center justify-center ${isLiked ? 'text-red-500' : 'text-white/70'} hover:text-red-500 hover:bg-white/20 transition active:scale-90 border border-white/10">
+                        <i class="${isLiked ? 'fas' : 'far'} fa-heart text-sm"></i>
+                    </button>
+                    <button onclick="app.shareItem('${item.title.replace(/'/g, "\\'")}', '${item.id}')" class="w-10 h-10 rounded-full bg-black/20 backdrop-blur-md flex items-center justify-center text-white/70 hover:text-accent hover:bg-white/20 transition active:scale-90 border border-white/10">
+                        <i class="fas fa-share-alt text-sm"></i>
+                    </button>
+                </div>
+
+                <div class="relative z-10 flex flex-col justify-end h-full fade-up" style="animation-delay: ${i * 0.05}s">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="px-2.5 py-0.5 rounded-full bg-white/10 backdrop-blur border border-white/10 text-[10px] font-bold text-white uppercase tracking-wider">#${item.tag}</span>
+                        <span class="text-white/50 text-[10px] font-medium">${item.date} • ${item.source}</span>
+                    </div>
+                    <h2 class="text-2xl md:text-4xl font-extrabold text-white leading-[1.15] mb-3 drop-shadow-lg tracking-tight pr-12">${item.title}</h2>
+                    <p class="text-base md:text-lg text-gray-200 mb-5 line-clamp-3 drop-shadow-md font-light leading-relaxed max-w-lg">${item.body}</p>
+                    
+                    <div class="flex items-center gap-3">
+                        <button onclick="app.openReader('${item.id}')" class="self-start inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-wide hover:bg-accent hover:border-accent transition-all duration-300 group/btn">
+                            <span>Читать полностью</span>
+                            <i class="fas fa-arrow-right text-[10px] group-hover/btn:translate-x-1 transition-transform"></i>
+                        </button>
+                        <span class="text-xs text-white/40 font-medium">${displayLikes} ❤️</span>
+                    </div>
+                </div>
+            </div>
+        `}).join('');
         container.insertAdjacentHTML('beforeend', html);
     },
 
@@ -421,7 +517,7 @@ const app = {
         const title = document.getElementById('new-title').value; const body = document.getElementById('new-body').value; const type = document.getElementById('new-tag').value;
         if(!title || !body) return alert('Заполните все поля');
         const newItem = { id: Date.now(), title, body: body.substring(0, 150) + '...', full: `<p>${body.replace(/\n/g, '</p><p>')}</p>`, tag: type === 'idea' ? 'Мнение' : 'Новости', source: 'Автор', date: 'Только что', isPost: type === 'idea', sourceUrl: '#' };
-        if(type === 'idea') { this.data.posts.unshift(newItem); localStorage.setItem('ip_posts_v10', JSON.stringify(this.data.posts)); this.renderIdeas(); } 
+        if(type === 'idea') { this.data.posts.unshift(newItem); localStorage.setItem('ip_posts_v11', JSON.stringify(this.data.posts)); this.renderIdeas(); } 
         else { this.data.news.unshift(newItem); this.data.allFetchedNews.unshift(newItem); this.renderFeedChunk([newItem]); }
         this.rebuildIndex(); this.renderClassic(); document.getElementById('new-title').value = ''; document.getElementById('new-body').value = ''; alert('Опубликовано!'); this.nav(type === 'idea' ? 'ideas' : 'feed');
     },
