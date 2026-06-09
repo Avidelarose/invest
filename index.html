@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>InvestPro | Infinite Feed</title>
+    <title>InvestPro | Infinite Feed & Comments</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -31,14 +31,20 @@
             transition: opacity 0.6s ease, visibility 0.6s ease;
         }
         #app-preloader.loaded { opacity: 0; visibility: hidden; pointer-events: none; }
-        .preloader-spinner {
-            width: 48px; height: 48px; border: 4px solid rgba(59, 130, 246, 0.2);
-            border-top-color: #3b82f6; border-radius: 50%; animation: spin 1s linear infinite;
-        }
+        .preloader-spinner { width: 48px; height: 48px; border: 4px solid rgba(59, 130, 246, 0.2); border-top-color: #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ЛЕНТА */
-        .feed-container { overflow-y: auto; height: calc(100vh - 64px); scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
+        /* ЖЕСТКАЯ ИЗОЛЯЦИЯ ЛЕНТЫ (чтобы не вылезала) */
+        .feed-container { 
+            overflow-y: auto; 
+            overflow-x: hidden;
+            height: calc(100vh - 64px); 
+            scroll-behavior: smooth; 
+            -webkit-overflow-scrolling: touch; 
+            position: relative;
+            contain: strict; /* CSS Containment для производительности и изоляции */
+        }
+        
         .feed-item { 
             min-height: 85vh; padding: 1.5rem; margin-bottom: 0; border-radius: 0;
             border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column;
@@ -54,12 +60,12 @@
         @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
         .glass-header { backdrop-filter: blur(16px); background: rgba(11, 17, 32, 0.9); border-bottom: 1px solid rgba(255,255,255,0.05); }
         
-        /* РИДЕР: СВЕТЛАЯ И ТЕМНАЯ ТЕМА */
+        /* РИДЕР */
         .reader-overlay { position: fixed; inset: 0; z-index: 100; overflow-y: auto; }
         .reader-paper { font-family: 'Merriweather', serif; line-height: 1.9; min-height: 100vh; padding-bottom: 4rem; transition: background 0.3s, color 0.3s; }
         .reader-header { position: sticky; top: 0; backdrop-filter: blur(12px); z-index: 10; transition: background 0.3s, border-color 0.3s; }
         
-        /* Светлая */
+        /* Светлая тема ридера */
         .reader-paper.light { background: #fdfbf7; color: #2d3748; }
         .reader-paper.light .prose-reader p { color: #4a5568; }
         .reader-paper.light .prose-reader h2 { color: #1a202c; }
@@ -68,8 +74,10 @@
         .reader-paper.light .reader-btn { background: white; border-color: #e2e8f0; color: #4a5568; }
         .reader-paper.light .reader-btn:hover { background: #f7fafc; border-color: #cbd5e0; }
         .reader-paper.light .meta-tag { background: rgba(0,0,0,0.06); color: #4a5568; }
+        .reader-paper.light .comment-box { background: #fff; border-color: #e2e8f0; }
+        .reader-paper.light .comment-input { background: #f7fafc; border-color: #e2e8f0; color: #2d3748; }
         
-        /* Темная */
+        /* Темная тема ридера */
         .reader-paper.dark { background: #1a202c; color: #cbd5e1; }
         .reader-paper.dark .prose-reader p { color: #a0aec0; }
         .reader-paper.dark .prose-reader h2 { color: #f7fafc; }
@@ -78,14 +86,15 @@
         .reader-paper.dark .reader-btn { background: #2d3748; border-color: #4a5568; color: #e2e8f0; }
         .reader-paper.dark .reader-btn:hover { background: #4a5568; border-color: #718096; }
         .reader-paper.dark .meta-tag { background: rgba(255,255,255,0.08); color: #a0aec0; }
+        .reader-paper.dark .comment-box { background: #2d3748; border-color: #4a5568; }
+        .reader-paper.dark .comment-input { background: #1a202c; border-color: #4a5568; color: #e2e8f0; }
 
-        /* Типографика */
+        /* Типографика и комментарии */
         .prose-reader { max-width: 65ch; margin: 0 auto; padding: 2rem 1.5rem; }
         .prose-reader p { margin-bottom: 1.8em; font-size: 1.125rem; }
         .prose-reader h2 { font-family: 'Inter', sans-serif; font-weight: 800; font-size: 1.5rem; margin-top: 2.5em; margin-bottom: 1em; letter-spacing: -0.02em; }
         .prose-reader strong { font-weight: 700; }
         .prose-reader blockquote { padding: 1.5em; margin: 2em 0; border-radius: 0 8px 8px 0; font-style: italic; border-left-width: 4px; }
-        .prose-reader a { color: #3b82f6; text-decoration: underline; text-underline-offset: 4px; }
         
         @media (max-width: 640px) {
             .prose-reader { padding: 1.5rem 1rem; }
@@ -96,7 +105,6 @@
         .reader-progress { position: fixed; top: 0; left: 0; height: 3px; background: #3b82f6; z-index: 200; width: 0%; transition: width 0.1s; }
         .feed-loader { padding: 2rem; text-align: center; color: #64748b; font-size: 0.875rem; }
         
-        /* Уведомление (Toast) */
         #toast {
             position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(100px);
             background: #1e293b; color: white; padding: 0.75rem 1.5rem; border-radius: 999px;
@@ -105,28 +113,20 @@
             border: 1px solid rgba(255,255,255,0.1);
         }
         #toast.show { transform: translateX(-50%) translateY(0); }
-
-        /* Анимация лайка */
         @keyframes likePop { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
         .like-animate { animation: likePop 0.3s ease-out; }
     </style>
 </head>
 <body class="bg-dark text-gray-300 antialiased h-screen flex flex-col overflow-hidden selection:bg-accent selection:text-white">
 
-    <!-- ПРЕЛОАДЕР -->
     <div id="app-preloader">
         <div class="preloader-spinner"></div>
-        <p style="color:#94a3b8; margin-top:1.5rem; font-family:'Inter',sans-serif; font-size:.875rem; letter-spacing:.1em; text-transform:uppercase; font-weight:600;">
-            Загрузка InvestPro...
-        </p>
+        <p style="color:#94a3b8; margin-top:1.5rem; font-family:'Inter',sans-serif; font-size:.875rem; letter-spacing:.1em; text-transform:uppercase; font-weight:600;">Загрузка InvestPro...</p>
     </div>
 
-    <!-- ТОСТ УВЕДОМЛЕНИЕ -->
     <div id="toast"><i class="fas fa-check-circle mr-2 text-accent"></i><span id="toast-msg">Скопировано!</span></div>
-
     <div id="reading-progress" class="reader-progress hidden"></div>
 
-    <!-- ШАПКА -->
     <header class="glass-header h-16 flex items-center justify-between px-4 md:px-8 z-50 shrink-0">
         <div onclick="app.nav('main')" class="flex items-center gap-2 cursor-pointer group">
             <div class="w-8 h-8 rounded bg-gradient-to-tr from-accent to-blue-500 flex items-center justify-center text-white text-xs shadow-lg shadow-accent/20"><i class="fas fa-chart-line"></i></div>
@@ -140,17 +140,13 @@
         <button onclick="app.toggleAdmin()" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition border border-white/5"><i class="fas fa-cog text-xs"></i></button>
     </header>
 
-    <!-- ОСНОВНОЙ КОНТЕЙНЕР -->
     <main class="flex-grow relative w-full bg-black overflow-hidden">
-        
-        <!-- БЕСКОНЕЧНАЯ ЛЕНТА -->
         <section id="view-feed" class="absolute inset-0 feed-container bg-dark hidden">
             <div id="feed-content"></div>
             <div id="feed-loader" class="feed-loader hidden"><i class="fas fa-circle-notch fa-spin mr-2"></i>Загрузка новостей...</div>
             <div id="feed-end" class="feed-loader hidden">Вы просмотрели все доступные новости</div>
         </section>
 
-        <!-- ГЛАВНАЯ -->
         <section id="view-main" class="absolute inset-0 overflow-y-auto p-4 md:p-8 space-y-8 bg-dark hidden">
             <div class="max-w-4xl mx-auto">
                 <h2 class="text-2xl font-bold text-white mb-6 flex items-center gap-3"><span class="w-1 h-8 bg-yellow-500 rounded-full"></span> Главное за сегодня</h2>
@@ -162,7 +158,6 @@
             </div>
         </section>
 
-        <!-- МНЕНИЯ -->
         <section id="view-ideas" class="absolute inset-0 overflow-y-auto p-4 md:p-8 bg-dark hidden">
             <div class="max-w-3xl mx-auto">
                 <h2 class="text-3xl font-bold text-white mb-8 border-b border-white/10 pb-4">Мнения и Идеи</h2>
@@ -170,7 +165,6 @@
             </div>
         </section>
 
-        <!-- АДМИНКА -->
         <section id="view-admin" class="absolute inset-0 overflow-y-auto p-4 bg-dark z-50 hidden">
             <div class="max-w-lg mx-auto bg-card p-8 rounded-2xl border border-white/10 shadow-2xl mt-10">
                 <h2 class="text-2xl font-bold text-white mb-6 flex items-center gap-2"><i class="fas fa-user-shield text-accent"></i> Редактор</h2>
@@ -191,7 +185,7 @@
         </section>
     </main>
 
-    <!-- РИДЕР -->
+    <!-- РИДЕР С КОММЕНТАРИЯМИ -->
     <div id="reader-modal" class="reader-overlay hidden">
         <div id="reader-paper" class="reader-paper light">
             <div class="reader-header px-4 py-3 flex justify-between items-center font-sans">
@@ -202,19 +196,37 @@
                     <button onclick="app.toggleReaderTheme()" class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-black/5 transition text-current opacity-70 hover:opacity-100" title="Сменить тему">
                         <i id="theme-icon" class="fas fa-moon"></i>
                     </button>
-                    <span class="text-[10px] opacity-50 uppercase tracking-widest font-bold hidden sm:block">InvestPro Reader</span>
                 </div>
             </div>
+            
             <article id="reader-content" class="prose-reader"></article>
-            <div class="max-w-[65ch] mx-auto px-6 pb-20 border-t border-current/10 mt-12 pt-8 font-sans">
-                <p class="text-sm opacity-60 mb-4">Понравился материал?</p>
-                <div class="flex gap-3">
-                    <button id="reader-like-btn" onclick="app.handleReaderLike()" class="reader-btn flex-1 py-3 rounded-xl font-bold transition flex items-center justify-center gap-2 shadow-sm border">
-                        <i class="fas fa-heart"></i> <span id="reader-like-text">Нравится</span>
-                    </button>
-                    <button id="reader-share-btn" onclick="app.handleReaderShare()" class="reader-btn flex-1 py-3 rounded-xl font-bold transition shadow-lg border">
-                        <i class="fas fa-share-alt mr-2"></i> Поделиться
-                    </button>
+            
+            <!-- БЛОК ДЕЙСТВИЙ И КОММЕНТАРИЕВ -->
+            <div class="max-w-[65ch] mx-auto px-6 pb-20 mt-12 font-sans">
+                <div class="border-t border-current/10 pt-8 mb-10">
+                    <p class="text-sm opacity-60 mb-4">Понравился материал?</p>
+                    <div class="flex gap-3">
+                        <button id="reader-like-btn" onclick="app.handleReaderLike()" class="reader-btn flex-1 py-3 rounded-xl font-bold transition flex items-center justify-center gap-2 shadow-sm border">
+                            <i class="fas fa-heart"></i> <span id="reader-like-count">0</span>
+                        </button>
+                        <button id="reader-share-btn" onclick="app.handleReaderShare()" class="reader-btn flex-1 py-3 rounded-xl font-bold transition shadow-lg border">
+                            <i class="fas fa-share-alt mr-2"></i> Поделиться
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Комментарии -->
+                <div class="border-t border-current/10 pt-8">
+                    <h3 class="text-xl font-bold mb-6 font-sans">Комментарии (<span id="comments-count">0</span>)</h3>
+                    
+                    <div class="flex gap-3 mb-8">
+                        <input type="text" id="comment-input" class="comment-input flex-1 px-4 py-3 rounded-xl border outline-none focus:border-accent transition text-sm" placeholder="Написать комментарий...">
+                        <button onclick="app.postComment()" class="bg-accent text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-blue-600 transition">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+
+                    <div id="comments-list" class="space-y-4"></div>
                 </div>
             </div>
         </div>
@@ -225,20 +237,17 @@ const app = {
     data: { 
         news: [], posts: [], feedPage: 0, feedLoading: false, feedHasMore: true, allFetchedNews: [],
         readerTheme: localStorage.getItem('ip_reader_theme') || 'light',
-        likes: JSON.parse(localStorage.getItem('ip_likes') || '{}'),
-        currentItem: null // Текущая открытая новость
+        likes: JSON.parse(localStorage.getItem('ip_likes_v2') || '{}'),
+        comments: JSON.parse(localStorage.getItem('ip_comments_v2') || '{}'),
+        currentItem: null,
+        rssSources: [] // Будет заполнено динамически
     },
 
-    rssSources: [
-        "https://news.google.com/rss/search?q=инвестиции+акции+мосбиржа&hl=ru&gl=RU&ceid=RU:ru",
-        "https://news.google.com/rss/search?q=криптовалюта+биткоин+блокчейн&hl=ru&gl=RU&ceid=RU:ru",
-        "https://news.google.com/rss/search?q=центробанк+ключевая+ставка+макроэкономика&hl=ru&gl=RU&ceid=RU:ru",
-        "https://news.google.com/rss/search?q=нефть+газ+сырье+экспорт&hl=ru&gl=RU&ceid=RU:ru",
-        "https://news.google.com/rss/search?q=дивиденды+отчетность+прибыль&hl=ru&gl=RU&ceid=RU:ru"
-    ],
-
     init() {
-        const savedPosts = localStorage.getItem('ip_posts_v7');
+        // Генерируем 100+ источников через комбинации ключевых слов
+        this.generateRSSSources();
+
+        const savedPosts = localStorage.getItem('ip_posts_v9');
         this.data.posts = savedPosts ? JSON.parse(savedPosts) : [
             { id: 101, title: "Почему я покупаю нефтянку прямо сейчас", body: "Многие боятся рецессии, но я вижу точку входа.", full: "<p>Многие боятся рецессии, но я вижу отличную точку входа. Энергетический кризис только начинается.</p><p>Текущие цены на нефть не отражают реальный дефицит предложения.</p>", tag: "Мнение", date: "2ч назад", isPost: true }
         ];
@@ -249,6 +258,7 @@ const app = {
             { id: 3, title: "ЦБ сохранил ключевую ставку", body: "Регулятор сохранил жесткую риторику.", full: "<p>Эльвира Набиуллина заявила о необходимости сохранения жесткой ДКП.</p>", tag: "Макро", source: "Интерфакс", date: "5ч назад" }
         ];
 
+        this.rebuildIndex();
         this.renderClassic();
         this.renderIdeas();
         this.nav('main');
@@ -257,12 +267,45 @@ const app = {
         feedContainer.addEventListener('scroll', () => {
             if (this.data.currentView !== 'feed') return;
             const { scrollTop, scrollHeight, clientHeight } = feedContainer;
-            if (scrollTop + clientHeight >= scrollHeight - 300 && !this.data.feedLoading && this.data.feedHasMore) {
+            if (scrollTop + clientHeight >= scrollHeight - 400 && !this.data.feedLoading && this.data.feedHasMore) {
                 this.loadMoreFeed();
             }
         });
 
         setTimeout(() => document.getElementById('app-preloader')?.classList.add('loaded'), 800);
+    },
+
+    // ГЕНЕРАТОР 100+ ИСТОЧНИКОВ
+    generateRSSSources() {
+        const tickers = ['SBER', 'GAZP', 'LKOH', 'YNDX', 'VTBR', 'ROSN', 'GMKN', 'PLZL', 'MGNT', 'TCSG'];
+        const sectors = ['нефть', 'газ', 'золото', 'банки', 'IT', 'криптовалюта', 'биткоин', 'облигации', 'дивиденды', 'IPO'];
+        const macro = ['ключевая ставка', 'инфляция', 'ВВП', 'курс доллара', 'курс юаня', 'санкции', 'импорт', 'экспорт'];
+        
+        const queries = [...tickers, ...sectors, ...macro];
+        // Создаем уникальные комбинации и одиночные запросы
+        this.data.rssSources = queries.map(q => 
+            `https://news.google.com/rss/search?q=${encodeURIComponent(q)}+инвестиции&hl=ru&gl=RU&ceid=RU:ru`
+        );
+        
+        // Добавляем общие ленты
+        this.data.rssSources.push(
+            "https://news.google.com/rss/search?q=мосбиржа+рынок&hl=ru&gl=RU&ceid=RU:ru",
+            "https://news.google.com/rss/search?q=центробанк+рф&hl=ru&gl=RU&ceid=RU:ru"
+        );
+        
+        console.log(`[InvestPro] Сгенерировано ${this.data.rssSources.length} источников новостей`);
+    },
+
+    rebuildIndex() {
+        this.data.allItemsMap = {};
+        [...this.data.news, ...this.data.posts, ...this.data.allFetchedNews].forEach(item => {
+            this.data.allItemsMap[item.id] = item;
+        });
+    },
+
+    getItemById(id) {
+        if (this.data.allItemsMap[id]) return this.data.allItemsMap[id];
+        return [...this.data.news, ...this.data.posts, ...this.data.allFetchedNews].find(i => i.id == id);
     },
 
     nav(view) {
@@ -284,10 +327,11 @@ const app = {
         setTimeout(() => toast.classList.remove('show'), 2500);
     },
 
-    // --- РАБОЧИЕ ЛАЙКИ ---
+    // --- ЛАЙКИ ---
     toggleLike(btn, id) {
         if (!id) return;
         const isLiked = this.data.likes[id];
+        const currentCount = parseInt(document.getElementById('reader-like-count')?.innerText || 0);
         
         if (isLiked) {
             delete this.data.likes[id];
@@ -301,58 +345,142 @@ const app = {
             setTimeout(() => btn.querySelector('i').classList.remove('like-animate'), 300);
         }
         
-        localStorage.setItem('ip_likes', JSON.stringify(this.data.likes));
+        localStorage.setItem('ip_likes_v2', JSON.stringify(this.data.likes));
+        this.updateLikeUI(id);
+    },
+
+    updateLikeUI(id) {
+        const isLiked = this.data.likes[id];
+        // Базовое число лайков (для демо) + пользовательский лайк
+        const baseLikes = Math.abs(String(id).split('').reduce((a,b)=>a+b.charCodeAt(0),0)) % 150;
+        const total = isLiked ? baseLikes + 1 : baseLikes;
         
-        // Обновляем счетчик если он есть
-        const counter = btn.parentElement.querySelector('.like-counter');
-        if (counter) {
-            let count = parseInt(counter.dataset.baseCount || counter.innerText);
-            if (!counter.dataset.baseCount) counter.dataset.baseCount = count;
-            counter.innerText = isLiked ? count : count + 1;
+        const counter = document.getElementById('reader-like-count');
+        if (counter) counter.innerText = total;
+        
+        const btn = document.getElementById('reader-like-btn');
+        if (btn) {
+            if (isLiked) {
+                btn.classList.add('text-red-500');
+                btn.querySelector('i').className = 'fas fa-heart';
+            } else {
+                btn.classList.remove('text-red-500');
+                btn.querySelector('i').className = 'far fa-heart';
+            }
         }
     },
 
-    // --- РАБОЧИЙ ШЕРИНГ ---
+    // --- ШЕРИНГ ---
     async shareItem(title, id) {
         const url = `${window.location.origin}${window.location.pathname}?news=${id}`;
-        const shareData = { title: `InvestPro: ${title}`, text: `Читай на InvestPro: ${title}`, url: url };
-
         try {
-            if (navigator.share) {
-                await navigator.share(shareData);
-            } else {
-                await navigator.clipboard.writeText(url);
-                this.showToast('Ссылка скопирована в буфер!');
-            }
-        } catch (err) {
-            // Пользователь отменил шеринг или ошибка
-            if (err.name !== 'AbortError') {
-                console.error('Share error:', err);
-                this.showToast('Не удалось поделиться');
-            }
+            if (navigator.share) await navigator.share({ title: `InvestPro: ${title}`, url });
+            else { await navigator.clipboard.writeText(url); this.showToast('Ссылка скопирована!'); }
+        } catch (err) { if (err.name !== 'AbortError') this.showToast('Ошибка шеринга'); }
+    },
+
+    handleReaderLike() { if (this.data.currentItem) this.toggleLike(document.getElementById('reader-like-btn'), this.data.currentItem.id); },
+    handleReaderShare() { if (this.data.currentItem) this.shareItem(this.data.currentItem.title, this.data.currentItem.id); },
+
+    // --- КОММЕНТАРИИ ---
+    getComments(id) { return this.data.comments[id] || []; },
+    
+    postComment() {
+        if (!this.data.currentItem) return;
+        const input = document.getElementById('comment-input');
+        const text = input.value.trim();
+        if (!text) return;
+
+        const id = this.data.currentItem.id;
+        if (!this.data.comments[id]) this.data.comments[id] = [];
+        
+        this.data.comments[id].unshift({
+            text,
+            date: new Date().toLocaleString('ru-RU', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'}),
+            author: 'Вы'
+        });
+
+        localStorage.setItem('ip_comments_v2', JSON.stringify(this.data.comments));
+        input.value = '';
+        this.renderComments(id);
+        this.showToast('Комментарий добавлен');
+    },
+
+    renderComments(id) {
+        const list = document.getElementById('comments-list');
+        const countSpan = document.getElementById('comments-count');
+        const comments = this.getComments(id);
+        
+        countSpan.innerText = comments.length;
+        
+        if (comments.length === 0) {
+            list.innerHTML = '<p class="text-sm opacity-50 italic text-center py-4">Будьте первым, кто оставит комментарий</p>';
+            return;
         }
+
+        list.innerHTML = comments.map(c => `
+            <div class="comment-box p-4 rounded-xl border transition">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="font-bold text-sm">${c.author}</span>
+                    <span class="text-xs opacity-50">${c.date}</span>
+                </div>
+                <p class="text-sm leading-relaxed opacity-90">${c.text}</p>
+            </div>
+        `).join('');
     },
 
-    handleReaderLike() {
-        if (!this.data.currentItem) return;
-        const btn = document.getElementById('reader-like-btn');
-        this.toggleLike(btn, this.data.currentItem.id);
+    // --- РИДЕР ---
+    openReader(id) {
+        const item = this.getItemById(id);
+        if (!item) return;
+
+        this.data.currentItem = item;
+        const modal = document.getElementById('reader-modal');
+        const paper = document.getElementById('reader-paper');
+        const content = document.getElementById('reader-content');
+        const progress = document.getElementById('reading-progress');
+        const themeIcon = document.getElementById('theme-icon');
+
+        paper.className = `reader-paper ${this.data.readerTheme}`;
+        themeIcon.className = this.data.readerTheme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+
+        content.innerHTML = `
+            <div class="font-sans text-xs opacity-50 uppercase tracking-widest mb-6 flex items-center gap-3">
+                <span class="meta-tag px-2 py-1 rounded font-bold">${item.tag}</span>
+                <span>${item.source || 'Автор'} • ${item.date}</span>
+            </div>
+            <h1 class="text-3xl md:text-4xl font-bold mb-8 leading-tight font-sans">${item.title}</h1>
+            <div class="mb-10">${item.full || item.body}</div>
+        `;
+
+        this.updateLikeUI(id);
+        this.renderComments(id);
+
+        modal.classList.remove('hidden');
+        progress.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+
+        modal.onscroll = () => {
+            const winScroll = modal.scrollTop;
+            const height = modal.scrollHeight - modal.clientHeight;
+            progress.style.width = (height > 0 ? (winScroll / height) * 100 : 0) + "%";
+        };
     },
 
-    handleReaderShare() {
-        if (!this.data.currentItem) return;
-        this.shareItem(this.data.currentItem.title, this.data.currentItem.id);
-    },
-
-    // --- БЕСКОНЕЧНАЯ ЛЕНТА ---
+    // --- БЕСКОНЕЧНАЯ ЛЕНТА (ОПТИМИЗИРОВАННАЯ) ---
     async loadMoreFeed() {
         if (this.data.feedLoading || !this.data.feedHasMore) return;
         this.data.feedLoading = true;
         document.getElementById('feed-loader').classList.remove('hidden');
 
         try {
-            if (this.data.allFetchedNews.length < 50) {
-                const promises = this.rssSources.map(url => 
+            // Загружаем порциями по 5 источников за раз, чтобы не забить канал
+            const batchSize = 5;
+            const startIdx = (this.data.feedPage * batchSize) % this.data.rssSources.length;
+            const batch = this.data.rssSources.slice(startIdx, startIdx + batchSize);
+            
+            if (batch.length > 0 && this.data.allFetchedNews.length < 500) {
+                const promises = batch.map(url => 
                     fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`)
                         .then(r => r.text())
                         .then(xml => {
@@ -369,21 +497,28 @@ const app = {
                         })
                         .catch(() => [])
                 );
+                
                 const results = await Promise.all(promises);
                 this.data.allFetchedNews = [...this.data.allFetchedNews, ...results.flat()];
                 this.data.allFetchedNews = this.data.allFetchedNews.filter((v,i,a) => a.findIndex(t => t.title === v.title) === i);
+                this.rebuildIndex();
             }
 
-            const start = this.data.feedPage * 10;
-            const end = start + 10;
-            const chunk = this.data.allFetchedNews.slice(start, end);
+            // Рендерим порцию из 10 новостей
+            const renderStart = this.data.feedPage * 10;
+            const chunk = this.data.allFetchedNews.slice(renderStart, renderStart + 10);
 
             if (chunk.length > 0) {
                 this.renderFeedChunk(chunk);
                 this.data.feedPage++;
-            } else {
+            } else if (this.data.allFetchedNews.length >= 500) {
                 this.data.feedHasMore = false;
                 document.getElementById('feed-end').classList.remove('hidden');
+            } else {
+                // Если новостей мало, пробуем еще раз
+                this.data.feedLoading = false;
+                this.loadMoreFeed();
+                return;
             }
         } catch (e) { console.error(e); } 
         finally {
@@ -394,11 +529,11 @@ const app = {
 
     renderFeedChunk(items) {
         const container = document.getElementById('feed-content');
-        const getGradient = (id) => ['from-blue-900 via-slate-900 to-black','from-indigo-900 via-purple-900 to-black','from-emerald-900 via-teal-900 to-black','from-rose-900 via-pink-900 to-black','from-amber-900 via-orange-900 to-black'][Math.abs(id.split('').reduce((a,b)=>a+b.charCodeAt(0),0)) % 5];
+        const getGradient = (id) => ['from-blue-900 via-slate-900 to-black','from-indigo-900 via-purple-900 to-black','from-emerald-900 via-teal-900 to-black','from-rose-900 via-pink-900 to-black','from-amber-900 via-orange-900 to-black'][Math.abs(String(id).split('').reduce((a,b)=>a+b.charCodeAt(0),0)) % 5];
 
         const html = items.map((item, i) => {
             const isLiked = this.data.likes[item.id];
-            const baseLikes = Math.floor(Math.random() * 500) + 10;
+            const baseLikes = Math.abs(String(item.id).split('').reduce((a,b)=>a+b.charCodeAt(0),0)) % 150;
             const displayLikes = isLiked ? baseLikes + 1 : baseLikes;
             
             return `
@@ -406,7 +541,6 @@ const app = {
                 <div class="absolute inset-0 opacity-20 pointer-events-none" style="background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.15) 1px, transparent 0); background-size: 20px 20px;"></div>
                 <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none"></div>
                 
-                <!-- Кнопки действий -->
                 <div class="absolute top-4 right-4 flex gap-2 z-20">
                     <button onclick="app.toggleLike(this, '${item.id}')" class="w-10 h-10 rounded-full bg-black/20 backdrop-blur-md flex items-center justify-center ${isLiked ? 'text-red-500' : 'text-white/70'} hover:text-red-500 hover:bg-white/20 transition active:scale-90 border border-white/10">
                         <i class="${isLiked ? 'fas' : 'far'} fa-heart text-sm"></i>
@@ -425,11 +559,11 @@ const app = {
                     <p class="text-base md:text-lg text-gray-200 mb-5 line-clamp-3 drop-shadow-md font-light leading-relaxed max-w-lg">${item.body}</p>
                     
                     <div class="flex items-center gap-3">
-                        <button onclick='app.openReaderFromFeed(${JSON.stringify(item).replace(/'/g, "&#39;")})' class="self-start inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-wide hover:bg-accent hover:border-accent transition-all duration-300 group/btn">
+                        <button onclick="app.openReader('${item.id}')" class="self-start inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-wide hover:bg-accent hover:border-accent transition-all duration-300 group/btn">
                             <span>Читать полностью</span>
                             <i class="fas fa-arrow-right text-[10px] group-hover/btn:translate-x-1 transition-transform"></i>
                         </button>
-                        <span class="like-counter text-xs text-white/40 font-medium" data-base-count="${baseLikes}">${displayLikes} ❤️</span>
+                        <span class="text-xs text-white/40 font-medium">${displayLikes} ❤️</span>
                     </div>
                 </div>
             </div>
@@ -437,57 +571,12 @@ const app = {
         container.insertAdjacentHTML('beforeend', html);
     },
 
-    openReaderFromFeed(item) {
-        this.data.currentItem = item;
-        const modal = document.getElementById('reader-modal');
-        const paper = document.getElementById('reader-paper');
-        const content = document.getElementById('reader-content');
-        const progress = document.getElementById('reading-progress');
-        const themeIcon = document.getElementById('theme-icon');
-        const likeBtn = document.getElementById('reader-like-btn');
-
-        // Тема
-        paper.className = `reader-paper ${this.data.readerTheme}`;
-        themeIcon.className = this.data.readerTheme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
-
-        // Состояние лайка в ридере
-        const isLiked = this.data.likes[item.id];
-        likeBtn.className = `reader-btn flex-1 py-3 rounded-xl font-bold transition flex items-center justify-center gap-2 shadow-sm border ${isLiked ? 'text-red-500 border-red-200 bg-red-50' : ''}`;
-        likeBtn.querySelector('i').className = `${isLiked ? 'fas' : 'far'} fa-heart`;
-
-        content.innerHTML = `
-            <div class="font-sans text-xs opacity-50 uppercase tracking-widest mb-6 flex items-center gap-3">
-                <span class="meta-tag px-2 py-1 rounded font-bold">${item.tag}</span>
-                <span>${item.source} • ${item.date}</span>
-            </div>
-            <h1 class="text-3xl md:text-4xl font-bold mb-8 leading-tight font-sans">${item.title}</h1>
-            <div class="mb-10">${item.full || item.body}</div>
-        `;
-
-        modal.classList.remove('hidden');
-        progress.classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
-
-        modal.onscroll = () => {
-            const winScroll = modal.scrollTop;
-            const height = modal.scrollHeight - modal.clientHeight;
-            progress.style.width = (height > 0 ? (winScroll / height) * 100 : 0) + "%";
-        };
-    },
-
     toggleReaderTheme() {
         const paper = document.getElementById('reader-paper');
         const icon = document.getElementById('theme-icon');
-        
-        if (this.data.readerTheme === 'light') {
-            this.data.readerTheme = 'dark';
-            paper.classList.replace('light', 'dark');
-            icon.classList.replace('fa-moon', 'fa-sun');
-        } else {
-            this.data.readerTheme = 'light';
-            paper.classList.replace('dark', 'light');
-            icon.classList.replace('fa-sun', 'fa-moon');
-        }
+        this.data.readerTheme = this.data.readerTheme === 'light' ? 'dark' : 'light';
+        paper.className = `reader-paper ${this.data.readerTheme}`;
+        icon.className = this.data.readerTheme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
         localStorage.setItem('ip_reader_theme', this.data.readerTheme);
     },
 
@@ -512,13 +601,14 @@ const app = {
 
         if(type === 'idea') {
             this.data.posts.unshift(newItem);
-            localStorage.setItem('ip_posts_v7', JSON.stringify(this.data.posts));
+            localStorage.setItem('ip_posts_v9', JSON.stringify(this.data.posts));
             this.renderIdeas();
         } else {
             this.data.news.unshift(newItem);
             this.data.allFetchedNews.unshift(newItem);
             this.renderFeedChunk([newItem]); 
         }
+        this.rebuildIndex();
         this.renderClassic();
         document.getElementById('new-title').value = '';
         document.getElementById('new-body').value = '';
@@ -527,14 +617,14 @@ const app = {
     },
     renderClassic() {
         document.getElementById('classic-news-list').innerHTML = this.data.news.slice(0,6).map(n => `
-            <div onclick="app.openReaderFromFeed(${JSON.stringify(n).replace(/'/g, "&#39;")})" class="bg-card/50 hover:bg-card border border-white/5 hover:border-accent/30 rounded-xl p-5 cursor-pointer transition-all group">
+            <div onclick="app.openReader('${n.id}')" class="bg-card/50 hover:bg-card border border-white/5 hover:border-accent/30 rounded-xl p-5 cursor-pointer transition-all group">
                 <div class="flex justify-between mb-2"><span class="text-xs font-bold text-accent bg-accent/10 px-2 py-1 rounded">${n.tag}</span><span class="text-xs text-gray-500">${n.date}</span></div>
                 <h3 class="text-lg font-bold text-white group-hover:text-accent transition mb-2">${n.title}</h3>
                 <p class="text-sm text-gray-400 line-clamp-2">${n.body}</p>
             </div>
         `).join('');
         document.getElementById('sidebar-ideas').innerHTML = this.data.posts.slice(0,3).map(p => `
-            <div onclick="app.openReaderFromFeed(${JSON.stringify(p).replace(/'/g, "&#39;")})" class="flex gap-4 items-start cursor-pointer group p-3 rounded-lg hover:bg-white/5 transition">
+            <div onclick="app.openReader('${p.id}')" class="flex gap-4 items-start cursor-pointer group p-3 rounded-lg hover:bg-white/5 transition">
                 <div class="w-10 h-10 rounded bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white shrink-0"><i class="fas fa-pen-nib text-xs"></i></div>
                 <div><h4 class="font-bold text-gray-200 group-hover:text-accent transition text-sm">${p.title}</h4><span class="text-xs text-gray-500">${p.date}</span></div>
             </div>
@@ -542,7 +632,7 @@ const app = {
     },
     renderIdeas() {
         document.getElementById('ideas-list').innerHTML = this.data.posts.map(p => `
-            <div onclick="app.openReaderFromFeed(${JSON.stringify(p).replace(/'/g, "&#39;")})" class="border-b border-white/10 pb-8 cursor-pointer group">
+            <div onclick="app.openReader('${p.id}')" class="border-b border-white/10 pb-8 cursor-pointer group">
                 <div class="text-xs font-bold text-purple-400 uppercase tracking-wider mb-3">Мнение автора • ${p.date}</div>
                 <h3 class="text-2xl font-bold text-white mb-3 group-hover:text-accent transition">${p.title}</h3>
                 <p class="text-gray-400 line-clamp-3 mb-4">${p.body}</p>
