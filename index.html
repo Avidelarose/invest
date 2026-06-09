@@ -40,7 +40,7 @@
         @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
 
         /* Feeds */
-        .standard-feed { overflow-y: auto; height: calc(100vh - 128px); padding: 1rem; scroll-behavior: smooth; } /* Adjusted height for top banner */
+        .standard-feed { overflow-y: auto; height: calc(100vh - 128px); padding: 1rem; scroll-behavior: smooth; }
         @media (min-width: 768px) { .standard-feed { padding: 2rem; } }
 
         .essence-scroll-mobile { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; height: calc(100vh - 128px); padding-left: 1rem; }
@@ -99,6 +99,10 @@
         @media (max-width: 640px) {
             .ai-chat-window { bottom: 0; right: 0; width: 100%; height: 100%; border-radius: 0; }
         }
+        
+        /* Custom Amount Input */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     </style>
 </head>
 <body class="antialiased h-screen flex flex-col selection:bg-fuch-accent selection:text-white">
@@ -162,19 +166,37 @@
         </div>
     </div>
 
-    <!-- DONATE MODAL -->
+    <!-- DONATE MODAL (С произвольной суммой) -->
     <div id="donate-modal" class="modal-overlay z-[110]">
         <div class="auth-modal-content bg-fuch-card w-[90%] max-w-md p-8 rounded-3xl border border-fuch-border shadow-2xl relative text-center">
             <button onclick="document.getElementById('donate-modal').classList.remove('active')" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white transition text-lg"><i class="fas fa-times"></i></button>
             <div class="w-20 h-20 bg-gradient-to-tr from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-orange-500/30"><i class="fas fa-hand-holding-heart text-white text-3xl"></i></div>
             <h2 class="text-3xl font-bold text-white mb-2">Поддержать FUCH</h2>
+            <p class="text-gray-400 text-sm mb-6">Ваш вклад помогает развивать проект</p>
+            
             <div class="mb-8 text-left mt-6">
                 <div class="flex justify-between text-sm mb-2 font-bold"><span class="text-white">Собрано: 12 400 ₽</span><span class="text-gray-500">Цель: 50 000 ₽</span></div>
                 <div class="w-full bg-fuch-bg rounded-full h-4 overflow-hidden border border-fuch-border"><div class="bg-gradient-to-r from-yellow-400 to-orange-500 h-full rounded-full" style="width: 25%"></div></div>
             </div>
-            <div class="grid grid-cols-2 gap-4 mb-4">
-                <button onclick="app.donate(100)" class="bg-fuch-bg hover:bg-fuch-accent hover:text-white border border-fuch-border py-4 rounded-xl font-bold text-xl transition">100 ₽</button>
-                <button onclick="app.donate(500)" class="bg-fuch-bg hover:bg-fuch-accent hover:text-white border border-fuch-border py-4 rounded-xl font-bold text-xl transition">500 ₽</button>
+
+            <!-- Произвольная сумма -->
+            <div class="mb-6">
+                <label class="block text-left text-xs text-gray-500 mb-2 uppercase font-bold">Своя сумма</label>
+                <div class="flex gap-2">
+                    <div class="relative flex-1">
+                        <input type="number" id="custom-donate-amount" min="1" placeholder="1000" class="w-full bg-fuch-bg border border-fuch-border rounded-xl pl-4 pr-10 py-4 text-white outline-none focus:border-yellow-500 transition text-lg font-bold">
+                        <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">₽</span>
+                    </div>
+                    <button onclick="app.processCustomDonate()" class="bg-yellow-500 hover:bg-yellow-400 text-black font-bold px-6 rounded-xl transition active:scale-95">
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-3">
+                <button onclick="app.donate(100)" class="bg-fuch-bg hover:bg-fuch-accent hover:text-white border border-fuch-border py-3 rounded-xl font-bold text-lg transition">100 ₽</button>
+                <button onclick="app.donate(300)" class="bg-fuch-bg hover:bg-fuch-accent hover:text-white border border-fuch-border py-3 rounded-xl font-bold text-lg transition">300 ₽</button>
+                <button onclick="app.donate(500)" class="bg-fuch-bg hover:bg-fuch-accent hover:text-white border border-fuch-border py-3 rounded-xl font-bold text-lg transition">500 ₽</button>
             </div>
         </div>
     </div>
@@ -322,14 +344,27 @@ const app = {
     data: { 
         news: [], posts: [], essenceFeed: [], generatedIds: new Set(),
         feedLoading: false, essenceLoading: false, 
-        likes: JSON.parse(localStorage.getItem('ip_likes_v15') || '{}'),
-        comments: JSON.parse(localStorage.getItem('ip_comments_v15') || '{}'),
+        likes: JSON.parse(localStorage.getItem('ip_likes_v17') || '{}'),
+        comments: JSON.parse(localStorage.getItem('ip_comments_v17') || '{}'),
         users: JSON.parse(localStorage.getItem('fuch_users') || '[]'),
         currentUser: JSON.parse(localStorage.getItem('fuch_current_user') || 'null'),
-        currentItem: null, vkAppId: 0
+        currentItem: null, vkAppId: 0, aiChatOpen: false
     },
 
-    // --- DATA GENERATORS ---
+    // --- КОНФИГУРАЦИЯ AI АССИСТЕНТА ---
+    aiConfig: {
+        systemPrompt: "Ты — финансовый AI-ассистент платформы FUCH. Твоя задача: давать краткие, емкие ответы по инвестициям, акциям РФ, крипто и макроэкономике. Стиль: профессиональный, сухой, без воды. ВСЕГДА заканчивай ответ фразой: '⚠️ Не является ИИР'.",
+        knowledgeBase: [
+            { keywords: ['сбер', 'sber'], answer: "Сбербанк (SBER) демонстрирует рекордную рентабельность капитала (ROE > 20%). Дивидендная политика предполагает выплату 50% от скорректированной прибыли. Текущие мультипликаторы P/E около 3.5x выглядят привлекательно." },
+            { keywords: ['газпром', 'gazp'], answer: "Газпром (GAZP) находится в стадии трансформации бизнес-модели. Капекс остается высоким, дивиденды под вопросом из-за налоговой нагрузки. Риски превышают потенциал роста в краткосроке." },
+            { keywords: ['лукойл', 'lkoh'], answer: "Лукойл (LKOH) — главный дивидендный фишка рынка. Компания генерирует мощный свободный денежный поток при цене Brent > $75. Ожидаемая доходность к дивам: 12-14%." },
+            { keywords: ['биткоин', 'btc', 'крипт'], answer: "Биткоин торгуется в зоне накопления институционалов через ETF. Ключевой уровень поддержки: $60k, сопротивления: $72k. Волатильность высокая, соблюдайте риск-менеджмент." },
+            { keywords: ['ставк', 'цб', 'ключевая'], answer: "ЦБ РФ сохраняет жесткую ДКП. Высокая ставка давит на долговой рынок, но поддерживает банковский сектор. Снижение возможно не ранее II полугодия при замедлении инфляции до 4.5%." },
+            { keywords: ['нефть', 'brent'], answer: "Нефть Brent удерживается выше $80 благодаря сокращению добычи ОПЕК+. Геополитическая премия сохраняется. Для российского бюджета текущие цены комфортны." }
+        ]
+    },
+
+    // --- ГЕНЕРАТОРЫ ДАННЫХ ---
     companies: ['Сбербанк', 'Газпром', 'Лукойл', 'Яндекс', 'Тинькофф', 'Магнит', 'Норникель', 'Полюс', 'Аэрофлот', 'Роснефть', 'МТС', 'Северсталь', 'НЛМК', 'Татнефть', 'Мосбиржа', 'VK', 'Ozon'],
     templates: {
         essence: [
@@ -342,23 +377,17 @@ const app = {
             () => { const c = app.companies[Math.floor(Math.random()*app.companies.length)]; return { t: `Акции ${c} под давлением`, b: `Инвесторы фиксируют прибыль после роста. Рынок ожидает новых драйверов.`, hash: `feed_drop_${c}` }; }
         ]
     },
-
     generateUniqueID() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 9); },
-
     generateEssenceItem() {
         let attempts = 0;
         while(attempts < 50) {
             const tmpl = this.templates.essence[Math.floor(Math.random() * this.templates.essence.length)];
             const data = tmpl.gen();
-            if (!this.data.generatedIds.has(data.hash)) {
-                this.data.generatedIds.add(data.hash);
-                return { id: this.generateUniqueID(), title: data.t, summary: data.s, tag: tmpl.tag, source: 'FUCH News', date: 'Сегодня', sourceUrl: '#' };
-            }
+            if (!this.data.generatedIds.has(data.hash)) { this.data.generatedIds.add(data.hash); return { id: this.generateUniqueID(), title: data.t, summary: data.s, tag: tmpl.tag, source: 'FUCH News', date: 'Сегодня', sourceUrl: '#' }; }
             attempts++;
         }
-        return { id: this.generateUniqueID(), title: "Новости рынка", summary: "• Активные торги\n• Смешанная динамика", tag: "Рынок", source: "FUCH", date: "Сейчас", sourceUrl: "#" };
+        return { id: this.generateUniqueID(), title: "Новости рынка", summary: "• Активные торги", tag: "Рынок", source: "FUCH", date: "Сейчас", sourceUrl: "#" };
     },
-
     generateFeedItem() {
         let attempts = 0;
         while(attempts < 50) {
@@ -366,53 +395,40 @@ const app = {
             const data = gen();
             if (!this.data.generatedIds.has(data.hash)) {
                 this.data.generatedIds.add(data.hash);
-                // Генерируем уникальную картинку на основе ID
                 const imgSeed = Math.abs(data.hash.split('').reduce((a,b)=>a+b.charCodeAt(0),0));
-                const imgUrl = `https://picsum.photos/seed/${imgSeed}/600/400`;
-                
-                return { 
-                    id: this.generateUniqueID(), 
-                    title: data.t, 
-                    body: data.b, 
-                    full: `<p>${data.b}</p><p>Подробности развиваются...</p>`, 
-                    tag: ["Акции","Макро"][Math.floor(Math.random()*2)], 
-                    source: 'РБК / Ведомости', 
-                    date: '1ч назад', 
-                    image: imgUrl,
-                    sourceUrl: '#' 
-                };
+                return { id: this.generateUniqueID(), title: data.t, body: data.b, full: `<p>${data.b}</p>`, tag: ["Акции","Макро"][Math.floor(Math.random()*2)], source: 'РБК', date: '1ч назад', image: `https://picsum.photos/seed/${imgSeed}/600/400`, sourceUrl: '#' };
             }
             attempts++;
         }
-        return { id: this.generateUniqueID(), title: "Обзор рынка", body: "Индексы топчутся на месте.", full: "<p>Обзор...</p>", tag: "Рынок", source: "FUCH", date: "Сейчас", image: 'https://picsum.photos/600/400', sourceUrl: "#" };
+        return { id: this.generateUniqueID(), title: "Обзор рынка", body: "Индексы топчутся.", full: "<p>Обзор...</p>", tag: "Рынок", source: "FUCH", date: "Сейчас", image: 'https://picsum.photos/600/400', sourceUrl: "#" };
     },
 
     init() {
         if (this.data.vkAppId) VK.init({ apiId: this.data.vkAppId });
-        const savedPosts = localStorage.getItem('ip_posts_v15');
+        const savedPosts = localStorage.getItem('ip_posts_v17');
         this.data.posts = savedPosts ? JSON.parse(savedPosts) : [{ id: 'post_1', title: "Нефтянка: покупать?", body: "Энергокризис начинается.", full: "<p>Дефицит инвестиций толкает цены вверх.</p>", tag: "Мнение", date: "2ч назад", isPost: true }];
-
-        this.updateAuthUI();
-        this.initTicker();
-        this.renderIdeas();
-        
+        this.updateAuthUI(); this.initTicker(); this.renderIdeas();
         for(let i=0; i<10; i++) this.data.news.push(this.generateFeedItem());
         for(let i=0; i<5; i++) this.data.essenceFeed.push(this.generateEssenceItem());
-        
-        this.renderStandardFeed(this.data.news);
-        this.renderEssenceChunk(this.data.essenceFeed);
-        
+        this.renderStandardFeed(this.data.news); this.renderEssenceChunk(this.data.essenceFeed);
         document.getElementById('view-feed').addEventListener('scroll', () => this.checkStandardScroll());
         ['mobile', 'desktop'].forEach(dev => document.getElementById(`essence-${dev}`).addEventListener('scroll', () => this.checkEssenceScroll(dev)));
         this.nav('feed');
     },
 
-    // --- AI CHAT LOGIC ---
+    // --- УМНАЯ ЛОГИКА AI ЧАТА ---
     toggleAiChat() {
-        document.getElementById('ai-chat-window').classList.toggle('open');
+        this.data.aiChatOpen = !this.data.aiChatOpen;
+        const win = document.getElementById('ai-chat-window');
+        if(this.data.aiChatOpen) {
+            win.classList.add('open');
+            setTimeout(() => document.getElementById('ai-input').focus(), 300);
+        } else {
+            win.classList.remove('open');
+        }
     },
     
-    sendAiMessage(e) {
+    async sendAiMessage(e) {
         e.preventDefault();
         const input = document.getElementById('ai-input');
         const msg = input.value.trim();
@@ -420,242 +436,110 @@ const app = {
 
         const chat = document.getElementById('ai-messages');
         
-        // User Message
-        chat.innerHTML += `<div class="flex gap-3 justify-end"><div class="bg-indigo-600 p-3 rounded-2xl rounded-tr-none text-sm text-white max-w-[80%]">${msg}</div></div>`;
+        // 1. Сообщение пользователя
+        chat.innerHTML += `<div class="flex gap-3 justify-end fade-in"><div class="bg-indigo-600 p-3 rounded-2xl rounded-tr-none text-sm text-white max-w-[85%] shadow-lg">${msg}</div></div>`;
         input.value = '';
         chat.scrollTop = chat.scrollHeight;
 
-        // Simulate AI thinking
+        // 2. Индикатор "печатает..."
+        const typingId = 'typing-' + Date.now();
+        chat.innerHTML += `<div id="${typingId}" class="flex gap-3 fade-in"><div class="w-8 h-8 rounded bg-indigo-600 flex items-center justify-center shrink-0 text-xs"><i class="fas fa-robot"></i></div><div class="bg-white/5 p-3 rounded-2xl rounded-tl-none text-sm text-gray-400 flex items-center gap-1"><span class="animate-bounce">.</span><span class="animate-bounce delay-100">.</span><span class="animate-bounce delay-200">.</span></div></div>`;
+        chat.scrollTop = chat.scrollHeight;
+
+        // 3. Поиск ответа (Имитация RAG + База знаний)
         setTimeout(() => {
-            let response = "Это интересный вопрос. Однако помните, что я искусственный интеллект, а не финансовый советник.";
-            const lowerMsg = msg.toLowerCase();
+            const response = this.getAiResponse(msg);
             
-            if(lowerMsg.includes('сбер') || lowerMsg.includes('банк')) response = "Сбербанк показывает сильные результаты благодаря высокой марже. Дивидендный потенциал сохраняется высоким.";
-            else if(lowerMsg.includes('газпром') || lowerMsg.includes('газ')) response = "Газпром сейчас перенаправляет потоки на Восток. Капекс высокий, дивиденды под вопросом.";
-            else if(lowerMsg.includes('биткоин') || lowerMsg.includes('крипт')) response = "Крипторынок волатилен. Сейчас наблюдается накопление крупными игроками на фоне ожидания ETF.";
-            else if(lowerMsg.includes('купить') || lowerMsg.includes('продать')) response = "Я не могу давать прямые рекомендации. Проанализируйте отчетность и мультипликаторы P/E.";
-            else if(lowerMsg.includes('ставк') || lowerMsg.includes('цб')) response = "ЦБ держит жесткую риторику для борьбы с инфляцией. Высокие ставки давят на бизнес, но поддерживают рубль.";
+            // Удаляем индикатор печати
+            const typingEl = document.getElementById(typingId);
+            if(typingEl) typingEl.remove();
 
-            chat.innerHTML += `<div class="flex gap-3"><div class="w-8 h-8 rounded bg-indigo-600 flex items-center justify-center shrink-0 text-xs"><i class="fas fa-robot"></i></div><div class="bg-white/5 p-3 rounded-2xl rounded-tl-none text-sm text-gray-300 max-w-[80%]">${response}</div></div>`;
+            // Добавляем ответ AI
+            chat.innerHTML += `<div class="flex gap-3 fade-in"><div class="w-8 h-8 rounded bg-indigo-600 flex items-center justify-center shrink-0 text-xs shadow-lg shadow-indigo-500/20"><i class="fas fa-robot"></i></div><div class="bg-white/5 border border-white/5 p-3 rounded-2xl rounded-tl-none text-sm text-gray-200 max-w-[85%] leading-relaxed">${response}</div></div>`;
             chat.scrollTop = chat.scrollHeight;
-        }, 1000);
+        }, 1200 + Math.random() * 800); // Случайная задержка для реалистичности
     },
 
-    // --- CORE FUNCTIONS ---
-    openAuth() {
-        document.getElementById('auth-modal').classList.add('active');
-        if (this.data.currentUser) this.showProfile(); else this.toggleAuthMode('login');
-    },
-    closeAuth() { document.getElementById('auth-modal').classList.remove('active'); },
-    toggleAuthMode(mode) {
-        document.getElementById('auth-login-form').classList.toggle('hidden', mode !== 'login');
-        document.getElementById('auth-register-form').classList.toggle('hidden', mode !== 'register');
-        document.getElementById('profile-view').classList.add('hidden');
-    },
-    showProfile() {
-        document.getElementById('auth-login-form').classList.add('hidden');
-        document.getElementById('auth-register-form').classList.add('hidden');
-        document.getElementById('profile-view').classList.remove('hidden');
-        const u = this.data.currentUser;
-        document.getElementById('profile-name').innerText = u.name;
-        document.getElementById('profile-email').innerText = u.email || 'Нет email';
-        document.getElementById('profile-avatar').src = u.photo || 'https://via.placeholder.com/150';
-        document.getElementById('edit-name').value = u.name;
-        document.getElementById('edit-age').value = u.age || '';
-    },
-    saveProfile() {
-        const newName = document.getElementById('edit-name').value.trim();
-        const newAge = document.getElementById('edit-age').value;
-        if(!newName) return this.showToast('Имя пустое');
-        this.data.currentUser.name = newName;
-        this.data.currentUser.age = newAge;
-        const idx = this.data.users.findIndex(u => u.id === this.data.currentUser.id);
-        if(idx > -1) { this.data.users[idx] = this.data.currentUser; localStorage.setItem('fuch_users', JSON.stringify(this.data.users)); }
-        localStorage.setItem('fuch_current_user', JSON.stringify(this.data.currentUser));
-        this.updateAuthUI(); this.showProfile(); this.showToast('Сохранено');
-    },
-    registerUser() {
-        const name = document.getElementById('reg-name').value.trim();
-        const email = document.getElementById('reg-email').value.trim();
-        const pass = document.getElementById('reg-pass').value;
-        if (!name || !email || !pass) return this.showToast('Заполните поля');
-        const newUser = { name, email, pass, id: this.generateUniqueID(), photo: null, age: null };
-        this.data.users.push(newUser); localStorage.setItem('fuch_users', JSON.stringify(this.data.users));
-        this.loginAs(newUser);
-    },
-    loginUser() {
-        const email = document.getElementById('login-email').value.trim();
-        const pass = document.getElementById('login-pass').value;
-        const user = this.data.users.find(u => u.email === email && u.pass === pass);
-        if (!user) return this.showToast('Ошибка входа');
-        this.loginAs(user);
-    },
-    vkLogin() {
-        if(confirm('Демо-вход через VK?')) {
-            const u = { id: 'vk_demo', name: 'Павел Дуров', email: 'vk@vk.com', photo: 'https://sun9-68.userapi.com/impg/WDXWj5-Xj5_jQ-_l5_wXJw.jpg', age: 39, isVk: true };
-            this.loginAs(u);
-        }
-    },
-    loginAs(user) {
-        this.data.currentUser = user; localStorage.setItem('fuch_current_user', JSON.stringify(user));
-        this.closeAuth(); this.updateAuthUI();
-    },
-    logout() {
-        this.data.currentUser = null; localStorage.removeItem('fuch_current_user');
-        this.updateAuthUI(); this.toggleAuthMode('login'); this.showToast('Выход');
-    },
-    updateAuthUI() {
-        const btn = document.getElementById('user-profile-btn');
-        const span = document.getElementById('user-name-display');
-        if (this.data.currentUser) {
-            span.innerText = this.data.currentUser.name.split(' ')[0];
-            btn.classList.add('border-fuch-accent', 'text-white', 'bg-fuch-accent/10');
-        } else {
-            span.innerText = 'Войти';
-            btn.classList.remove('border-fuch-accent', 'text-white', 'bg-fuch-accent/10');
-        }
-    },
-    donate(amt) { this.showToast(`Переход к оплате ${amt}₽...`); },
-    adminLogin() { if(document.getElementById('adm-pass').value==='admin') { document.getElementById('admin-auth').classList.add('hidden'); document.getElementById('admin-editor').classList.remove('hidden'); } },
-    initTicker() {
-        const d = [{n:'IMOEX',v:'3,245',c:'+1.2%',u:1},{n:'S&P',v:'5,432',c:'-0.4%',u:0},{n:'BTC',v:'68K',c:'+2.1%',u:1},{n:'Brent',v:'82',c:'-1.1%',u:0}];
-        document.getElementById('ticker-content').innerHTML = d.map(i=>`<div class="ticker-item"><span class="font-bold text-gray-300">${i.n}</span> <span class="${i.u?'text-up':'text-down'}">${i.c}</span></div>`).join('').repeat(6);
-    },
-    nav(view) {
-        this.data.currentView = view;
-        document.querySelectorAll('main > section').forEach(el => el.classList.add('hidden'));
-        document.getElementById(`view-${view}`).classList.remove('hidden');
-        ['feed', 'essence', 'ideas'].forEach(v => {
-            const btn = document.getElementById(`btn-${v}`);
-            const tab = document.getElementById(`tab-${v}`);
-            if(v === view) {
-                btn.className = v==='essence' ? 'nav-btn px-4 py-1.5 rounded-full text-xs font-bold bg-fuch-essence text-black' : 'nav-btn px-4 py-1.5 rounded-full text-xs font-bold bg-fuch-accent text-white';
-                tab.classList.replace('text-gray-500', v==='essence'?'text-fuch-essence':'text-fuch-accent');
-            } else {
-                btn.className = 'nav-btn px-4 py-1.5 rounded-full text-xs font-medium text-gray-400 hover:text-white';
-                tab.classList.replace(v==='essence'?'text-fuch-essence':'text-fuch-accent', 'text-gray-500');
+    getAiResponse(query) {
+        const q = query.toLowerCase();
+        
+        // А. Поиск в локальной базе знаний (Hardcoded Expertise)
+        for (const item of this.aiConfig.knowledgeBase) {
+            if (item.keywords.some(k => q.includes(k))) {
+                return `${item.answer}<br><br><span class="text-[10px] opacity-50 block mt-2 border-t border-white/10 pt-2">Источник: Внутренняя база FUCH Analytics</span><br><span class="text-red-400 text-[10px] font-bold">⚠️ Не является ИИР</span>`;
             }
-        });
-        if(view === 'essence' && !localStorage.getItem('ip_essence_seen')) document.getElementById('essence-modal').classList.add('active');
-    },
-    closeEssenceModal() { document.getElementById('essence-modal').classList.remove('active'); localStorage.setItem('ip_essence_seen', 'true'); },
-    showToast(msg) { const t = document.getElementById('toast'); document.getElementById('toast-msg').innerText = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000); },
-    
-    // Likes & Comments
-    toggleLike(btn, id) {
-        if (!this.data.currentUser) return this.openAuth();
-        const isLiked = this.data.likes[id];
-        if (isLiked) { delete this.data.likes[id]; btn.classList.remove('text-red-500'); btn.querySelector('i').classList.replace('fas', 'far'); } 
-        else { this.data.likes[id] = true; btn.classList.add('text-red-500'); btn.querySelector('i').classList.replace('far', 'fas'); }
-        localStorage.setItem('ip_likes_v15', JSON.stringify(this.data.likes)); this.updateLikeUI(id);
-    },
-    updateLikeUI(id) {
-        const isLiked = this.data.likes[id];
-        const total = isLiked ? 151 : 150;
-        document.getElementById('reader-like-count').innerText = total;
-        const b = document.getElementById('reader-like-btn'); 
-        if(isLiked) { b.classList.add('text-red-500'); b.querySelector('i').className='fas fa-heart'; } else { b.classList.remove('text-red-500'); b.querySelector('i').className='far fa-heart'; }
-    },
-    handleReaderLike() { if(this.data.currentItem) this.toggleLike(document.getElementById('reader-like-btn'), this.data.currentItem.id); },
-    handleReaderShare() { this.showToast('Ссылка скопирована'); },
-    postComment() {
-        if(!this.data.currentUser) return this.openAuth();
-        const input = document.getElementById('comment-input');
-        const text = input.value.trim(); if(!text) return;
-        const id = this.data.currentItem.id;
-        if(!this.data.comments[id]) this.data.comments[id] = [];
-        this.data.comments[id].unshift({text, author: this.data.currentUser.name, date: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})});
-        localStorage.setItem('ip_comments_v15', JSON.stringify(this.data.comments));
-        input.value = ''; this.renderComments(id); this.showToast('Отправлено');
-    },
-    renderComments(id) {
-        const list = document.getElementById('comments-list');
-        document.getElementById('comments-count').innerText = (this.data.comments[id] || []).length;
-        if (this.data.currentUser) {
-            document.getElementById('comment-section-logged-in').classList.remove('hidden');
-            document.getElementById('comment-section-logged-out').classList.add('hidden');
-            document.getElementById('comment-avatar').innerText = this.data.currentUser.name.charAt(0);
-        } else {
-            document.getElementById('comment-section-logged-in').classList.add('hidden');
-            document.getElementById('comment-section-logged-out').classList.remove('hidden');
         }
-        list.innerHTML = (this.data.comments[id] || []).map(c => `<div class="bg-black/5 p-4 rounded-xl"><div class="flex justify-between text-xs font-bold mb-1 opacity-70"><span>${c.author}</span><span>${c.date}</span></div><p class="text-sm">${c.text}</p></div>`).join('');
+
+        // Б. Поиск по новостям на сайте (RAG Simulation)
+        const relevantNews = this.data.news.filter(n => 
+            n.title.toLowerCase().includes(q) || n.body.toLowerCase().includes(q)
+        ).slice(0, 2);
+
+        if (relevantNews.length > 0) {
+            const summary = relevantNews.map(n => `• ${n.title}: ${n.body.substring(0, 60)}...`).join('<br>');
+            return `На основе последних новостей на FUCH:<br><br>${summary}<br><br>Рекомендую открыть карточки этих новостей для детального изучения.<br><br><span class="text-red-400 text-[10px] font-bold">⚠️ Не является ИИР</span>`;
+        }
+
+        // В. Общий ответ (Fallback)
+        const fallbacks = [
+            "Для точного анализа уточните тикер актива или сектор экономики. Я специализируюсь на рынке РФ и крипте.",
+            "Текущая рыночная конъюнктура требует осторожности. Следите за ключевой ставкой ЦБ и геополитическим фоном.",
+            "Это сложный вопрос. Рекомендую изучить квартальную отчетность компаний сектора перед принятием решения.",
+            "Рынок сейчас находится в зоне неопределенности. Лучше сохранить кэш или защитные активы (золото, фонды ликвидности)."
+        ];
+        const randomFallback = fallbacks[Math.floor(Math.random() * fallbacks.length)];
+        
+        return `${randomFallback}<br><br><span class="text-red-400 text-[10px] font-bold">⚠️ Не является индивидуальной инвестиционной рекомендацией</span>`;
     },
 
-    // Reader
-    openReader(id, isEssence = false) {
-        const item = isEssence ? this.data.essenceFeed.find(i => i.id == id) : [...this.data.news, ...this.data.posts].find(i => i.id == id);
-        if(!item) return;
-        this.data.currentItem = item;
-        const modal = document.getElementById('reader-modal');
-        const paper = document.getElementById('reader-paper');
-        const content = document.getElementById('reader-content');
-        
-        paper.className = `reader-box reader-paper ${localStorage.getItem('ip_theme') === 'dark' ? 'dark' : 'light'}`;
-        
-        let bodyHtml = item.full || item.body;
-        if (isEssence && item.summary) bodyHtml = `<div class="bg-black/5 p-6 rounded-2xl mb-8 border-l-4 border-fuch-essence"><h3 class="font-bold text-lg mb-3 font-sans"><i class="fas fa-bolt text-fuch-essence"></i> Главное</h3><p class="whitespace-pre-line">${item.summary}</p></div>` + bodyHtml;
-        
-        content.innerHTML = `<div class="font-sans text-xs opacity-50 uppercase tracking-widest mb-6 flex gap-3"><span class="bg-black/5 px-2 py-1 rounded font-bold">${item.tag}</span><span>${item.source}</span></div><h1 class="text-3xl font-black mb-8 font-sans">${item.title}</h1><div class="mb-10">${bodyHtml}</div>`;
-        
-        this.updateLikeUI(id); this.renderComments(id);
-        modal.classList.add('active'); document.body.style.overflow = 'hidden';
+    // --- ДОНАТЫ ---
+    donate(amount) {
+        this.showToast(`Переход к оплате ${amount}₽...`);
+        // Здесь должна быть интеграция с платежным шлюзом
     },
-    closeReader() { document.getElementById('reader-modal').classList.remove('active'); document.body.style.overflow = ''; },
-    toggleReaderTheme() {
-        const cur = localStorage.getItem('ip_theme') === 'dark' ? 'light' : 'dark';
-        localStorage.setItem('ip_theme', cur);
-        document.getElementById('reader-paper').className = `reader-box reader-paper ${cur}`;
-        document.getElementById('theme-icon').className = cur === 'light' ? 'fas fa-moon text-sm' : 'fas fa-sun text-sm';
+    
+    processCustomDonate() {
+        const input = document.getElementById('custom-donate-amount');
+        const amount = parseInt(input.value);
+        if (!amount || amount <= 0) return this.showToast('Введите корректную сумму');
+        this.donate(amount);
+        input.value = '';
     },
 
-    // Infinite Scroll
-    checkStandardScroll() { if (this.data.currentView !== 'feed' || this.data.feedLoading) return; const el = document.getElementById('view-feed'); if (el.scrollTop + el.clientHeight >= el.scrollHeight - 300) this.loadMoreStandard(); },
-    async loadMoreStandard() {
-        this.data.feedLoading = true; document.getElementById('feed-loader').classList.remove('hidden');
-        setTimeout(() => { const n=[]; for(let i=0;i<4;i++) n.push(this.generateFeedItem()); this.data.news=[...this.data.news,...n]; this.renderStandardFeed(n); this.data.feedLoading=false; document.getElementById('feed-loader').classList.add('hidden'); }, 800);
-    },
-    renderStandardFeed(items) {
-        const container = document.getElementById('standard-feed-container');
-        const html = items.map(n => `
-            <div onclick="app.openReader('${n.id}')" class="bg-fuch-card hover:bg-zinc-800 border border-fuch-border hover:border-fuch-accent/50 rounded-xl overflow-hidden cursor-pointer transition-all group flex flex-col h-full">
-                <div class="h-48 overflow-hidden relative">
-                    <img src="${n.image}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
-                    <div class="absolute top-3 left-3 bg-black/60 backdrop-blur px-2 py-1 rounded text-xs font-bold text-white">${n.tag}</div>
-                </div>
-                <div class="p-5 flex flex-col flex-grow">
-                    <h3 class="text-xl font-bold text-white group-hover:text-fuch-accent transition mb-2 leading-snug">${n.title}</h3>
-                    <p class="text-sm text-gray-400 line-clamp-3 mb-4 flex-grow">${n.body}</p>
-                    <div class="flex items-center justify-between text-xs text-gray-500 mt-auto pt-4 border-t border-white/5">
-                        <span>${n.source}</span>
-                        <span>${n.date}</span>
-                    </div>
-                </div>
-            </div>
-        `).join('');
-        container.insertAdjacentHTML('beforeend', html);
-    },
-    checkEssenceScroll(device) { if (this.data.currentView !== 'essence' || this.data.essenceLoading) return; const el = document.getElementById(`essence-${device}`); const isEnd = device === 'mobile' ? el.scrollLeft + el.clientWidth >= el.scrollWidth - 300 : el.scrollTop + el.clientHeight >= el.scrollHeight - 300; if (isEnd) this.loadMoreEssence(); },
-    async loadMoreEssence() {
-        this.data.essenceLoading = true;
-        setTimeout(() => { const n=[]; for(let i=0;i<3;i++) n.push(this.generateEssenceItem()); this.data.essenceFeed=[...this.data.essenceFeed,...n]; this.renderEssenceChunk(n); this.data.essenceLoading=false; }, 800);
-    },
-    renderEssenceChunk(items) {
-        const mC = document.getElementById('essence-mobile'); const dC = document.getElementById('essence-desktop');
-        const grads = ['from-orange-900 to-black', 'from-amber-900 to-black', 'from-yellow-900 to-black'];
-        const html = items.map(i => {
-            const g = grads[Math.abs(String(i.id).split('').reduce((a,b)=>a+b.charCodeAt(0),0)) % grads.length];
-            const inner = `<div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-10"></div><div class="relative z-20 h-full flex flex-col justify-end p-6 cursor-pointer" onclick="app.openReader('${i.id}', true)"><div class="flex items-center gap-2 mb-3"><span class="px-2 py-0.5 rounded bg-fuch-essence/20 text-[10px] font-bold text-fuch-essence uppercase border border-fuch-essence/30">#${i.tag}</span></div><h2 class="text-2xl font-bold text-white mb-3">${i.title}</h2><div class="bg-black/40 backdrop-blur p-4 rounded-xl border border-white/10 mb-4"><p class="text-sm text-gray-200 whitespace-pre-line">${i.summary}</p></div><div class="mt-auto"><span class="block w-full py-3 rounded-xl font-bold text-center text-base bg-fuch-essence text-black">Источник</span></div></div>`;
-            mC.insertAdjacentHTML('beforeend', `<div class="essence-card-mobile bg-gradient-to-br ${g}">${inner}</div>`);
-            dC.insertAdjacentHTML('beforeend', `<div class="essence-card-desktop bg-gradient-to-br ${g}">${inner}</div>`);
-        });
-    },
-    addNews() {
-        const b=document.getElementById('new-body').value; if(!b) return;
-        const n={id:this.generateUniqueID(), title:"Новая идея", body:b, full:`<p>${b}</p>`, tag:"Мнение", source:'Автор', date:'Сейчас', isPost:true};
-        this.data.posts.unshift(n); localStorage.setItem('ip_posts_v15',JSON.stringify(this.data.posts)); this.renderIdeas(); this.nav('ideas');
-    },
-    renderIdeas() { document.getElementById('ideas-list').innerHTML = this.data.posts.map(p => `<div onclick="app.openReader('${p.id}')" class="bg-fuch-card p-6 rounded-2xl border border-fuch-border cursor-pointer hover:border-purple-500/50"><div class="text-xs text-purple-400 font-bold mb-3 uppercase">Мнение • ${p.date}</div><h3 class="text-xl font-bold mb-3">${p.title}</h3><p class="text-sm text-gray-400">${p.body}</p></div>`).join(''); }
+    // --- ОСТАЛЬНЫЕ ФУНКЦИИ (Auth, Nav, Render) ---
+    openAuth() { document.getElementById('auth-modal').classList.add('active'); if (this.data.currentUser) this.showProfile(); else this.toggleAuthMode('login'); },
+    closeAuth() { document.getElementById('auth-modal').classList.remove('active'); },
+    toggleAuthMode(mode) { document.getElementById('auth-login-form').classList.toggle('hidden', mode !== 'login'); document.getElementById('auth-register-form').classList.toggle('hidden', mode !== 'register'); document.getElementById('profile-view').classList.add('hidden'); },
+    showProfile() { document.getElementById('auth-login-form').classList.add('hidden'); document.getElementById('auth-register-form').classList.add('hidden'); document.getElementById('profile-view').classList.remove('hidden'); const u = this.data.currentUser; document.getElementById('profile-name').innerText = u.name; document.getElementById('profile-email').innerText = u.email || 'Нет email'; document.getElementById('profile-avatar').src = u.photo || 'https://via.placeholder.com/150'; document.getElementById('edit-name').value = u.name; document.getElementById('edit-age').value = u.age || ''; },
+    saveProfile() { const n = document.getElementById('edit-name').value.trim(); const a = document.getElementById('edit-age').value; if(!n) return this.showToast('Имя пустое'); this.data.currentUser.name = n; this.data.currentUser.age = a; const idx = this.data.users.findIndex(u => u.id === this.data.currentUser.id); if(idx > -1) { this.data.users[idx] = this.data.currentUser; localStorage.setItem('fuch_users', JSON.stringify(this.data.users)); } localStorage.setItem('fuch_current_user', JSON.stringify(this.data.currentUser)); this.updateAuthUI(); this.showProfile(); this.showToast('Сохранено'); },
+    registerUser() { const n=document.getElementById('reg-name').value.trim(), e=document.getElementById('reg-email').value.trim(), p=document.getElementById('reg-pass').value; if(!n||!e||!p) return this.showToast('Заполните поля'); const u={name:n,email:e,pass:p,id:this.generateUniqueID(),photo:null,age:null}; this.data.users.push(u); localStorage.setItem('fuch_users',JSON.stringify(this.data.users)); this.loginAs(u); },
+    loginUser() { const e=document.getElementById('login-email').value.trim(), p=document.getElementById('login-pass').value; const u=this.data.users.find(u=>u.email===e&&u.pass===p); if(!u) return this.showToast('Ошибка'); this.loginAs(u); },
+    vkLogin() { if(confirm('Демо-вход VK?')) this.loginAs({id:'vk_demo',name:'Павел Дуров',email:'vk@vk.com',photo:'https://sun9-68.userapi.com/impg/WDXWj5-Xj5_jQ-_l5_wXJw.jpg',age:39,isVk:true}); },
+    loginAs(u) { this.data.currentUser=u; localStorage.setItem('fuch_current_user',JSON.stringify(u)); this.closeAuth(); this.updateAuthUI(); },
+    logout() { this.data.currentUser=null; localStorage.removeItem('fuch_current_user'); this.updateAuthUI(); this.toggleAuthMode('login'); this.showToast('Выход'); },
+    updateAuthUI() { const b=document.getElementById('user-profile-btn'), s=document.getElementById('user-name-display'); if(this.data.currentUser){s.innerText=this.data.currentUser.name.split(' ')[0];b.classList.add('border-fuch-accent','text-white','bg-fuch-accent/10');}else{s.innerText='Войти';b.classList.remove('border-fuch-accent','text-white','bg-fuch-accent/10');} },
+    adminLogin() { if(document.getElementById('adm-pass').value==='admin'){document.getElementById('admin-auth').classList.add('hidden');document.getElementById('admin-editor').classList.remove('hidden');} },
+    initTicker() { const d=[{n:'IMOEX',v:'3,245',c:'+1.2%',u:1},{n:'S&P',v:'5,432',c:'-0.4%',u:0},{n:'BTC',v:'68K',c:'+2.1%',u:1},{n:'Brent',v:'82',c:'-1.1%',u:0}]; document.getElementById('ticker-content').innerHTML=d.map(i=>`<div class="ticker-item"><span class="font-bold text-gray-300">${i.n}</span> <span class="${i.u?'text-up':'text-down'}">${i.c}</span></div>`).join('').repeat(6); },
+    nav(v) { this.data.currentView=v; document.querySelectorAll('main > section').forEach(el=>el.classList.add('hidden')); document.getElementById(`view-${v}`).classList.remove('hidden'); ['feed','essence','ideas'].forEach(x=>{const b=document.getElementById(`btn-${x}`),t=document.getElementById(`tab-${x}`);if(x===v){b.className=x==='essence'?'nav-btn px-4 py-1.5 rounded-full text-xs font-bold bg-fuch-essence text-black':'nav-btn px-4 py-1.5 rounded-full text-xs font-bold bg-fuch-accent text-white';t.classList.replace('text-gray-500',x==='essence'?'text-fuch-essence':'text-fuch-accent');}else{b.className='nav-btn px-4 py-1.5 rounded-full text-xs font-medium text-gray-400 hover:text-white';t.classList.replace(x==='essence'?'text-fuch-essence':'text-fuch-accent','text-gray-500');}}); if(v==='essence'&&!localStorage.getItem('ip_essence_seen'))document.getElementById('essence-modal').classList.add('active'); },
+    closeEssenceModal() { document.getElementById('essence-modal').classList.remove('active'); localStorage.setItem('ip_essence_seen','true'); },
+    showToast(m) { const t=document.getElementById('toast'); document.getElementById('toast-msg').innerText=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2000); },
+    toggleLike(b,id) { if(!this.data.currentUser)return this.openAuth(); const l=this.data.likes[id]; if(l){delete this.data.likes[id];b.classList.remove('text-red-500');b.querySelector('i').classList.replace('fas','far');}else{this.data.likes[id]=true;b.classList.add('text-red-500');b.querySelector('i').classList.replace('far','fas');} localStorage.setItem('ip_likes_v17',JSON.stringify(this.data.likes));this.updateLikeUI(id); },
+    updateLikeUI(id) { const l=this.data.likes[id]; document.getElementById('reader-like-count').innerText=l?151:150; const b=document.getElementById('reader-like-btn'); if(l){b.classList.add('text-red-500');b.querySelector('i').className='fas fa-heart';}else{b.classList.remove('text-red-500');b.querySelector('i').className='far fa-heart';} },
+    handleReaderLike() { if(this.data.currentItem)this.toggleLike(document.getElementById('reader-like-btn'),this.data.currentItem.id); },
+    handleReaderShare() { this.showToast('Ссылка скопирована'); },
+    postComment() { if(!this.data.currentUser)return this.openAuth(); const i=document.getElementById('comment-input'),t=i.value.trim(); if(!t)return; const id=this.data.currentItem.id; if(!this.data.comments[id])this.data.comments[id]=[]; this.data.comments[id].unshift({text:t,author:this.data.currentUser.name,date:new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}); localStorage.setItem('ip_comments_v17',JSON.stringify(this.data.comments)); i.value=''; this.renderComments(id); this.showToast('Отправлено'); },
+    renderComments(id) { const l=document.getElementById('comments-list'); document.getElementById('comments-count').innerText=(this.data.comments[id]||[]).length; if(this.data.currentUser){document.getElementById('comment-section-logged-in').classList.remove('hidden');document.getElementById('comment-section-logged-out').classList.add('hidden');document.getElementById('comment-avatar').innerText=this.data.currentUser.name.charAt(0);}else{document.getElementById('comment-section-logged-in').classList.add('hidden');document.getElementById('comment-section-logged-out').classList.remove('hidden');} l.innerHTML=(this.data.comments[id]||[]).map(c=>`<div class="bg-black/5 p-4 rounded-xl"><div class="flex justify-between text-xs font-bold mb-1 opacity-70"><span>${c.author}</span><span>${c.date}</span></div><p class="text-sm">${c.text}</p></div>`).join(''); },
+    openReader(id,isE=false) { const item=isE?this.data.essenceFeed.find(i=>i.id==id):[...this.data.news,...this.data.posts].find(i=>i.id==id); if(!item)return; this.data.currentItem=item; const m=document.getElementById('reader-modal'),p=document.getElementById('reader-paper'),c=document.getElementById('reader-content'); p.className=`reader-box reader-paper ${localStorage.getItem('ip_theme')==='dark'?'dark':'light'}`; let h=item.full||item.body; if(isE&&item.summary)h=`<div class="bg-black/5 p-6 rounded-2xl mb-8 border-l-4 border-fuch-essence"><h3 class="font-bold text-lg mb-3 font-sans"><i class="fas fa-bolt text-fuch-essence"></i> Главное</h3><p class="whitespace-pre-line">${item.summary}</p></div>`+h; c.innerHTML=`<div class="font-sans text-xs opacity-50 uppercase tracking-widest mb-6 flex gap-3"><span class="bg-black/5 px-2 py-1 rounded font-bold">${item.tag}</span><span>${item.source}</span></div><h1 class="text-3xl font-black mb-8 font-sans">${item.title}</h1><div class="mb-10">${h}</div>`; this.updateLikeUI(id);this.renderComments(id);m.classList.add('active');document.body.style.overflow='hidden'; },
+    closeReader() { document.getElementById('reader-modal').classList.remove('active');document.body.style.overflow=''; },
+    toggleReaderTheme() { const c=localStorage.getItem('ip_theme')==='dark'?'light':'dark'; localStorage.setItem('ip_theme',c); document.getElementById('reader-paper').className=`reader-box reader-paper ${c}`; document.getElementById('theme-icon').className=c==='light'?'fas fa-moon text-sm':'fas fa-sun text-sm'; },
+    checkStandardScroll() { if(this.data.currentView!=='feed'||this.data.feedLoading)return; const e=document.getElementById('view-feed'); if(e.scrollTop+e.clientHeight>=e.scrollHeight-300)this.loadMoreStandard(); },
+    async loadMoreStandard() { this.data.feedLoading=true;document.getElementById('feed-loader').classList.remove('hidden'); setTimeout(()=>{const n=[];for(let i=0;i<4;i++)n.push(this.generateFeedItem());this.data.news=[...this.data.news,...n];this.renderStandardFeed(n);this.data.feedLoading=false;document.getElementById('feed-loader').classList.add('hidden');},800); },
+    renderStandardFeed(items) { const c=document.getElementById('standard-feed-container'); c.insertAdjacentHTML('beforeend',items.map(n=>`<div onclick="app.openReader('${n.id}')" class="bg-fuch-card hover:bg-zinc-800 border border-fuch-border hover:border-fuch-accent/50 rounded-xl overflow-hidden cursor-pointer transition-all group flex flex-col h-full"><div class="h-48 overflow-hidden relative"><img src="${n.image}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500"><div class="absolute top-3 left-3 bg-black/60 backdrop-blur px-2 py-1 rounded text-xs font-bold text-white">${n.tag}</div></div><div class="p-5 flex flex-col flex-grow"><h3 class="text-xl font-bold text-white group-hover:text-fuch-accent transition mb-2 leading-snug">${n.title}</h3><p class="text-sm text-gray-400 line-clamp-3 mb-4 flex-grow">${n.body}</p><div class="flex items-center justify-between text-xs text-gray-500 mt-auto pt-4 border-t border-white/5"><span>${n.source}</span><span>${n.date}</span></div></div></div>`).join('')); },
+    checkEssenceScroll(d) { if(this.data.currentView!=='essence'||this.data.essenceLoading)return; const e=document.getElementById(`essence-${d}`); const end=d==='mobile'?e.scrollLeft+e.clientWidth>=e.scrollWidth-300:e.scrollTop+e.clientHeight>=e.scrollHeight-300; if(end)this.loadMoreEssence(); },
+    async loadMoreEssence() { this.data.essenceLoading=true; setTimeout(()=>{const n=[];for(let i=0;i<3;i++)n.push(this.generateEssenceItem());this.data.essenceFeed=[...this.data.essenceFeed,...n];this.renderEssenceChunk(n);this.data.essenceLoading=false;},800); },
+    renderEssenceChunk(items) { const m=document.getElementById('essence-mobile'),d=document.getElementById('essence-desktop'); const g=['from-orange-900 to-black','from-amber-900 to-black','from-yellow-900 to-black']; items.forEach(i=>{const gr=g[Math.abs(String(i.id).split('').reduce((a,b)=>a+b.charCodeAt(0),0))%g.length]; const inner=`<div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-10"></div><div class="relative z-20 h-full flex flex-col justify-end p-6 cursor-pointer" onclick="app.openReader('${i.id}',true)"><div class="flex items-center gap-2 mb-3"><span class="px-2 py-0.5 rounded bg-fuch-essence/20 text-[10px] font-bold text-fuch-essence uppercase border border-fuch-essence/30">#${i.tag}</span></div><h2 class="text-2xl font-bold text-white mb-3">${i.title}</h2><div class="bg-black/40 backdrop-blur p-4 rounded-xl border border-white/10 mb-4"><p class="text-sm text-gray-200 whitespace-pre-line">${i.summary}</p></div><div class="mt-auto"><span class="block w-full py-3 rounded-xl font-bold text-center text-base bg-fuch-essence text-black">Источник</span></div></div>`; m.insertAdjacentHTML('beforeend',`<div class="essence-card-mobile bg-gradient-to-br ${gr}">${inner}</div>`); d.insertAdjacentHTML('beforeend',`<div class="essence-card-desktop bg-gradient-to-br ${gr}">${inner}</div>`);}); },
+    addNews() { const b=document.getElementById('new-body').value; if(!b)return; const n={id:this.generateUniqueID(),title:"Новая идея",body:b,full:`<p>${b}</p>`,tag:"Мнение",source:'Автор',date:'Сейчас',isPost:true}; this.data.posts.unshift(n);localStorage.setItem('ip_posts_v17',JSON.stringify(this.data.posts));this.renderIdeas();this.nav('ideas'); },
+    renderIdeas() { document.getElementById('ideas-list').innerHTML=this.data.posts.map(p=>`<div onclick="app.openReader('${p.id}')" class="bg-fuch-card p-6 rounded-2xl border border-fuch-border cursor-pointer hover:border-purple-500/50"><div class="text-xs text-purple-400 font-bold mb-3 uppercase">Мнение • ${p.date}</div><h3 class="text-xl font-bold mb-3">${p.title}</h3><p class="text-sm text-gray-400">${p.body}</p></div>`).join(''); }
 };
 
 document.addEventListener('DOMContentLoaded', () => app.init());
