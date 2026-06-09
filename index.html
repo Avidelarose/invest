@@ -17,7 +17,8 @@
                     colors: {
                         fuch: { 
                             bg: '#09090b', card: '#18181b', border: '#27272a',
-                            accent: '#3b82f6', essence: '#f97316', text: '#e4e4e7'
+                            accent: '#3b82f6', essence: '#f97316', text: '#e4e4e7',
+                            gold: '#d4af37', 'gold-light': '#f3e5ab'
                         }
                     },
                     fontFamily: { sans: ['Inter', 'sans-serif'], serif: ['Merriweather', 'serif'] }
@@ -29,13 +30,11 @@
     <style>
         body { background-color: #09090b; color: #e4e4e7; -webkit-tap-highlight-color: transparent; overflow: hidden; }
         
-        /* Ticker */
         .ticker-wrap { height: 32px; line-height: 32px; overflow: hidden; background: #000; border-bottom: 1px solid #27272a; }
         .ticker { display: inline-block; white-space: nowrap; padding-left: 100%; animation: ticker 40s linear infinite; }
         .ticker-item { display: inline-block; padding: 0 1.5rem; font-size: 0.75rem; color: #71717a; }
         @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
 
-        /* Feeds */
         .standard-feed { overflow-y: auto; height: calc(100vh - 128px); padding: 1rem; scroll-behavior: smooth; }
         @media (min-width: 768px) { .standard-feed { padding: 2rem; } }
 
@@ -45,19 +44,31 @@
         .essence-card-desktop { height: 500px; border-radius: 20px; position: relative; overflow: hidden; transition: transform 0.2s; display: flex; flex-direction: column; border: 1px solid #27272a; }
         .essence-card-desktop:hover { transform: translateY(-5px); border-color: #f97316; }
 
+        /* ЗОЛОТАЯ РАМКА ДЛЯ БАНКОВ */
+        .bank-card {
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            background: linear-gradient(145deg, rgba(212, 175, 55, 0.05), rgba(9, 9, 11, 0.9));
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.05);
+        }
+        .bank-card:hover { border-color: #d4af37; box-shadow: 0 0 25px rgba(212, 175, 55, 0.15); }
+        .bank-badge {
+            background: linear-gradient(90deg, #d4af37, #f3e5ab, #d4af37);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
         .glass-header { backdrop-filter: blur(16px); background: rgba(9, 9, 11, 0.9); border-bottom: 1px solid #27272a; }
         .tab-bar { backdrop-filter: saturate(180%) blur(20px); background-color: rgba(9, 9, 11, 0.95); border-top: 1px solid #27272a; }
         
-        /* Modals */
         .modal-overlay { position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); opacity: 0; pointer-events: none; transition: opacity 0.3s; display: flex; align-items: center; justify-content: center; }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
         .auth-modal-content { transform: scale(0.95); opacity: 0; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
         .modal-overlay.active .auth-modal-content { transform: scale(1); opacity: 1; }
 
-        /* Reader */
         .reader-box { width: 100%; height: 100%; overflow-y: auto; transition: all 0.3s; }
         @media (min-width: 768px) { .reader-box { width: 800px; height: 90vh; border-radius: 20px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); } }
         .reader-paper.light { background: #fafafa; color: #18181b; }
@@ -82,7 +93,6 @@
         #toast { position: fixed; bottom: 6rem; left: 50%; transform: translateX(-50%) translateY(100px); background: #18181b; color: white; padding: 0.75rem 1.5rem; border-radius: 999px; font-size: 0.875rem; font-weight: 600; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 9999; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: none; border: 1px solid #27272a; }
         #toast.show { transform: translateX(-50%) translateY(0); }
 
-        /* AI Chat Styles */
         .ai-chat-window {
             position: fixed; bottom: 80px; right: 20px; width: 350px; height: 500px;
             background: #18181b; border: 1px solid #27272a; border-radius: 16px;
@@ -92,79 +102,49 @@
             opacity: 0; transform: scale(0.5) translateY(20px); pointer-events: none;
         }
         .ai-chat-window.open { opacity: 1; transform: scale(1) translateY(0); pointer-events: auto; }
-        @media (max-width: 640px) {
-            .ai-chat-window { bottom: 0; right: 0; width: 100%; height: 100%; border-radius: 0; }
-        }
+        @media (max-width: 640px) { .ai-chat-window { bottom: 0; right: 0; width: 100%; height: 100%; border-radius: 0; } }
         
-        input[type=number]::-webkit-inner-spin-button, 
-        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     </style>
 </head>
 <body class="antialiased h-screen flex flex-col selection:bg-fuch-accent selection:text-white">
 
     <div id="toast"><i class="fas fa-check-circle mr-2 text-fuch-accent"></i><span id="toast-msg">Готово</span></div>
 
-    <!-- TOP RESPONSIBILITY BANNER -->
+    <!-- TOP BANNER -->
     <div class="bg-red-950/80 border-b border-red-900/50 py-1 px-4 text-center shrink-0 z-[60]">
         <p class="text-[10px] md:text-xs text-red-200 font-medium leading-tight">
             ⚠️ ВЫ САМИ НЕСЕТЕ ОТВЕТСТВЕННОСТЬ ЗА ФИНАНСОВЫЕ РЕШЕНИЯ. ИНФОРМАЦИЯ НА САЙТЕ — ПУБЛИЧНЫЕ НОВОСТИ И МНЕНИЕ АВТОРА.
         </p>
     </div>
 
-    <!-- AUTH / PROFILE MODAL -->
+    <!-- AUTH MODAL -->
     <div id="auth-modal" class="modal-overlay z-[120]">
         <div class="auth-modal-content bg-fuch-card w-[90%] max-w-sm p-6 rounded-3xl border border-fuch-border shadow-2xl relative max-h-[90vh] overflow-y-auto no-scrollbar">
             <button onclick="app.closeAuth()" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition text-lg z-10"><i class="fas fa-times"></i></button>
-
-            <!-- ЭКРАН ВХОДА (ГОСТЬ) -->
             <div id="auth-login-form">
                 <h2 class="text-2xl font-bold text-white mb-1">Добро пожаловать</h2>
                 <p class="text-xs text-gray-500 mb-6">Войдите, чтобы комментировать и ставить лайки</p>
-                
                 <div class="space-y-3 mb-6">
                     <input type="text" id="guest-name" class="w-full bg-fuch-bg border border-fuch-border rounded-xl px-4 py-4 text-white outline-none focus:border-fuch-accent transition text-base" placeholder="Ваше имя / Никнейм">
                     <input type="number" id="guest-age" class="w-full bg-fuch-bg border border-fuch-border rounded-xl px-4 py-4 text-white outline-none focus:border-fuch-accent transition text-base" placeholder="Возраст (необязательно)">
                 </div>
-
-                <button onclick="app.guestLogin()" class="w-full bg-fuch-accent hover:bg-blue-600 text-white font-bold py-4 rounded-xl transition active:scale-95 mb-4 text-lg">
-                    Войти как гость
-                </button>
-                <p class="text-center text-[10px] text-gray-500 mt-4">
-                    Данные хранятся только в течение этой сессии.<br>При закрытии вкладки они будут удалены.
-                </p>
+                <button onclick="app.guestLogin()" class="w-full bg-fuch-accent hover:bg-blue-600 text-white font-bold py-4 rounded-xl transition active:scale-95 mb-4 text-lg">Войти как гость</button>
+                <p class="text-center text-[10px] text-gray-500 mt-4">Данные хранятся только в течение этой сессии.</p>
             </div>
-
-            <!-- ЛИЧНЫЙ КАБИНЕТ ГОСТЯ -->
             <div id="profile-view" class="hidden">
                 <div class="flex flex-col items-center mb-6">
-                    <div class="w-24 h-24 rounded-full border-4 border-fuch-accent mb-4 flex items-center justify-center text-3xl font-bold text-white bg-gradient-to-br from-blue-600 to-indigo-700" id="profile-avatar-letter">
-                        G
-                    </div>
+                    <div class="w-24 h-24 rounded-full border-4 border-fuch-accent mb-4 flex items-center justify-center text-3xl font-bold text-white bg-gradient-to-br from-blue-600 to-indigo-700" id="profile-avatar-letter">G</div>
                     <h2 id="profile-name" class="text-2xl font-bold text-white text-center">Guest</h2>
-                    <div class="mt-2 bg-green-500/20 text-green-400 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
-                        <i class="fas fa-user-secret"></i> Гостевой аккаунт
-                    </div>
+                    <div class="mt-2 bg-green-500/20 text-green-400 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1"><i class="fas fa-user-secret"></i> Гостевой аккаунт</div>
                 </div>
-
                 <div class="bg-fuch-bg rounded-xl p-4 border border-fuch-border mb-6 space-y-4">
                     <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider">Редактировать данные</h3>
-                    
-                    <div>
-                        <label class="block text-xs text-gray-500 mb-1">Отображаемое имя</label>
-                        <input type="text" id="edit-name" class="w-full bg-fuch-card border border-fuch-border rounded-lg px-3 py-3 text-white outline-none focus:border-fuch-accent text-sm">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-xs text-gray-500 mb-1">Возраст</label>
-                        <input type="number" id="edit-age" class="w-full bg-fuch-card border border-fuch-border rounded-lg px-3 py-3 text-white outline-none focus:border-fuch-accent text-sm" placeholder="Не указан">
-                    </div>
-
-                    <button onclick="app.saveProfile()" class="w-full bg-white/10 hover:bg-white/20 text-white font-bold py-3 rounded-lg transition text-sm">Сохранить изменения</button>
+                    <div><label class="block text-xs text-gray-500 mb-1">Имя</label><input type="text" id="edit-name" class="w-full bg-fuch-card border border-fuch-border rounded-lg px-3 py-3 text-white outline-none focus:border-fuch-accent text-sm"></div>
+                    <div><label class="block text-xs text-gray-500 mb-1">Возраст</label><input type="number" id="edit-age" class="w-full bg-fuch-card border border-fuch-border rounded-lg px-3 py-3 text-white outline-none focus:border-fuch-accent text-sm"></div>
+                    <button onclick="app.saveProfile()" class="w-full bg-white/10 hover:bg-white/20 text-white font-bold py-3 rounded-lg transition text-sm">Сохранить</button>
                 </div>
-
-                <button onclick="app.logout()" class="w-full border border-red-500/50 text-red-500 hover:bg-red-500/10 font-bold py-4 rounded-xl transition text-lg">
-                    Завершить сеанс
-                </button>
+                <button onclick="app.logout()" class="w-full border border-red-500/50 text-red-500 hover:bg-red-500/10 font-bold py-4 rounded-xl transition text-lg">Завершить сеанс</button>
             </div>
         </div>
     </div>
@@ -175,26 +155,17 @@
             <button onclick="document.getElementById('donate-modal').classList.remove('active')" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white transition text-lg"><i class="fas fa-times"></i></button>
             <div class="w-20 h-20 bg-gradient-to-tr from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-orange-500/30"><i class="fas fa-hand-holding-heart text-white text-3xl"></i></div>
             <h2 class="text-3xl font-bold text-white mb-2">Поддержать FUCH</h2>
-            <p class="text-gray-400 text-sm mb-6">Ваш вклад помогает развивать проект</p>
-            
             <div class="mb-8 text-left mt-6">
                 <div class="flex justify-between text-sm mb-2 font-bold"><span class="text-white">Собрано: 12 400 ₽</span><span class="text-gray-500">Цель: 50 000 ₽</span></div>
                 <div class="w-full bg-fuch-bg rounded-full h-4 overflow-hidden border border-fuch-border"><div class="bg-gradient-to-r from-yellow-400 to-orange-500 h-full rounded-full" style="width: 25%"></div></div>
             </div>
-
             <div class="mb-6">
                 <label class="block text-left text-xs text-gray-500 mb-2 uppercase font-bold">Своя сумма</label>
                 <div class="flex gap-2">
-                    <div class="relative flex-1">
-                        <input type="number" id="custom-donate-amount" min="1" placeholder="1000" class="w-full bg-fuch-bg border border-fuch-border rounded-xl pl-4 pr-10 py-4 text-white outline-none focus:border-yellow-500 transition text-lg font-bold">
-                        <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">₽</span>
-                    </div>
-                    <button onclick="app.processCustomDonate()" class="bg-yellow-500 hover:bg-yellow-400 text-black font-bold px-6 rounded-xl transition active:scale-95">
-                        <i class="fas fa-arrow-right"></i>
-                    </button>
+                    <div class="relative flex-1"><input type="number" id="custom-donate-amount" min="1" placeholder="1000" class="w-full bg-fuch-bg border border-fuch-border rounded-xl pl-4 pr-10 py-4 text-white outline-none focus:border-yellow-500 transition text-lg font-bold"><span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">₽</span></div>
+                    <button onclick="app.processCustomDonate()" class="bg-yellow-500 hover:bg-yellow-400 text-black font-bold px-6 rounded-xl transition active:scale-95"><i class="fas fa-arrow-right"></i></button>
                 </div>
             </div>
-
             <div class="grid grid-cols-3 gap-3">
                 <button onclick="app.donate(100)" class="bg-fuch-bg hover:bg-fuch-accent hover:text-white border border-fuch-border py-3 rounded-xl font-bold text-lg transition">100 ₽</button>
                 <button onclick="app.donate(300)" class="bg-fuch-bg hover:bg-fuch-accent hover:text-white border border-fuch-border py-3 rounded-xl font-bold text-lg transition">300 ₽</button>
@@ -221,8 +192,9 @@
         </div>
         <nav class="hidden md:flex items-center gap-1 bg-white/5 p-1 rounded-full border border-fuch-border">
             <button onclick="app.nav('feed')" id="btn-feed" class="nav-btn px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-fuch-accent text-white shadow-lg shadow-blue-500/20">Главная</button>
+            <button onclick="app.nav('banks')" id="btn-banks" class="nav-btn px-4 py-1.5 rounded-full text-xs font-medium text-fuch-gold hover:text-fuch-gold-light hover:bg-fuch-gold/10 transition-all flex items-center gap-1"><i class="fas fa-university text-[10px]"></i> Банки</button>
+            <button onclick="app.nav('zen')" id="btn-zen" class="nav-btn px-4 py-1.5 rounded-full text-xs font-medium text-gray-400 hover:text-white hover:bg-white/10 transition-all">Дзен</button>
             <button onclick="app.nav('essence')" id="btn-essence" class="nav-btn px-4 py-1.5 rounded-full text-xs font-medium text-gray-400 hover:text-fuch-essence hover:bg-white/10 transition-all flex items-center gap-1"><i class="fas fa-bolt text-[10px]"></i> Суть</button>
-            <button onclick="app.nav('ideas')" id="btn-ideas" class="nav-btn px-4 py-1.5 rounded-full text-xs font-medium text-gray-400 hover:text-white hover:bg-white/10 transition-all">Мнения</button>
         </nav>
         <div class="flex items-center gap-2 md:gap-3">
             <button onclick="document.getElementById('donate-modal').classList.add('active')" class="h-10 md:h-9 px-3 md:px-2 rounded-full border border-yellow-500/30 bg-yellow-500/10 flex items-center justify-center gap-2 text-yellow-500 hover:bg-yellow-500 hover:text-black transition text-xs font-bold"><i class="fas fa-heart text-xs"></i></button>
@@ -237,10 +209,38 @@
 
     <!-- MAIN CONTENT -->
     <main class="flex-grow relative w-full overflow-hidden">
-        <!-- FEED WITH IMAGES -->
+        <!-- FEED -->
         <section id="view-feed" class="absolute inset-0 standard-feed bg-fuch-bg hidden">
             <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6" id="standard-feed-container"></div>
             <div id="feed-loader" class="py-8 text-center text-gray-500 hidden"><i class="fas fa-circle-notch fa-spin mr-2"></i>Загрузка...</div>
+        </section>
+
+        <!-- BANKS (GOLD FRAME) -->
+        <section id="view-banks" class="absolute inset-0 standard-feed bg-fuch-bg hidden">
+            <div class="max-w-4xl mx-auto">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-fuch-gold to-yellow-300 flex items-center justify-center text-black"><i class="fas fa-university"></i></div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">Официальные каналы</h2>
+                        <p class="text-xs text-fuch-gold uppercase tracking-widest">Прямые заявления регуляторов и банков</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="banks-feed-container"></div>
+            </div>
+        </section>
+
+        <!-- ZEN (POPULAR) -->
+        <section id="view-zen" class="absolute inset-0 standard-feed bg-fuch-bg hidden">
+            <div class="max-w-4xl mx-auto">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-600 to-pink-600 flex items-center justify-center text-white"><i class="fas fa-fire"></i></div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">Популярное в Дзене</h2>
+                        <p class="text-xs text-gray-500 uppercase tracking-widest">Самые обсуждаемые темы</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="zen-feed-container"></div>
+            </div>
         </section>
 
         <!-- ESSENCE -->
@@ -276,35 +276,24 @@
     <!-- MOBILE TAB BAR -->
     <nav class="md:hidden tab-bar safe-bottom z-50 flex justify-around items-center h-[64px] shrink-0">
         <button onclick="app.nav('feed')" class="flex flex-col items-center gap-1 w-full py-2 text-fuch-accent transition" id="tab-feed"><i class="fas fa-newspaper text-lg"></i><span class="text-[10px]">Главная</span></button>
+        <button onclick="app.nav('banks')" class="flex flex-col items-center gap-1 w-full py-2 text-gray-500 transition" id="tab-banks"><i class="fas fa-university text-lg"></i><span class="text-[10px]">Банки</span></button>
+        <button onclick="app.nav('zen')" class="flex flex-col items-center gap-1 w-full py-2 text-gray-500 transition" id="tab-zen"><i class="fas fa-fire text-lg"></i><span class="text-[10px]">Дзен</span></button>
         <button onclick="app.nav('essence')" class="flex flex-col items-center gap-1 w-full py-2 text-gray-500 transition" id="tab-essence"><i class="fas fa-bolt text-lg"></i><span class="text-[10px]">Суть</span></button>
-        <button onclick="app.nav('ideas')" class="flex flex-col items-center gap-1 w-full py-2 text-gray-500 transition" id="tab-ideas"><i class="fas fa-lightbulb text-lg"></i><span class="text-[10px]">Мнения</span></button>
     </nav>
 
-    <!-- AI CHAT BUTTON & WINDOW -->
+    <!-- AI CHAT -->
     <button onclick="app.toggleAiChat()" class="fixed bottom-24 md:bottom-8 right-4 md:right-8 w-14 h-14 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full shadow-lg shadow-indigo-500/40 flex items-center justify-center text-white z-[80] hover:scale-110 transition active:scale-95 group">
         <i class="fas fa-robot text-2xl group-hover:animate-pulse"></i>
     </button>
-
     <div id="ai-chat-window" class="ai-chat-window">
         <div class="bg-indigo-900/50 p-4 border-b border-white/10 flex justify-between items-center backdrop-blur">
-            <div class="flex items-center gap-2">
-                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span class="font-bold text-white text-sm">Invest AI Assistant</span>
-            </div>
+            <div class="flex items-center gap-2"><div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div><span class="font-bold text-white text-sm">Invest AI Assistant</span></div>
             <button onclick="app.toggleAiChat()" class="text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
         </div>
-        
-        <div class="bg-red-500/10 border-b border-red-500/20 px-3 py-2 text-[10px] text-red-400 text-center font-bold uppercase tracking-wide">
-            <i class="fas fa-exclamation-triangle mr-1"></i> Не является индивидуальной инвестиционной рекомендацией
-        </div>
-
+        <div class="bg-red-500/10 border-b border-red-500/20 px-3 py-2 text-[10px] text-red-400 text-center font-bold uppercase tracking-wide"><i class="fas fa-exclamation-triangle mr-1"></i> Не является индивидуальной инвестиционной рекомендацией</div>
         <div id="ai-messages" class="flex-1 overflow-y-auto p-4 space-y-4 bg-fuch-bg">
-            <div class="flex gap-3">
-                <div class="w-8 h-8 rounded bg-indigo-600 flex items-center justify-center shrink-0 text-xs"><i class="fas fa-robot"></i></div>
-                <div class="bg-white/5 p-3 rounded-2xl rounded-tl-none text-sm text-gray-300">Привет! Я AI-ассистент FUCH. Задай мне вопрос по акциям, облигациям или макроэкономике.</div>
-            </div>
+            <div class="flex gap-3"><div class="w-8 h-8 rounded bg-indigo-600 flex items-center justify-center shrink-0 text-xs"><i class="fas fa-robot"></i></div><div class="bg-white/5 p-3 rounded-2xl rounded-tl-none text-sm text-gray-300">Привет! Я AI-ассистент FUCH. Задай мне вопрос по акциям, облигациям или макроэкономике.</div></div>
         </div>
-
         <div class="p-3 border-t border-white/10 bg-fuch-card">
             <form onsubmit="app.sendAiMessage(event)" class="flex gap-2">
                 <input type="text" id="ai-input" class="flex-1 bg-fuch-bg border border-fuch-border rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-indigo-500" placeholder="Что там с Газпромом?">
@@ -327,10 +316,7 @@
                     <button onclick="app.handleReaderShare()" class="reader-btn flex-1 py-4 rounded-xl font-bold bg-fuch-accent text-white flex items-center justify-center gap-2 transition active:scale-95"><i class="fas fa-share-alt"></i></button>
                 </div>
                 <h3 class="text-lg font-bold mb-4">Комментарии (<span id="comments-count">0</span>)</h3>
-                <div id="comment-section-logged-out" class="hidden bg-black/5 p-6 rounded-xl text-center mb-6">
-                    <p class="text-sm text-gray-400 mb-3">Войдите как гость, чтобы оставить комментарий</p>
-                    <button onclick="app.openAuth()" class="bg-fuch-accent text-white px-8 py-3 rounded-xl font-bold">Войти</button>
-                </div>
+                <div id="comment-section-logged-out" class="hidden bg-black/5 p-6 rounded-xl text-center mb-6"><p class="text-sm text-gray-400 mb-3">Войдите как гость, чтобы оставить комментарий</p><button onclick="app.openAuth()" class="bg-fuch-accent text-white px-8 py-3 rounded-xl font-bold">Войти</button></div>
                 <div id="comment-section-logged-in" class="hidden flex gap-3 mb-6 items-center">
                     <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white font-bold shrink-0" id="comment-avatar">U</div>
                     <input type="text" id="comment-input" class="comment-input flex-1 px-4 py-3 rounded-xl border outline-none text-sm" placeholder="Комментарий...">
@@ -344,15 +330,14 @@
 <script>
 const app = {
     data: { 
-        news: [], posts: [], essenceFeed: [], generatedIds: new Set(),
+        news: [], banks: [], zen: [], posts: [], essenceFeed: [], generatedIds: new Set(),
         feedLoading: false, essenceLoading: false, 
-        likes: JSON.parse(localStorage.getItem('ip_likes_v18') || '{}'),
-        comments: JSON.parse(localStorage.getItem('ip_comments_v18') || '{}'),
-        currentUser: JSON.parse(sessionStorage.getItem('fuch_guest') || 'null'), // sessionStorage для гостя
+        likes: JSON.parse(localStorage.getItem('ip_likes_v19') || '{}'),
+        comments: JSON.parse(localStorage.getItem('ip_comments_v19') || '{}'),
+        currentUser: JSON.parse(sessionStorage.getItem('fuch_guest') || 'null'),
         currentItem: null, aiChatOpen: false
     },
 
-    // --- AI CONFIG ---
     aiConfig: {
         knowledgeBase: [
             { keywords: ['сбер', 'sber'], answer: "Сбербанк (SBER) демонстрирует рекордную рентабельность капитала (ROE > 20%). Дивидендная политика предполагает выплату 50% от скорректированной прибыли." },
@@ -364,8 +349,9 @@ const app = {
         ]
     },
 
-    // --- GENERATORS ---
     companies: ['Сбербанк', 'Газпром', 'Лукойл', 'Яндекс', 'Тинькофф', 'Магнит', 'Норникель', 'Полюс', 'Аэрофлот', 'Роснефть', 'МТС', 'Северсталь', 'НЛМК', 'Татнефть', 'Мосбиржа', 'VK', 'Ozon'],
+    bankNames: ['Сбербанк', 'ВТБ', 'Тинькофф', 'Альфа-Банк', 'Газпромбанк', 'Россельхозбанк', 'Открытие', 'Промсвязьбанк'],
+    
     templates: {
         essence: [
             { tag: "Акции", gen: () => { const c = app.companies[Math.floor(Math.random()*app.companies.length)]; const n = Math.floor(Math.random()*40)+1; return { t: `${c}: прибыль +${n}%`, s: `• Прибыль: ${n} млрд\n• Дивиденды: Да\n• Рост`, hash: `ess_${c}_${n}` }; }},
@@ -375,8 +361,17 @@ const app = {
         feed: [
             () => { const c = app.companies[Math.floor(Math.random()*app.companies.length)]; return { t: `${c} отчитался за квартал`, b: `Выручка компании выросла на фоне расширения бизнеса. Аналитики позитивно оценивают перспективы.`, hash: `feed_${c}` }; },
             () => { const c = app.companies[Math.floor(Math.random()*app.companies.length)]; return { t: `Акции ${c} под давлением`, b: `Инвесторы фиксируют прибыль после роста. Рынок ожидает новых драйверов.`, hash: `feed_drop_${c}` }; }
+        ],
+        banks: [
+            () => { const b = app.bankNames[Math.floor(Math.random()*app.bankNames.length)]; return { t: `Официальное заявление: ${b}`, b: `Банк объявил о изменении условий по кредитным продуктам для юридических лиц. Подробности в пресс-релизе.`, hash: `bank_${b}_${Date.now()}`, isOfficial: true, bankName: b }; },
+            () => { const b = app.bankNames[Math.floor(Math.random()*app.bankNames.length)]; return { t: `${b}: отчетность по РСБУ`, b: `Чистая прибыль за отчетный период показала рост относительно прошлого года. Активы увеличились на 5%.`, hash: `bank_rsbsu_${b}`, isOfficial: true, bankName: b }; }
+        ],
+        zen: [
+            () => { const topics = ['Как я заработал миллион', 'Почему доллар рухнет', 'Секреты богатства', 'Куда вложить 100к']; const t = topics[Math.floor(Math.random()*topics.length)]; return { t: t, b: `Авторский блог о финансах. Читайте подробный разбор ситуации и мои личные прогнозы на ближайшее будущее.`, hash: `zen_${t}`, views: Math.floor(Math.random()*50)+'K' }; },
+            () => { return { t: 'Топ-5 акций для пенсии', b: `Разбираем самые надежные дивидендные фишки российского рынка. Список внутри.`, hash: `zen_pension`, views: '120K' }; }
         ]
     },
+
     generateUniqueID() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 9); },
     
     generateEssenceItem() {
@@ -390,46 +385,60 @@ const app = {
         return { id: this.generateUniqueID(), title: "Новости рынка", summary: "• Активные торги", tag: "Рынок", source: "FUCH", date: "Сейчас", sourceUrl: "#" };
     },
 
-    generateFeedItem() {
+    generateGenericItem(type) {
         let attempts = 0;
         while(attempts < 50) {
-            const gen = this.templates.feed[Math.floor(Math.random() * this.templates.feed.length)];
+            const gens = this.templates[type];
+            const gen = gens[Math.floor(Math.random() * gens.length)];
             const data = gen();
-            if (!this.data.generatedIds.has(data.hash)) {
-                this.data.generatedIds.add(data.hash);
-                // Unsplash Source для легальных картинок по ключевым словам
-                const keywords = ['finance', 'business', 'stock', 'crypto', 'money', 'office', 'chart'];
+            // Для банков и дзена используем более строгую проверку уникальности
+            const uniqueHash = type === 'banks' || type === 'zen' ? data.hash + '_' + Math.random().toString(36).substr(2,4) : data.hash;
+            
+            if (!this.data.generatedIds.has(uniqueHash)) {
+                this.data.generatedIds.add(uniqueHash);
+                const keywords = type === 'banks' ? ['bank', 'finance', 'office'] : ['people', 'money', 'success', 'blog'];
                 const keyword = keywords[Math.floor(Math.random() * keywords.length)];
-                const imgSeed = Math.abs(data.hash.split('').reduce((a,b)=>a+b.charCodeAt(0),0));
-                const imgUrl = `https://images.unsplash.com/photo-${imgSeed}?w=600&h=400&fit=crop&q=80`;
-                // Fallback на случай если ID не совпадет с реальным фото (используем source.unsplash.com для рандома по теме)
-                const safeImg = `https://source.unsplash.com/600x400/?${keyword},${imgSeed}`;
+                const safeImg = `https://source.unsplash.com/600x400/?${keyword},${Math.floor(Math.random()*1000)}`;
                 
                 return { 
                     id: this.generateUniqueID(), 
                     title: data.t, 
                     body: data.b, 
                     full: `<p>${data.b}</p>`, 
-                    tag: ["Акции","Макро"][Math.floor(Math.random()*2)], 
-                    source: 'РБК', 
-                    date: '1ч назад', 
+                    tag: type === 'banks' ? 'Официально' : 'Блог', 
+                    source: type === 'banks' ? data.bankName : 'Дзен Автор', 
+                    date: '2ч назад', 
                     image: safeImg, 
-                    sourceUrl: '#' 
+                    sourceUrl: '#',
+                    isOfficial: data.isOfficial || false,
+                    bankName: data.bankName || null,
+                    views: data.views || null
                 };
             }
             attempts++;
         }
-        return { id: this.generateUniqueID(), title: "Обзор рынка", body: "Индексы топчутся.", full: "<p>Обзор...</p>", tag: "Рынок", source: "FUCH", date: "Сейчас", image: 'https://source.unsplash.com/600x400/?finance', sourceUrl: "#" };
+        return { id: this.generateUniqueID(), title: "Загрузка...", body: "...", full: "...", tag: "Info", source: "System", date: "Сейчас", image: '', sourceUrl: "#" };
     },
 
     init() {
-        const savedPosts = localStorage.getItem('ip_posts_v18');
+        const savedPosts = localStorage.getItem('ip_posts_v19');
         this.data.posts = savedPosts ? JSON.parse(savedPosts) : [{ id: 'post_1', title: "Нефтянка: покупать?", body: "Энергокризис начинается.", full: "<p>Дефицит инвестиций толкает цены вверх.</p>", tag: "Мнение", date: "2ч назад", isPost: true }];
         this.updateAuthUI(); this.initTicker(); this.renderIdeas();
-        for(let i=0; i<10; i++) this.data.news.push(this.generateFeedItem());
+        
+        // Initial loads
+        for(let i=0; i<10; i++) this.data.news.push(this.generateGenericItem('feed'));
+        for(let i=0; i<5; i++) this.data.banks.push(this.generateGenericItem('banks'));
+        for(let i=0; i<6; i++) this.data.zen.push(this.generateGenericItem('zen'));
         for(let i=0; i<5; i++) this.data.essenceFeed.push(this.generateEssenceItem());
-        this.renderStandardFeed(this.data.news); this.renderEssenceChunk(this.data.essenceFeed);
-        document.getElementById('view-feed').addEventListener('scroll', () => this.checkStandardScroll());
+        
+        this.renderStandardFeed(this.data.news, 'standard-feed-container');
+        this.renderStandardFeed(this.data.banks, 'banks-feed-container', true); // true = isBankFeed
+        this.renderStandardFeed(this.data.zen, 'zen-feed-container');
+        this.renderEssenceChunk(this.data.essenceFeed);
+        
+        document.getElementById('view-feed').addEventListener('scroll', () => this.checkScroll('feed'));
+        document.getElementById('view-banks').addEventListener('scroll', () => this.checkScroll('banks'));
+        document.getElementById('view-zen').addEventListener('scroll', () => this.checkScroll('zen'));
         ['mobile', 'desktop'].forEach(dev => document.getElementById(`essence-${dev}`).addEventListener('scroll', () => this.checkEssenceScroll(dev)));
         this.nav('feed');
     },
@@ -437,36 +446,18 @@ const app = {
     // --- GUEST AUTH SYSTEM ---
     openAuth() { 
         document.getElementById('auth-modal').classList.add('active'); 
-        if (this.data.currentUser) {
-            this.showProfile();
-        } else {
-            document.getElementById('auth-login-form').classList.remove('hidden');
-            document.getElementById('profile-view').classList.add('hidden');
-            // Предзаполнение если есть черновик
-            document.getElementById('guest-name').value = '';
-            document.getElementById('guest-age').value = '';
-        }
+        if (this.data.currentUser) { this.showProfile(); } 
+        else { document.getElementById('auth-login-form').classList.remove('hidden'); document.getElementById('profile-view').classList.add('hidden'); }
     },
     closeAuth() { document.getElementById('auth-modal').classList.remove('active'); },
-    
     guestLogin() {
         const name = document.getElementById('guest-name').value.trim() || 'Гость';
         const age = document.getElementById('guest-age').value;
-        
-        const user = {
-            name: name,
-            age: age,
-            isGuest: true,
-            loginTime: Date.now()
-        };
-        
+        const user = { name, age, isGuest: true, loginTime: Date.now() };
         this.data.currentUser = user;
         sessionStorage.setItem('fuch_guest', JSON.stringify(user));
-        this.closeAuth();
-        this.updateAuthUI();
-        this.showToast(`Добро пожаловать, ${name}!`);
+        this.closeAuth(); this.updateAuthUI(); this.showToast(`Добро пожаловать, ${name}!`);
     },
-
     showProfile() {
         document.getElementById('auth-login-form').classList.add('hidden');
         document.getElementById('profile-view').classList.remove('hidden');
@@ -476,44 +467,24 @@ const app = {
         document.getElementById('edit-name').value = u.name;
         document.getElementById('edit-age').value = u.age || '';
     },
-
     saveProfile() {
         const newName = document.getElementById('edit-name').value.trim();
         const newAge = document.getElementById('edit-age').value;
         if(!newName) return this.showToast('Имя не может быть пустым');
-        
-        this.data.currentUser.name = newName;
-        this.data.currentUser.age = newAge;
-        
+        this.data.currentUser.name = newName; this.data.currentUser.age = newAge;
         sessionStorage.setItem('fuch_guest', JSON.stringify(this.data.currentUser));
-        this.updateAuthUI();
-        this.showProfile();
-        this.showToast('Данные обновлены');
-        
-        // Обновляем аватар в комментариях если открыт ридер
-        if(this.data.currentItem) {
-            document.getElementById('comment-avatar').innerText = newName.charAt(0).toUpperCase();
-        }
+        this.updateAuthUI(); this.showProfile(); this.showToast('Данные обновлены');
+        if(this.data.currentItem) document.getElementById('comment-avatar').innerText = newName.charAt(0).toUpperCase();
     },
-
     logout() {
-        this.data.currentUser = null;
-        sessionStorage.removeItem('fuch_guest');
-        this.updateAuthUI();
-        document.getElementById('auth-login-form').classList.remove('hidden');
-        document.getElementById('profile-view').classList.add('hidden');
+        this.data.currentUser = null; sessionStorage.removeItem('fuch_guest');
+        this.updateAuthUI(); document.getElementById('auth-login-form').classList.remove('hidden'); document.getElementById('profile-view').classList.add('hidden');
         this.showToast('Сеанс завершен');
     },
-
     updateAuthUI() { 
         const b=document.getElementById('user-profile-btn'), s=document.getElementById('user-name-display'); 
-        if(this.data.currentUser){
-            s.innerText=this.data.currentUser.name.split(' ')[0];
-            b.classList.add('border-fuch-accent','text-white','bg-fuch-accent/10');
-        } else {
-            s.innerText='Войти';
-            b.classList.remove('border-fuch-accent','text-white','bg-fuch-accent/10');
-        } 
+        if(this.data.currentUser){ s.innerText=this.data.currentUser.name.split(' ')[0]; b.classList.add('border-fuch-accent','text-white','bg-fuch-accent/10'); } 
+        else { s.innerText='Войти'; b.classList.remove('border-fuch-accent','text-white','bg-fuch-accent/10'); } 
     },
 
     // --- AI CHAT ---
@@ -523,12 +494,8 @@ const app = {
         if(this.data.aiChatOpen) { win.classList.add('open'); setTimeout(() => document.getElementById('ai-input').focus(), 300); } 
         else { win.classList.remove('open'); }
     },
-    
     async sendAiMessage(e) {
-        e.preventDefault();
-        const input = document.getElementById('ai-input');
-        const msg = input.value.trim();
-        if(!msg) return;
+        e.preventDefault(); const input = document.getElementById('ai-input'); const msg = input.value.trim(); if(!msg) return;
         const chat = document.getElementById('ai-messages');
         chat.innerHTML += `<div class="flex gap-3 justify-end fade-in"><div class="bg-indigo-600 p-3 rounded-2xl rounded-tr-none text-sm text-white max-w-[85%] shadow-lg">${msg}</div></div>`;
         input.value = ''; chat.scrollTop = chat.scrollHeight;
@@ -542,54 +509,139 @@ const app = {
             chat.scrollTop = chat.scrollHeight;
         }, 1200 + Math.random() * 800);
     },
-
     getAiResponse(query) {
         const q = query.toLowerCase();
-        for (const item of this.aiConfig.knowledgeBase) {
-            if (item.keywords.some(k => q.includes(k))) {
-                return `${item.answer}<br><br><span class="text-red-400 text-[10px] font-bold">⚠️ Не является ИИР</span>`;
-            }
-        }
+        for (const item of this.aiConfig.knowledgeBase) { if (item.keywords.some(k => q.includes(k))) return `${item.answer}<br><br><span class="text-red-400 text-[10px] font-bold">⚠️ Не является ИИР</span>`; }
         const relevantNews = this.data.news.filter(n => n.title.toLowerCase().includes(q) || n.body.toLowerCase().includes(q)).slice(0, 2);
-        if (relevantNews.length > 0) {
-            const summary = relevantNews.map(n => `• ${n.title}: ${n.body.substring(0, 60)}...`).join('<br>');
-            return `На основе последних новостей на FUCH:<br><br>${summary}<br><br><span class="text-red-400 text-[10px] font-bold">⚠️ Не является ИИР</span>`;
-        }
+        if (relevantNews.length > 0) { const summary = relevantNews.map(n => `• ${n.title}: ${n.body.substring(0, 60)}...`).join('<br>'); return `На основе последних новостей на FUCH:<br><br>${summary}<br><br><span class="text-red-400 text-[10px] font-bold">⚠️ Не является ИИР</span>`; }
         const fallbacks = ["Уточните тикер актива.", "Следите за ставкой ЦБ.", "Изучите отчетность сектора.", "Рынок в зоне неопределенности."];
         return `${fallbacks[Math.floor(Math.random() * fallbacks.length)]}<br><br><span class="text-red-400 text-[10px] font-bold">⚠️ Не является индивидуальной инвестиционной рекомендацией</span>`;
     },
 
     // --- DONATE ---
     donate(amount) { this.showToast(`Переход к оплате ${amount}₽...`); },
-    processCustomDonate() {
-        const input = document.getElementById('custom-donate-amount');
-        const amount = parseInt(input.value);
-        if (!amount || amount <= 0) return this.showToast('Введите корректную сумму');
-        this.donate(amount); input.value = '';
-    },
+    processCustomDonate() { const input = document.getElementById('custom-donate-amount'); const amount = parseInt(input.value); if (!amount || amount <= 0) return this.showToast('Введите корректную сумму'); this.donate(amount); input.value = ''; },
 
     // --- CORE ---
     adminLogin() { if(document.getElementById('adm-pass').value==='admin'){document.getElementById('admin-auth').classList.add('hidden');document.getElementById('admin-editor').classList.remove('hidden');} },
     initTicker() { const d=[{n:'IMOEX',v:'3,245',c:'+1.2%',u:1},{n:'S&P',v:'5,432',c:'-0.4%',u:0},{n:'BTC',v:'68K',c:'+2.1%',u:1},{n:'Brent',v:'82',c:'-1.1%',u:0}]; document.getElementById('ticker-content').innerHTML=d.map(i=>`<div class="ticker-item"><span class="font-bold text-gray-300">${i.n}</span> <span class="${i.u?'text-up':'text-down'}">${i.c}</span></div>`).join('').repeat(6); },
-    nav(v) { this.data.currentView=v; document.querySelectorAll('main > section').forEach(el=>el.classList.add('hidden')); document.getElementById(`view-${v}`).classList.remove('hidden'); ['feed','essence','ideas'].forEach(x=>{const b=document.getElementById(`btn-${x}`),t=document.getElementById(`tab-${x}`);if(x===v){b.className=x==='essence'?'nav-btn px-4 py-1.5 rounded-full text-xs font-bold bg-fuch-essence text-black':'nav-btn px-4 py-1.5 rounded-full text-xs font-bold bg-fuch-accent text-white';t.classList.replace('text-gray-500',x==='essence'?'text-fuch-essence':'text-fuch-accent');}else{b.className='nav-btn px-4 py-1.5 rounded-full text-xs font-medium text-gray-400 hover:text-white';t.classList.replace(x==='essence'?'text-fuch-essence':'text-fuch-accent','text-gray-500');}}); if(v==='essence'&&!localStorage.getItem('ip_essence_seen'))document.getElementById('essence-modal').classList.add('active'); },
+    
+    nav(v) { 
+        this.data.currentView=v; 
+        document.querySelectorAll('main > section').forEach(el=>el.classList.add('hidden')); 
+        document.getElementById(`view-${v}`).classList.remove('hidden'); 
+        
+        // Desktop Nav Update
+        ['feed','banks','zen','essence','ideas'].forEach(x=>{
+            const b=document.getElementById(`btn-${x}`);
+            if(b) {
+                if(x===v) {
+                    if(x==='banks') b.className = 'nav-btn px-4 py-1.5 rounded-full text-xs font-bold bg-fuch-gold/20 text-fuch-gold border border-fuch-gold/50';
+                    else if(x==='essence') b.className = 'nav-btn px-4 py-1.5 rounded-full text-xs font-bold bg-fuch-essence text-black';
+                    else b.className = 'nav-btn px-4 py-1.5 rounded-full text-xs font-bold bg-fuch-accent text-white';
+                } else {
+                    if(x==='banks') b.className = 'nav-btn px-4 py-1.5 rounded-full text-xs font-medium text-fuch-gold/60 hover:text-fuch-gold hover:bg-fuch-gold/10 transition-all';
+                    else b.className = 'nav-btn px-4 py-1.5 rounded-full text-xs font-medium text-gray-400 hover:text-white hover:bg-white/10 transition-all';
+                }
+            }
+        });
+
+        // Mobile Tab Update
+        ['feed','banks','zen','essence'].forEach(x=>{
+            const t=document.getElementById(`tab-${x}`);
+            if(t) {
+                if(x===v) t.classList.replace('text-gray-500', x==='banks'?'text-fuch-gold':x==='essence'?'text-fuch-essence':'text-fuch-accent');
+                else t.classList.replace(x==='banks'?'text-fuch-gold':x==='essence'?'text-fuch-essence':'text-fuch-accent', 'text-gray-500');
+            }
+        });
+
+        if(v==='essence'&&!localStorage.getItem('ip_essence_seen'))document.getElementById('essence-modal').classList.add('active'); 
+    },
+    
     closeEssenceModal() { document.getElementById('essence-modal').classList.remove('active'); localStorage.setItem('ip_essence_seen','true'); },
     showToast(m) { const t=document.getElementById('toast'); document.getElementById('toast-msg').innerText=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2000); },
-    toggleLike(b,id) { if(!this.data.currentUser)return this.openAuth(); const l=this.data.likes[id]; if(l){delete this.data.likes[id];b.classList.remove('text-red-500');b.querySelector('i').classList.replace('fas','far');}else{this.data.likes[id]=true;b.classList.add('text-red-500');b.querySelector('i').classList.replace('far','fas');} localStorage.setItem('ip_likes_v18',JSON.stringify(this.data.likes));this.updateLikeUI(id); },
+    
+    toggleLike(b,id) { if(!this.data.currentUser)return this.openAuth(); const l=this.data.likes[id]; if(l){delete this.data.likes[id];b.classList.remove('text-red-500');b.querySelector('i').classList.replace('fas','far');}else{this.data.likes[id]=true;b.classList.add('text-red-500');b.querySelector('i').classList.replace('far','fas');} localStorage.setItem('ip_likes_v19',JSON.stringify(this.data.likes));this.updateLikeUI(id); },
     updateLikeUI(id) { const l=this.data.likes[id]; document.getElementById('reader-like-count').innerText=l?151:150; const b=document.getElementById('reader-like-btn'); if(l){b.classList.add('text-red-500');b.querySelector('i').className='fas fa-heart';}else{b.classList.remove('text-red-500');b.querySelector('i').className='far fa-heart';} },
     handleReaderLike() { if(this.data.currentItem)this.toggleLike(document.getElementById('reader-like-btn'),this.data.currentItem.id); },
     handleReaderShare() { this.showToast('Ссылка скопирована'); },
-    postComment() { if(!this.data.currentUser)return this.openAuth(); const i=document.getElementById('comment-input'),t=i.value.trim(); if(!t)return; const id=this.data.currentItem.id; if(!this.data.comments[id])this.data.comments[id]=[]; this.data.comments[id].unshift({text:t,author:this.data.currentUser.name,date:new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}); localStorage.setItem('ip_comments_v18',JSON.stringify(this.data.comments)); i.value=''; this.renderComments(id); this.showToast('Отправлено'); },
+    
+    postComment() { if(!this.data.currentUser)return this.openAuth(); const i=document.getElementById('comment-input'),t=i.value.trim(); if(!t)return; const id=this.data.currentItem.id; if(!this.data.comments[id])this.data.comments[id]=[]; this.data.comments[id].unshift({text:t,author:this.data.currentUser.name,date:new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}); localStorage.setItem('ip_comments_v19',JSON.stringify(this.data.comments)); i.value=''; this.renderComments(id); this.showToast('Отправлено'); },
     renderComments(id) { const l=document.getElementById('comments-list'); document.getElementById('comments-count').innerText=(this.data.comments[id]||[]).length; if(this.data.currentUser){document.getElementById('comment-section-logged-in').classList.remove('hidden');document.getElementById('comment-section-logged-out').classList.add('hidden');document.getElementById('comment-avatar').innerText=this.data.currentUser.name.charAt(0);}else{document.getElementById('comment-section-logged-in').classList.add('hidden');document.getElementById('comment-section-logged-out').classList.remove('hidden');} l.innerHTML=(this.data.comments[id]||[]).map(c=>`<div class="bg-black/5 p-4 rounded-xl"><div class="flex justify-between text-xs font-bold mb-1 opacity-70"><span>${c.author}</span><span>${c.date}</span></div><p class="text-sm">${c.text}</p></div>`).join(''); },
-    openReader(id,isE=false) { const item=isE?this.data.essenceFeed.find(i=>i.id==id):[...this.data.news,...this.data.posts].find(i=>i.id==id); if(!item)return; this.data.currentItem=item; const m=document.getElementById('reader-modal'),p=document.getElementById('reader-paper'),c=document.getElementById('reader-content'); p.className=`reader-box reader-paper ${localStorage.getItem('ip_theme')==='dark'?'dark':'light'}`; let h=item.full||item.body; if(isE&&item.summary)h=`<div class="bg-black/5 p-6 rounded-2xl mb-8 border-l-4 border-fuch-essence"><h3 class="font-bold text-lg mb-3 font-sans"><i class="fas fa-bolt text-fuch-essence"></i> Главное</h3><p class="whitespace-pre-line">${item.summary}</p></div>`+h; c.innerHTML=`<div class="font-sans text-xs opacity-50 uppercase tracking-widest mb-6 flex gap-3"><span class="bg-black/5 px-2 py-1 rounded font-bold">${item.tag}</span><span>${item.source}</span></div><h1 class="text-3xl font-black mb-8 font-sans">${item.title}</h1><div class="mb-10">${h}</div>`; this.updateLikeUI(id);this.renderComments(id);m.classList.add('active');document.body.style.overflow='hidden'; },
+    
+    openReader(id,isE=false) { 
+        let item;
+        if(isE) item = this.data.essenceFeed.find(i=>i.id==id);
+        else item = [...this.data.news, ...this.data.posts, ...this.data.banks, ...this.data.zen].find(i=>i.id==id);
+        
+        if(!item)return; 
+        this.data.currentItem=item; 
+        const m=document.getElementById('reader-modal'),p=document.getElementById('reader-paper'),c=document.getElementById('reader-content'); 
+        p.className=`reader-box reader-paper ${localStorage.getItem('ip_theme')==='dark'?'dark':'light'}`; 
+        let h=item.full||item.body; 
+        if(isE&&item.summary)h=`<div class="bg-black/5 p-6 rounded-2xl mb-8 border-l-4 border-fuch-essence"><h3 class="font-bold text-lg mb-3 font-sans"><i class="fas fa-bolt text-fuch-essence"></i> Главное</h3><p class="whitespace-pre-line">${item.summary}</p></div>`+h; 
+        
+        // Special header for Bank Official News
+        let headerHtml = '';
+        if(item.isOfficial) {
+            headerHtml = `<div class="flex items-center gap-3 mb-6 p-4 rounded-xl bg-gradient-to-r from-yellow-900/20 to-transparent border border-fuch-gold/30"><div class="w-10 h-10 rounded-full bg-fuch-gold flex items-center justify-center text-black"><i class="fas fa-university"></i></div><div><div class="text-fuch-gold font-bold uppercase text-xs tracking-widest">Официальный канал</div><div class="text-white font-bold text-lg">${item.bankName}</div></div></div>`;
+        } else {
+            headerHtml = `<div class="font-sans text-xs opacity-50 uppercase tracking-widest mb-6 flex gap-3"><span class="bg-black/5 px-2 py-1 rounded font-bold">${item.tag}</span><span>${item.source}</span></div>`;
+        }
+
+        c.innerHTML=`${headerHtml}<h1 class="text-3xl font-black mb-8 font-sans">${item.title}</h1><div class="mb-10">${h}</div>`; 
+        this.updateLikeUI(id);this.renderComments(id);m.classList.add('active');document.body.style.overflow='hidden'; 
+    },
     closeReader() { document.getElementById('reader-modal').classList.remove('active');document.body.style.overflow=''; },
     toggleReaderTheme() { const c=localStorage.getItem('ip_theme')==='dark'?'light':'dark'; localStorage.setItem('ip_theme',c); document.getElementById('reader-paper').className=`reader-box reader-paper ${c}`; document.getElementById('theme-icon').className=c==='light'?'fas fa-moon text-sm':'fas fa-sun text-sm'; },
-    checkStandardScroll() { if(this.data.currentView!=='feed'||this.data.feedLoading)return; const e=document.getElementById('view-feed'); if(e.scrollTop+e.clientHeight>=e.scrollHeight-300)this.loadMoreStandard(); },
-    async loadMoreStandard() { this.data.feedLoading=true;document.getElementById('feed-loader').classList.remove('hidden'); setTimeout(()=>{const n=[];for(let i=0;i<4;i++)n.push(this.generateFeedItem());this.data.news=[...this.data.news,...n];this.renderStandardFeed(n);this.data.feedLoading=false;document.getElementById('feed-loader').classList.add('hidden');},800); },
-    renderStandardFeed(items) { const c=document.getElementById('standard-feed-container'); c.insertAdjacentHTML('beforeend',items.map(n=>`<div onclick="app.openReader('${n.id}')" class="bg-fuch-card hover:bg-zinc-800 border border-fuch-border hover:border-fuch-accent/50 rounded-xl overflow-hidden cursor-pointer transition-all group flex flex-col h-full"><div class="h-48 overflow-hidden relative bg-gray-800"><img src="${n.image}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='https://source.unsplash.com/600x400/?finance'"><div class="absolute top-3 left-3 bg-black/60 backdrop-blur px-2 py-1 rounded text-xs font-bold text-white">${n.tag}</div></div><div class="p-5 flex flex-col flex-grow"><h3 class="text-xl font-bold text-white group-hover:text-fuch-accent transition mb-2 leading-snug">${n.title}</h3><p class="text-sm text-gray-400 line-clamp-3 mb-4 flex-grow">${n.body}</p><div class="flex items-center justify-between text-xs text-gray-500 mt-auto pt-4 border-t border-white/5"><span>${n.source}</span><span>${n.date}</span></div></div></div>`).join('')); },
+    
+    checkScroll(viewType) { 
+        if(this.data.currentView!==viewType)return; 
+        const el = document.getElementById(viewType === 'feed' ? 'view-feed' : viewType === 'banks' ? 'view-banks' : 'view-zen');
+        const isLoading = viewType === 'feed' ? this.data.feedLoading : false; // Simplified loading state
+        if(isLoading) return;
+        
+        if(el.scrollTop+el.clientHeight>=el.scrollHeight-300) {
+            if(viewType === 'feed') this.loadMore('feed');
+            if(viewType === 'banks') this.loadMore('banks');
+            if(viewType === 'zen') this.loadMore('zen');
+        } 
+    },
+
+    async loadMore(type) {
+        if(type === 'feed') this.data.feedLoading = true;
+        const loader = type === 'feed' ? document.getElementById('feed-loader') : null;
+        if(loader) loader.classList.remove('hidden');
+        
+        setTimeout(()=>{
+            const n=[];
+            const count = type === 'feed' ? 4 : 3;
+            for(let i=0;i<count;i++) n.push(this.generateGenericItem(type));
+            
+            if(type === 'feed') { this.data.news=[...this.data.news,...n]; this.renderStandardFeed(n, 'standard-feed-container'); this.data.feedLoading=false; if(loader) loader.classList.add('hidden'); }
+            if(type === 'banks') { this.data.banks=[...this.data.banks,...n]; this.renderStandardFeed(n, 'banks-feed-container', true); }
+            if(type === 'zen') { this.data.zen=[...this.data.zen,...n]; this.renderStandardFeed(n, 'zen-feed-container'); }
+        },800); 
+    },
+
+    renderStandardFeed(items, containerId, isBankFeed = false) { 
+        const c=document.getElementById(containerId); 
+        c.insertAdjacentHTML('beforeend',items.map(n=>{
+            const cardClass = n.isOfficial ? 'bank-card' : 'bg-fuch-card hover:bg-zinc-800 border border-fuch-border hover:border-fuch-accent/50';
+            const badge = n.isOfficial 
+                ? `<div class="absolute top-3 left-3 bg-black/80 backdrop-blur px-2 py-1 rounded border border-fuch-gold/50 flex items-center gap-1"><i class="fas fa-check-circle text-fuch-gold text-[10px]"></i><span class="text-[10px] font-bold text-fuch-gold uppercase">Официально</span></div>`
+                : `<div class="absolute top-3 left-3 bg-black/60 backdrop-blur px-2 py-1 rounded text-xs font-bold text-white">${n.tag}</div>`;
+            
+            const views = n.views ? `<span class="flex items-center gap-1"><i class="far fa-eye"></i> ${n.views}</span>` : '';
+
+            return `<div onclick="app.openReader('${n.id}')" class="${cardClass} rounded-xl overflow-hidden cursor-pointer transition-all group flex flex-col h-full"><div class="h-48 overflow-hidden relative bg-gray-800"><img src="${n.image}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='https://source.unsplash.com/600x400/?finance'">${badge}</div><div class="p-5 flex flex-col flex-grow"><h3 class="text-xl font-bold ${n.isOfficial ? 'text-fuch-gold-light' : 'text-white'} group-hover:text-fuch-accent transition mb-2 leading-snug">${n.title}</h3><p class="text-sm text-gray-400 line-clamp-3 mb-4 flex-grow">${n.body}</p><div class="flex items-center justify-between text-xs text-gray-500 mt-auto pt-4 border-t border-white/5"><span class="${n.isOfficial ? 'bank-badge' : ''}">${n.source}</span><div class="flex gap-3">${views}<span>${n.date}</span></div></div></div></div>`
+        }).join('')); 
+    },
+
     checkEssenceScroll(d) { if(this.data.currentView!=='essence'||this.data.essenceLoading)return; const e=document.getElementById(`essence-${d}`); const end=d==='mobile'?e.scrollLeft+e.clientWidth>=e.scrollWidth-300:e.scrollTop+e.clientHeight>=e.scrollHeight-300; if(end)this.loadMoreEssence(); },
     async loadMoreEssence() { this.data.essenceLoading=true; setTimeout(()=>{const n=[];for(let i=0;i<3;i++)n.push(this.generateEssenceItem());this.data.essenceFeed=[...this.data.essenceFeed,...n];this.renderEssenceChunk(n);this.data.essenceLoading=false;},800); },
     renderEssenceChunk(items) { const m=document.getElementById('essence-mobile'),d=document.getElementById('essence-desktop'); const g=['from-orange-900 to-black','from-amber-900 to-black','from-yellow-900 to-black']; items.forEach(i=>{const gr=g[Math.abs(String(i.id).split('').reduce((a,b)=>a+b.charCodeAt(0),0))%g.length]; const inner=`<div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-10"></div><div class="relative z-20 h-full flex flex-col justify-end p-6 cursor-pointer" onclick="app.openReader('${i.id}',true)"><div class="flex items-center gap-2 mb-3"><span class="px-2 py-0.5 rounded bg-fuch-essence/20 text-[10px] font-bold text-fuch-essence uppercase border border-fuch-essence/30">#${i.tag}</span></div><h2 class="text-2xl font-bold text-white mb-3">${i.title}</h2><div class="bg-black/40 backdrop-blur p-4 rounded-xl border border-white/10 mb-4"><p class="text-sm text-gray-200 whitespace-pre-line">${i.summary}</p></div><div class="mt-auto"><span class="block w-full py-3 rounded-xl font-bold text-center text-base bg-fuch-essence text-black">Источник</span></div></div>`; m.insertAdjacentHTML('beforeend',`<div class="essence-card-mobile bg-gradient-to-br ${gr}">${inner}</div>`); d.insertAdjacentHTML('beforeend',`<div class="essence-card-desktop bg-gradient-to-br ${gr}">${inner}</div>`);}); },
-    addNews() { const b=document.getElementById('new-body').value; if(!b)return; const n={id:this.generateUniqueID(),title:"Новая идея",body:b,full:`<p>${b}</p>`,tag:"Мнение",source:'Автор',date:'Сейчас',isPost:true}; this.data.posts.unshift(n);localStorage.setItem('ip_posts_v18',JSON.stringify(this.data.posts));this.renderIdeas();this.nav('ideas'); },
+    addNews() { const b=document.getElementById('new-body').value; if(!b)return; const n={id:this.generateUniqueID(),title:"Новая идея",body:b,full:`<p>${b}</p>`,tag:"Мнение",source:'Автор',date:'Сейчас',isPost:true}; this.data.posts.unshift(n);localStorage.setItem('ip_posts_v19',JSON.stringify(this.data.posts));this.renderIdeas();this.nav('ideas'); },
     renderIdeas() { document.getElementById('ideas-list').innerHTML=this.data.posts.map(p=>`<div onclick="app.openReader('${p.id}')" class="bg-fuch-card p-6 rounded-2xl border border-fuch-border cursor-pointer hover:border-purple-500/50"><div class="text-xs text-purple-400 font-bold mb-3 uppercase">Мнение • ${p.date}</div><h3 class="text-xl font-bold mb-3">${p.title}</h3><p class="text-sm text-gray-400">${p.body}</p></div>`).join(''); }
 };
 
