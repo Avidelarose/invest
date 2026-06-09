@@ -288,38 +288,73 @@ const app = {
         feedPage: 0, essencePage: 0, 
         feedLoading: false, essenceLoading: false, 
         readerTheme: localStorage.getItem('ip_theme') || 'light',
-        likes: JSON.parse(localStorage.getItem('ip_likes_v11') || '{}'),
-        comments: JSON.parse(localStorage.getItem('ip_comments_v11') || '{}'),
+        likes: JSON.parse(localStorage.getItem('ip_likes_v12') || '{}'),
+        comments: JSON.parse(localStorage.getItem('ip_comments_v12') || '{}'),
         users: JSON.parse(localStorage.getItem('fuch_users') || '[]'),
         currentUser: JSON.parse(localStorage.getItem('fuch_current_user') || 'null'),
         currentItem: null, rssSources: []
     },
 
-    // ГЕНЕРАТОР РАЗНООБРАЗНЫХ ВЫЖИМОК ДЛЯ "СУТИ"
-    essenceTemplates: [
-        { tag: "Акции", titles: ["{T} отчитался за квартал", "{T}: дивидендный сюрприз", "{T} обновляет максимумы"], summaries: ["• Прибыль +{N}% г/г\n• Рекомендация: Покупать\n• Цель: {P} руб."] },
-        { tag: "Макро", titles: ["ЦБ: решение по ставке", "Инфляция замедляется", "ВВП вырос на {N}%"], summaries: ["• Ставка сохранена\n• Прогноз позитивный\n• Рубль укрепляется"] },
-        { tag: "Крипто", titles: ["BTC пробил ${P}", "Эфир обновляет хаи", "Киты скупают {T}"], summaries: ["• Объем торгов +{N}%\n• Страх и жадность: {N}\n• Технически: пробой"] },
-        { tag: "Сырье", titles: ["Нефть Brent > ${P}", "Золото бьет рекорды", "Газпром: новый контракт"], summaries: ["• Цена: ${P} за баррель\n• Спрос растет\n• Дефицит предложения"] },
-        { tag: "IPO", titles: ["IPO {T}: итоги размещения", "{T} выходит на биржу", "Размещение {T} переподписано"], summaries: ["• Цена: {P} руб.\n• Оценка: {N} млрд\n• Доходность: {N}%"] }
-    ],
-    tickers: ['SBER', 'GAZP', 'LKOH', 'YNDX', 'VTBR', 'ROSN', 'GMKN', 'PLZL', 'MGNT', 'TCSG', 'NVTK', 'MTSS', 'POLY', 'ALRS', 'CHMF', 'NLMK', 'TATN', 'MOEX', 'IRAO', 'FLOT'],
+    // --- ГЕНЕРАТОР КОНТЕНТА ---
+    companies: ['Сбербанк', 'Газпром', 'Лукойл', 'Яндекс', 'Тинькофф', 'Магнит', 'Норникель', 'Полюс', 'Аэрофлот', 'Сургутнефтегаз', 'Роснефть', 'МТС', 'Северсталь', 'НЛМК', 'Татнефть', 'Мосбиржа', 'VK', 'Ozon', 'Wildberries', 'Детский мир'],
+    tickers: ['SBER', 'GAZP', 'LKOH', 'YNDX', 'TCSG', 'MGNT', 'GMKN', 'PLZL', 'AFLT', 'SNGS', 'ROSN', 'MTSS', 'CHMF', 'NLMK', 'TATN', 'MOEX', 'VKCO', 'OZON', 'DSKY'],
+    macroEvents: ['Ключевая ставка ЦБ', 'Инфляция в РФ', 'ВВП России', 'Безработица США', 'Non-Farm Payrolls', 'Ставка ФРС', 'Индекс PMI', 'Розничные продажи', 'Промышленное производство', 'Сальдо торгового баланса'],
+    cryptoAssets: ['Bitcoin', 'Ethereum', 'Solana', 'TON', 'BNB', 'Ripple', 'Cardano', 'Dogecoin'],
+    
+    templates: {
+        essence: [
+            { tag: "Акции", gen: () => {
+                const c = app.companies[Math.floor(Math.random()*app.companies.length)];
+                const n = Math.floor(Math.random()*40)+1;
+                return { t: `${c}: прибыль +${n}%`, s: `• Чистая прибыль: ${n} млрд руб\n• Дивиденды: рекомендованы\n• Акции реагируют ростом` };
+            }},
+            { tag: "Макро", gen: () => {
+                const e = app.macroEvents[Math.floor(Math.random()*app.macroEvents.length)];
+                const v = (Math.random()*10).toFixed(1);
+                return { t: `${e}: данные вышли`, s: `• Показатель: ${v}%\n• Прогноз был ниже\n• Рынок корректируется` };
+            }},
+            { tag: "Крипто", gen: () => {
+                const a = app.cryptoAssets[Math.floor(Math.random()*app.cryptoAssets.length)];
+                const p = Math.floor(Math.random()*50000)+1000;
+                return { t: `${a} пробивает уровень`, s: `• Цена: $${p}\n• Объем торгов растет\n• Киты накапливают позицию` };
+            }},
+            { tag: "Сырье", gen: () => {
+                const items = ['Нефть Brent', 'Золото', 'Палладий', 'Природный газ'];
+                const i = items[Math.floor(Math.random()*items.length)];
+                return { t: `${i} обновляет максимум`, s: `• Дефицит предложения\n• Геополитическая премия\n• Тренд восходящий` };
+            }}
+        ],
+        feed: [
+            () => {
+                const c = app.companies[Math.floor(Math.random()*app.companies.length)];
+                return { t: `${c} опубликовал отчетность за квартал`, b: `Компания показала результаты выше ожиданий аналитиков. Выручка выросла на фоне расширения бизнеса.` };
+            },
+            () => {
+                const t = app.tickers[Math.floor(Math.random()*app.tickers.length)];
+                return { t: `Акции ${t} падают на новостях о санкциях`, b: `Рынок негативно отреагировал на новые ограничения. Инвесторы фиксируют прибыль.` };
+            },
+            () => {
+                const e = app.macroEvents[Math.floor(Math.random()*app.macroEvents.length)];
+                return { t: `ЦБ прокомментировал ${e}`, b: `Регулятор отметил стабильность финансовой системы и отсутствие системных рисков.` };
+            },
+            () => {
+                const a = app.cryptoAssets[Math.floor(Math.random()*app.cryptoAssets.length)];
+                return { t: `Крупный фонд купил ${a} на $100 млн`, b: `Институциональные инвесторы продолжают наращивать позиции в цифровых активах.` };
+            }
+        ]
+    },
+
+    generateUniqueID() {
+        return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+    },
 
     generateEssenceItem() {
-        const tmpl = this.essenceTemplates[Math.floor(Math.random() * this.essenceTemplates.length)];
-        const ticker = this.tickers[Math.floor(Math.random() * this.tickers.length)];
-        const num = Math.floor(Math.random() * 30) + 1;
-        const price = Math.floor(Math.random() * 5000) + 100;
-        
-        const title = tmpl.titles[Math.floor(Math.random() * tmpl.titles.length)]
-            .replace('{T}', ticker).replace('{N}', num).replace('{P}', price);
-        const summary = tmpl.summaries[0]
-            .replace('{T}', ticker).replace('{N}', num).replace('{P}', price);
-
+        const tmpl = this.templates.essence[Math.floor(Math.random() * this.templates.essence.length)];
+        const data = tmpl.gen();
         return {
-            id: 'ess_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
-            title,
-            summary,
+            id: this.generateUniqueID(),
+            title: data.t,
+            summary: data.s,
             tag: tmpl.tag,
             source: ['Bloomberg', 'Reuters', 'Интерфакс', 'РБК', 'ЦБ РФ'][Math.floor(Math.random() * 5)],
             date: new Date(Date.now() - Math.floor(Math.random() * 86400000)).toLocaleDateString('ru-RU', {day:'numeric', month:'short'}),
@@ -327,24 +362,38 @@ const app = {
         };
     },
 
+    generateFeedItem() {
+        const gen = this.templates.feed[Math.floor(Math.random() * this.templates.feed.length)];
+        const data = gen();
+        return {
+            id: this.generateUniqueID(),
+            title: data.t,
+            body: data.b,
+            full: `<p>${data.b}</p><p>Подробности развиваются...</p>`,
+            tag: ["Акции","Макро","Крипто","Сырье"][Math.floor(Math.random()*4)],
+            source: ['Ведомости', 'Коммерсантъ', 'Forbes', 'Habr'][Math.floor(Math.random() * 4)],
+            date: new Date(Date.now() - Math.floor(Math.random() * 86400000)).toLocaleDateString('ru-RU', {day:'numeric', month:'short'}),
+            sourceUrl: '#'
+        };
+    },
+
     init() {
-        this.generateRSSSources();
         this.seedData();
         
-        const savedPosts = localStorage.getItem('ip_posts_v11');
+        const savedPosts = localStorage.getItem('ip_posts_v12');
         this.data.posts = savedPosts ? JSON.parse(savedPosts) : [
-            { id: 101, title: "Почему я покупаю нефтянку", body: "Энергетический кризис только начинается.", full: "<p>Многие боятся рецессии, но я вижу точку входа.</p><h2>Причины</h2><p>Дефицит инвестиций в добычу создает предпосылки для роста цен.</p>", tag: "Мнение", date: "2ч назад", isPost: true }
+            { id: 'post_1', title: "Почему я покупаю нефтянку", body: "Энергетический кризис только начинается.", full: "<p>Многие боятся рецессии, но я вижу точку входа.</p><h2>Причины</h2><p>Дефицит инвестиций в добычу создает предпосылки для роста цен.</p>", tag: "Мнение", date: "2ч назад", isPost: true }
         ];
 
         this.updateAuthUI();
         this.initTicker();
         this.renderIdeas();
-        this.renderStandardFeed(this.data.news.slice(0, 10));
         
-        // Генерируем стартовую порцию для Сути
-        for(let i = 0; i < 5; i++) {
-            this.data.essenceFeed.push(this.generateEssenceItem());
-        }
+        // Генерируем стартовые порции
+        for(let i=0; i<10; i++) this.data.news.push(this.generateFeedItem());
+        for(let i=0; i<5; i++) this.data.essenceFeed.push(this.generateEssenceItem());
+        
+        this.renderStandardFeed(this.data.news);
         this.renderEssenceChunk(this.data.essenceFeed);
         
         document.getElementById('view-feed').addEventListener('scroll', () => this.checkStandardScroll());
@@ -358,47 +407,29 @@ const app = {
     // --- AUTH SYSTEM ---
     openAuth() {
         if (this.data.currentUser) {
-            if(confirm(`Вы вошли как ${this.data.currentUser.name}. Выйти из аккаунта?`)) {
-                this.logout();
-            }
+            if(confirm(`Вы вошли как ${this.data.currentUser.name}. Выйти из аккаунта?`)) this.logout();
         } else {
             document.getElementById('auth-modal').classList.add('active');
             this.toggleAuthMode('login');
         }
     },
-
-    closeAuth() {
-        document.getElementById('auth-modal').classList.remove('active');
-    },
-
+    closeAuth() { document.getElementById('auth-modal').classList.remove('active'); },
     toggleAuthMode(mode) {
-        const loginForm = document.getElementById('auth-login-form');
-        const regForm = document.getElementById('auth-register-form');
-        if (mode === 'register') {
-            loginForm.classList.add('hidden');
-            regForm.classList.remove('hidden');
-        } else {
-            loginForm.classList.remove('hidden');
-            regForm.classList.add('hidden');
-        }
+        document.getElementById('auth-login-form').classList.toggle('hidden', mode !== 'login');
+        document.getElementById('auth-register-form').classList.toggle('hidden', mode !== 'register');
     },
-
     registerUser() {
         const name = document.getElementById('reg-name').value.trim();
         const email = document.getElementById('reg-email').value.trim();
         const pass = document.getElementById('reg-pass').value;
-
         if (!name || !email || !pass) return this.showToast('Заполните все поля');
-        if (pass.length < 4) return this.showToast('Пароль слишком короткий');
         if (this.data.users.find(u => u.email === email)) return this.showToast('Email уже занят');
-
-        const newUser = { name, email, pass, id: Date.now() };
+        const newUser = { name, email, pass, id: this.generateUniqueID() };
         this.data.users.push(newUser);
         localStorage.setItem('fuch_users', JSON.stringify(this.data.users));
         this.loginAs(newUser);
         this.showToast('Регистрация успешна!');
     },
-
     loginUser() {
         const email = document.getElementById('login-email').value.trim();
         const pass = document.getElementById('login-pass').value;
@@ -407,19 +438,16 @@ const app = {
         this.loginAs(user);
         this.showToast(`Добро пожаловать, ${user.name}!`);
     },
-
     vkLoginMock() {
-        const mockUser = { name: 'VK User', email: 'vk@user.com', pass: '', id: 'vk_' + Date.now(), isVk: true };
-        let existing = this.data.users.find(u => u.isVk);
-        if (!existing) {
-            this.data.users.push(mockUser);
+        let user = this.data.users.find(u => u.isVk);
+        if (!user) {
+            user = { name: 'VK User', email: 'vk@user.com', pass: '', id: 'vk_' + Date.now(), isVk: true };
+            this.data.users.push(user);
             localStorage.setItem('fuch_users', JSON.stringify(this.data.users));
-            existing = mockUser;
         }
-        this.loginAs(existing);
+        this.loginAs(user);
         this.showToast('Вход через VK выполнен');
     },
-
     loginAs(user) {
         this.data.currentUser = user;
         localStorage.setItem('fuch_current_user', JSON.stringify(user));
@@ -427,7 +455,6 @@ const app = {
         this.updateAuthUI();
         if (this.data.currentItem) this.renderComments(this.data.currentItem.id);
     },
-
     logout() {
         this.data.currentUser = null;
         localStorage.removeItem('fuch_current_user');
@@ -435,7 +462,6 @@ const app = {
         this.showToast('Вы вышли из аккаунта');
         if (this.data.currentItem) this.renderComments(this.data.currentItem.id);
     },
-
     updateAuthUI() {
         const btn = document.getElementById('user-profile-btn');
         const nameSpan = document.getElementById('user-name-display');
@@ -461,20 +487,7 @@ const app = {
         } else this.showToast('Неверный пароль админа'); 
     },
 
-    seedData() {
-        this.data.news = [
-            { id: 's1', title: "Сбербанк: рекордная прибыль", body: "Чистая прибыль превысила 400 млрд руб.", full: "<p>Сбербанк опубликовал сильную отчетность.</p><h2>Детали</h2><p>Маржа выросла до 5.8%.</p>", tag: "Акции", source: "РБК", date: "1ч", sourceUrl: "https://rbc.ru" },
-            { id: 's2', title: "Биткоин > $70,000", body: "Крипта обновила максимум.", full: "<p>Рынок ликует на фоне ETF.</p>", tag: "Крипто", source: "Bloomberg", date: "3ч", sourceUrl: "https://bloomberg.com" },
-            { id: 's3', title: "ЦБ держит ставку", body: "Жесткая риторика сохраняется.", full: "<p>Набиуллина предупредила о рисках.</p>", tag: "Макро", source: "Интерфакс", date: "5ч", sourceUrl: "https://interfax.ru" },
-            { id: 's4', title: "Газпром: новый НПЗ", body: "Инвестиции 300 млрд.", full: "<p>Увеличение переработки.</p>", tag: "Сырье", source: "Ведомости", date: "6ч", sourceUrl: "https://vedomosti.ru" },
-            { id: 's5', title: "Яндекс GPT 5", body: "Лучше чем GPT-4?", full: "<p>Ставка на мультимодальность.</p>", tag: "IT", source: "Habr", date: "7ч", sourceUrl: "https://habr.com" }
-        ];
-    },
-
-    generateRSSSources() {
-        const q = ['SBER','GAZP','LKOH','YNDX','VTBR','ROSN','GMKN','PLZL','MGNT','TCSG','нефть','газ','золото','банки','крипта','биткоин','дивиденды','IPO','ставка','инфляция'];
-        this.data.rssSources = q.map(k => `https://news.google.com/rss/search?q=${k}+инвестиции&hl=ru&gl=RU&ceid=RU:ru`).sort(() => Math.random() - 0.5);
-    },
+    seedData() { /* Стартовые данные больше не нужны, всё генерируется */ },
 
     initTicker() {
         const d = [{n:'IMOEX',v:'3,245',c:'+1.2%',u:1},{n:'S&P',v:'5,432',c:'-0.4%',u:0},{n:'BTC',v:'68K',c:'+2.1%',u:1},{n:'Brent',v:'82',c:'-1.1%',u:0},{n:'USD',v:'92.5',c:'+0.3%',u:1}];
@@ -518,7 +531,7 @@ const app = {
         const isLiked = this.data.likes[id];
         if (isLiked) { delete this.data.likes[id]; btn.classList.remove('text-red-500'); btn.querySelector('i').classList.replace('fas', 'far'); } 
         else { this.data.likes[id] = true; btn.classList.add('text-red-500'); btn.querySelector('i').classList.replace('far', 'fas'); btn.querySelector('i').classList.add('like-animate'); setTimeout(() => btn.querySelector('i').classList.remove('like-animate'), 300); }
-        localStorage.setItem('ip_likes_v11', JSON.stringify(this.data.likes));
+        localStorage.setItem('ip_likes_v12', JSON.stringify(this.data.likes));
         this.updateLikeUI(id);
     },
 
@@ -543,7 +556,7 @@ const app = {
         const id = this.data.currentItem.id;
         if(!this.data.comments[id]) this.data.comments[id] = [];
         this.data.comments[id].unshift({text, author: this.data.currentUser.name, date: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})});
-        localStorage.setItem('ip_comments_v11', JSON.stringify(this.data.comments));
+        localStorage.setItem('ip_comments_v12', JSON.stringify(this.data.comments));
         input.value = '';
         this.renderComments(id);
         this.showToast('Комментарий добавлен');
@@ -629,15 +642,13 @@ const app = {
         this.data.feedLoading = true;
         document.getElementById('feed-loader').classList.remove('hidden');
         setTimeout(() => {
-            const newItems = [
-                { id: 'gen_'+Date.now(), title: "Отчетность Газпрома", body: "Чистая прибыль упала на 40%. Дивидендов не будет.", full: "<p>Подробности отчета...</p>", tag: "Акции", source: "Ведомости", date: "Сегодня", sourceUrl: "#" },
-                { id: 'gen_'+(Date.now()+1), title: "ФРС США: протокол", body: "Снижение ставки в июне маловероятно.", full: "<p>Анализ протокола...</p>", tag: "Макро", source: "Reuters", date: "Вчера", sourceUrl: "#" }
-            ];
+            const newItems = [];
+            for(let i=0; i<5; i++) newItems.push(this.generateFeedItem());
             this.data.news = [...this.data.news, ...newItems];
             this.renderStandardFeed(newItems);
             this.data.feedLoading = false;
             document.getElementById('feed-loader').classList.add('hidden');
-        }, 1000);
+        }, 800);
     },
 
     renderStandardFeed(items) {
@@ -663,13 +674,9 @@ const app = {
         if(this.data.essenceLoading) return;
         this.data.essenceLoading = true;
         document.getElementById('essence-loader').classList.remove('hidden');
-        
-        // Имитация задержки генерации
         setTimeout(() => {
             const newItems = [];
-            for(let i = 0; i < 5; i++) {
-                newItems.push(this.generateEssenceItem());
-            }
+            for(let i=0; i<5; i++) newItems.push(this.generateEssenceItem());
             this.data.essenceFeed = [...this.data.essenceFeed, ...newItems];
             this.renderEssenceChunk(newItems);
             this.data.essenceLoading = false;
@@ -712,8 +719,8 @@ const app = {
     addNews() {
         const t=document.getElementById('new-title').value, b=document.getElementById('new-body').value, type=document.getElementById('new-tag').value;
         if(!t||!b) return alert('Заполните');
-        const n={id:Date.now(), title:t, body:b.substring(0,150)+'...', full:`<p>${b.replace(/\n/g,'</p><p>')}</p>`, tag:type==='idea'?'Мнение':'Новости', source:'Автор', date:'Сейчас', isPost:type==='idea', sourceUrl:'#'};
-        if(type==='idea') { this.data.posts.unshift(n); localStorage.setItem('ip_posts_v11',JSON.stringify(this.data.posts)); this.renderIdeas(); }
+        const n={id:this.generateUniqueID(), title:t, body:b.substring(0,150)+'...', full:`<p>${b.replace(/\n/g,'</p><p>')}</p>`, tag:type==='idea'?'Мнение':'Новости', source:'Автор', date:'Сейчас', isPost:type==='idea', sourceUrl:'#'};
+        if(type==='idea') { this.data.posts.unshift(n); localStorage.setItem('ip_posts_v12',JSON.stringify(this.data.posts)); this.renderIdeas(); }
         else { this.data.news.unshift(n); this.renderStandardFeed([n]); }
         alert('OK'); this.nav(type==='idea'?'ideas':'feed');
     },
