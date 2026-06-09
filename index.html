@@ -5,114 +5,135 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>FUCH | Gewinn fixieren</title>
     
-    <!-- Иконки и Шрифты -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        fuch: { 
+                            bg: '#050505', card: '#121212', border: '#262626',
+                            accent: '#2563eb', essence: '#ea580c', text: '#e5e5e5',
+                            gold: '#d4af37', 'gold-dim': '#8a7020'
+                        }
+                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'], serif: ['Merriweather', 'serif'] }
+                }
+            }
+        }
+    </script>
     
     <style>
-        /* Базовые стили Tailwind (Минимальный набор для работы без сборки) */
-        *, ::before, ::after { box-sizing: border-box; border-width: 0; border-style: solid; }
-        body { margin: 0; background-color: #050505; color: #e5e5e5; font-family: 'Inter', sans-serif; overflow: hidden; -webkit-tap-highlight-color: transparent; }
+        body { background-color: #050505; color: #e5e5e5; -webkit-tap-highlight-color: transparent; overflow: hidden; }
         
-        /* Утилиты */
-        .hidden { display: none !important; }
-        .flex { display: flex; } .grid { display: grid; } .block { display: block; } .inline-flex { display: inline-flex; }
-        .absolute { position: absolute; } .relative { position: relative; } .fixed { position: fixed; } .sticky { position: sticky; }
-        .inset-0 { inset: 0; } .top-0 { top: 0; } .bottom-0 { bottom: 0; } .left-0 { left: 0; } .right-0 { right: 0; }
-        .z-10 { z-index: 10; } .z-20 { z-index: 20; } .z-50 { z-index: 50; } .z-[60] { z-index: 60; } .z-[80] { z-index: 80; } .z-[100] { z-index: 100; } .z-[110] { z-index: 110; } .z-[120] { z-index: 120; } .z-[9999] { z-index: 9999; }
-        .h-full { height: 100%; } .w-full { width: 100%; } .h-screen { height: 100vh; } .min-h-screen { min-height: 100vh; }
-        .flex-col { flex-direction: column; } .flex-grow { flex-grow: 1; } .shrink-0 { flex-shrink: 0; }
-        .items-center { align-items: center; } .justify-center { justify-content: center; } .justify-between { justify-content: space-between; } .justify-end { justify-content: flex-end; }
-        .gap-1 { gap: 0.25rem; } .gap-2 { gap: 0.5rem; } .gap-3 { gap: 0.75rem; } .gap-4 { gap: 1rem; } .gap-6 { gap: 1.5rem; }
-        .p-1 { padding: 0.25rem; } .p-3 { padding: 0.75rem; } .p-4 { padding: 1rem; } .p-5 { padding: 1.25rem; } .p-6 { padding: 1.5rem; } .p-8 { padding: 2rem; }
-        .px-2 { padding-left: 0.5rem; padding-right: 0.5rem; } .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; } .px-4 { padding-left: 1rem; padding-right: 1rem; } .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
-        .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; } .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; } .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; } .py-4 { padding-top: 1rem; padding-bottom: 1rem; }
-        .mb-2 { margin-bottom: 0.5rem; } .mb-3 { margin-bottom: 0.75rem; } .mb-4 { margin-bottom: 1rem; } .mb-6 { margin-bottom: 1.5rem; } .mb-8 { margin-bottom: 2rem; } .mt-auto { margin-top: auto; } .mt-8 { margin-top: 2rem; }
-        .text-xs { font-size: 0.75rem; line-height: 1rem; } .text-sm { font-size: 0.875rem; line-height: 1.25rem; } .text-lg { font-size: 1.125rem; line-height: 1.75rem; } .text-xl { font-size: 1.25rem; line-height: 1.75rem; } .text-2xl { font-size: 1.5rem; line-height: 2rem; } .text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
-        .font-medium { font-weight: 500; } .font-bold { font-weight: 700; } .font-black { font-weight: 900; }
-        .uppercase { text-transform: uppercase; } .tracking-wider { letter-spacing: 0.05em; } .tracking-tight { letter-spacing: -0.025em; }
-        .text-white { color: #fff; } .text-gray-400 { color: #9ca3af; } .text-gray-500 { color: #6b7280; } .text-red-400 { color: #f87171; } .text-red-500 { color: #ef4444; } .text-green-500 { color: #22c55e; } .text-yellow-500 { color: #eab308; }
-        .bg-black { background-color: #000; } .bg-white { background-color: #fff; } 
-        .rounded-full { border-radius: 9999px; } .rounded-lg { border-radius: 0.5rem; } .rounded-xl { border-radius: 0.75rem; } .rounded-2xl { border-radius: 1rem; } .rounded-3xl { border-radius: 1.5rem; }
-        .border { border-width: 1px; } .border-b { border-bottom-width: 1px; } .border-t { border-top-width: 1px; } .border-l-4 { border-left-width: 4px; }
-        .overflow-hidden { overflow: hidden; } .overflow-y-auto { overflow-y: auto; } .overflow-x-auto { overflow-x: auto; }
-        .opacity-0 { opacity: 0; } .opacity-40 { opacity: 0.4; } .opacity-60 { opacity: 0.6; } .opacity-80 { opacity: 0.8; }
-        .transition { transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
-        .duration-300 { transition-duration: 300ms; } .duration-500 { transition-duration: 500ms; }
-        .cursor-pointer { cursor: pointer; } .select-none { user-select: none; }
-        .leading-snug { line-height: 1.375; } .leading-relaxed { line-height: 1.625; }
-        .line-clamp-2 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
-        .line-clamp-3 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
-        .whitespace-pre-line { white-space: pre-line; }
-        .pointer-events-none { pointer-events: none; }
-        .backdrop-blur { backdrop-filter: blur(8px); } .backdrop-blur-md { backdrop-filter: blur(12px); } .backdrop-blur-sm { backdrop-filter: blur(4px); }
-        
-        /* Кастомные цвета и градиенты */
-        .bg-fuch-bg { background-color: #050505; } .bg-fuch-card { background-color: #121212; } .bg-fuch-accent { background-color: #2563eb; } .bg-fuch-essence { background-color: #ea580c; }
-        .border-fuch-border { border-color: #262626; } .border-fuch-accent { border-color: #2563eb; } .border-fuch-gold { border-color: #d4af37; }
-        .text-fuch-accent { color: #2563eb; } .text-fuch-essence { color: #ea580c; } .text-fuch-gold { color: #d4af37; }
-        .from-blue-600 { --tw-gradient-from: #2563eb; } .to-indigo-700 { --tw-gradient-to: #4338ca; }
-        .from-orange-900 { --tw-gradient-from: #7c2d12; } .to-black { --tw-gradient-to: #000; }
-        .bg-gradient-to-br { background-image: linear-gradient(to bottom right, var(--tw-gradient-stops)); }
-        .bg-gradient-to-tr { background-image: linear-gradient(to top right, var(--tw-gradient-stops)); }
-        .bg-gradient-to-t { background-image: linear-gradient(to top, var(--tw-gradient-stops)); }
-        .bg-gradient-to-r { background-image: linear-gradient(to right, var(--tw-gradient-stops)); }
-        
-        /* Анимации и спецстили */
-        @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
+        /* Animations & Utilities */
         .ticker-wrap { height: 32px; line-height: 32px; overflow: hidden; background: #000; border-bottom: 1px solid #262626; }
         .ticker { display: inline-block; white-space: nowrap; padding-left: 100%; animation: ticker 45s linear infinite; }
         .ticker-item { display: inline-block; padding: 0 2rem; font-size: 0.75rem; color: #737373; font-weight: 500; }
-        
+        @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
+
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        .glass-header { backdrop-filter: blur(20px); background: rgba(5, 5, 5, 0.85); border-bottom: 1px solid #262626; }
-        .tab-bar { backdrop-filter: saturate(180%) blur(20px); background-color: rgba(5, 5, 5, 0.9); border-top: 1px solid #262626; }
-        
+
+        /* Layouts */
+        .standard-feed { overflow-y: auto; height: calc(100vh - 128px); padding: 1rem; scroll-behavior: smooth; }
+        @media (min-width: 768px) { .standard-feed { padding: 2rem; } }
+
+        .essence-scroll-mobile { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; height: calc(100vh - 128px); padding-left: 1rem; }
+        .essence-card-mobile { flex: 0 0 90vw; height: 100%; scroll-snap-align: center; margin-right: 1rem; border-radius: 24px; position: relative; overflow: hidden; border: 1px solid #262626; }
+        .essence-grid-desktop { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; padding: 2rem; overflow-y: auto; height: calc(100vh - 128px); }
+        .essence-card-desktop { height: 500px; border-radius: 20px; position: relative; overflow: hidden; transition: transform 0.2s; display: flex; flex-direction: column; border: 1px solid #262626; }
+        .essence-card-desktop:hover { transform: translateY(-4px); border-color: #ea580c; }
+
+        /* Premium Bank Card Style */
         .bank-card {
             background: linear-gradient(145deg, rgba(212, 175, 55, 0.03), rgba(18, 18, 18, 0.95));
             border: 1px solid rgba(212, 175, 55, 0.2);
             box-shadow: 0 4px 20px -2px rgba(212, 175, 55, 0.05);
             transition: all 0.3s ease;
         }
-        .bank-card:hover { border-color: rgba(212, 175, 55, 0.6); box-shadow: 0 8px 30px -2px rgba(212, 175, 55, 0.15); transform: translateY(-2px); }
-        .text-gold-gradient { background: linear-gradient(to right, #d4af37, #f3e5ab, #d4af37); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .bank-card:hover {
+            border-color: rgba(212, 175, 55, 0.6);
+            box-shadow: 0 8px 30px -2px rgba(212, 175, 55, 0.15);
+            transform: translateY(-2px);
+        }
+        .text-gold-gradient {
+            background: linear-gradient(to right, #d4af37, #f3e5ab, #d4af37);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Glassmorphism */
+        .glass-header { backdrop-filter: blur(20px); background: rgba(5, 5, 5, 0.85); border-bottom: 1px solid #262626; }
+        .tab-bar { backdrop-filter: saturate(180%) blur(20px); background-color: rgba(5, 5, 5, 0.9); border-top: 1px solid #262626; }
         
-        /* TERMINAL STYLES */
-        .terminal-window {
-            position: fixed; bottom: 80px; right: 20px; width: 380px;
-            background: #0a0a0a; border: 1px solid #262626; border-radius: 16px;
-            box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.8); z-index: 90;
+        /* Modals */
+        .modal-overlay { position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); opacity: 0; pointer-events: none; transition: opacity 0.3s; display: flex; align-items: center; justify-content: center; }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .auth-modal-content { transform: scale(0.95) translateY(10px); opacity: 0; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        .modal-overlay.active .auth-modal-content { transform: scale(1) translateY(0); opacity: 1; }
+
+        /* Reader */
+        .reader-box { width: 100%; height: 100%; overflow-y: auto; transition: all 0.3s; }
+        @media (min-width: 768px) { .reader-box { width: 800px; height: 90vh; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7); } }
+        .reader-paper.light { background: #fafafa; color: #171717; }
+        .reader-paper.light .prose-reader p { color: #404040; }
+        .reader-paper.light .reader-header { background: rgba(250, 250, 250, 0.95); border-bottom: 1px solid #e5e5e5; }
+        .reader-paper.light .reader-btn { background: white; border-color: #e5e5e5; color: #171717; }
+        .reader-paper.light .comment-input { background: #f5f5f5; border-color: #e5e5e5; color: #171717; }
+        
+        .reader-paper.dark { background: #171717; color: #e5e5e5; }
+        .reader-paper.dark .prose-reader p { color: #a3a3a3; }
+        .reader-paper.dark .reader-header { background: rgba(23, 23, 23, 0.95); border-bottom: 1px solid #262626; }
+        .reader-paper.dark .reader-btn { background: #262626; border-color: #404040; color: #e5e5e5; }
+        .reader-paper.dark .comment-input { background: #0a0a0a; border-color: #262626; color: #e5e5e5; }
+
+        .prose-reader { max-width: 68ch; margin: 0 auto; padding: 2rem 1.5rem; font-family: 'Merriweather', serif; line-height: 1.9; }
+        .prose-reader p { margin-bottom: 1.8em; font-size: 1.125rem; }
+        .prose-reader h2 { font-family: 'Inter', sans-serif; font-weight: 800; font-size: 1.5rem; margin-top: 2.5em; margin-bottom: 1em; letter-spacing: -0.02em; }
+        .prose-reader blockquote { border-left: 4px solid #2563eb; padding: 1em 1.5em; margin: 2em 0; background: rgba(37,99,235,0.05); border-radius: 0 8px 8px 0; font-style: italic; }
+
+        @keyframes likePop { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
+        .like-animate { animation: likePop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        
+        #toast { position: fixed; bottom: 6rem; left: 50%; transform: translateX(-50%) translateY(100px); background: #262626; color: white; padding: 0.75rem 1.5rem; border-radius: 999px; font-size: 0.875rem; font-weight: 600; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 9999; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: none; border: 1px solid #404040; }
+        #toast.show { transform: translateX(-50%) translateY(0); }
+
+        /* AI Chat */
+        .ai-chat-window {
+            position: fixed; bottom: 80px; right: 20px; width: 360px; height: 520px;
+            background: #171717; border: 1px solid #262626; border-radius: 20px;
+            box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.6); z-index: 90;
             display: flex; flex-direction: column; overflow: hidden;
             transform-origin: bottom right; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             opacity: 0; transform: scale(0.9) translateY(20px); pointer-events: none;
-            font-family: 'JetBrains Mono', monospace;
         }
-        .terminal-window.open { opacity: 1; transform: scale(1) translateY(0); pointer-events: auto; }
-        @media (max-width: 640px) { .terminal-window { bottom: 0; right: 0; width: 100%; height: 100%; border-radius: 0; } }
+        .ai-chat-window.open { opacity: 1; transform: scale(1) translateY(0); pointer-events: auto; }
+        @media (max-width: 640px) { .ai-chat-window { bottom: 0; right: 0; width: 100%; height: 100%; border-radius: 0; } }
         
-        @media (min-width: 768px) {
-            .md\:flex { display: flex; } .md\:hidden { display: none; } .md\:px-8 { padding-left: 2rem; padding-right: 2rem; }
-            .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); } .md\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-            .md\:bottom-8 { bottom: 2rem; } .md\:right-8 { right: 2rem; } .md\:w-\[800px\] { width: 800px; } .md\:h-\[90vh\] { height: 90vh; } .md\:rounded-3xl { border-radius: 1.5rem; }
-            .md\:inline { display: inline; } .md\:text-4xl { font-size: 2.25rem; line-height: 2.5rem; }
-        }
+        input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     </style>
 </head>
-<body class="antialiased h-screen flex flex-col selection:bg-[#2563eb] selection:text-white">
+<body class="antialiased h-screen flex flex-col selection:bg-fuch-accent selection:text-white">
 
-    <div id="toast" class="fixed bottom-24 left-1/2 -translate-x-1/2 translate-y-[100px] bg-[#262626] text-white px-6 py-3 rounded-full text-sm font-bold shadow-xl z-[9999] transition-transform duration-300 pointer-events-none border border-[#404040] opacity-0"><i class="fas fa-check-circle mr-2 text-green-500"></i><span id="toast-msg">Готово</span></div>
+    <div id="toast"><i class="fas fa-check-circle mr-2 text-green-500"></i><span id="toast-msg">Готово</span></div>
 
     <!-- TOP BANNER -->
     <div class="bg-red-950/30 border-b border-red-900/30 py-1.5 px-4 text-center shrink-0 z-[60]">
-        <p class="text-[10px] md:text-xs text-red-300/80 font-medium tracking-wide uppercase">⚠️ Вы несете ответственность за финансовые решения. Информация носит ознакомительный характер.</p>
+        <p class="text-[10px] md:text-xs text-red-300/80 font-medium tracking-wide uppercase">
+            ⚠️ Вы несете ответственность за финансовые решения. Информация носит ознакомительный характер.
+        </p>
     </div>
 
     <!-- AUTH MODAL -->
-    <div id="auth-modal" class="fixed inset-0 z-[120] bg-black/80 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300 flex items-center justify-center">
-        <div class="bg-[#121212] w-[90%] max-w-sm p-6 rounded-3xl border border-[#262626] shadow-2xl relative max-h-[90vh] overflow-y-auto no-scrollbar scale-95 transition-transform duration-300">
+    <div id="auth-modal" class="modal-overlay z-[120]">
+        <div class="auth-modal-content bg-fuch-card w-[90%] max-w-sm p-6 rounded-3xl border border-fuch-border shadow-2xl relative max-h-[90vh] overflow-y-auto no-scrollbar">
             <button onclick="app.closeAuth()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition z-10"><i class="fas fa-times"></i></button>
+            
             <div id="auth-login-form">
                 <div class="text-center mb-6">
                     <div class="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-900/20"><i class="fas fa-user-secret text-white text-2xl"></i></div>
@@ -120,20 +141,21 @@
                     <p class="text-xs text-gray-500 mt-2">Данные удалятся после закрытия вкладки</p>
                 </div>
                 <div class="space-y-3 mb-6">
-                    <input type="text" id="guest-name" class="w-full bg-[#050505] border border-[#262626] rounded-xl px-4 py-4 text-white outline-none focus:border-[#2563eb] transition" placeholder="Ваше имя">
-                    <input type="number" id="guest-age" class="w-full bg-[#050505] border border-[#262626] rounded-xl px-4 py-4 text-white outline-none focus:border-[#2563eb] transition" placeholder="Возраст (опционально)">
+                    <input type="text" id="guest-name" class="w-full bg-fuch-bg border border-fuch-border rounded-xl px-4 py-4 text-white outline-none focus:border-fuch-accent transition" placeholder="Ваше имя">
+                    <input type="number" id="guest-age" class="w-full bg-fuch-bg border border-fuch-border rounded-xl px-4 py-4 text-white outline-none focus:border-fuch-accent transition" placeholder="Возраст (опционально)">
                 </div>
-                <button onclick="app.guestLogin()" class="w-full bg-[#2563eb] hover:bg-blue-600 text-white font-bold py-4 rounded-xl transition active:scale-[0.98] shadow-lg shadow-blue-900/20">Войти</button>
+                <button onclick="app.guestLogin()" class="w-full bg-fuch-accent hover:bg-blue-600 text-white font-bold py-4 rounded-xl transition active:scale-[0.98] shadow-lg shadow-blue-900/20">Войти</button>
             </div>
+
             <div id="profile-view" class="hidden">
                 <div class="flex flex-col items-center mb-6">
-                    <div class="w-24 h-24 rounded-full border-4 border-[#121212] shadow-[0_0_0_2px_rgba(37,99,235,0.5)] mb-4 flex items-center justify-center text-3xl font-bold text-white bg-gradient-to-br from-blue-600 to-indigo-700" id="profile-avatar-letter">G</div>
+                    <div class="w-24 h-24 rounded-full border-4 border-fuch-card shadow-[0_0_0_2px_rgba(37,99,235,0.5)] mb-4 flex items-center justify-center text-3xl font-bold text-white bg-gradient-to-br from-blue-600 to-indigo-700" id="profile-avatar-letter">G</div>
                     <h2 id="profile-name" class="text-2xl font-bold text-white text-center">Guest</h2>
                     <span class="mt-2 px-3 py-1 rounded-full bg-green-500/10 text-green-400 text-xs font-bold border border-green-500/20">Online</span>
                 </div>
-                <div class="bg-[#050505] rounded-2xl p-5 border border-[#262626] mb-6 space-y-4">
-                    <div><label class="block text-xs text-gray-500 mb-1.5 uppercase font-bold tracking-wider">Имя</label><input type="text" id="edit-name" class="w-full bg-[#121212] border border-[#262626] rounded-lg px-4 py-3 text-white outline-none focus:border-[#2563eb] transition"></div>
-                    <div><label class="block text-xs text-gray-500 mb-1.5 uppercase font-bold tracking-wider">Возраст</label><input type="number" id="edit-age" class="w-full bg-[#121212] border border-[#262626] rounded-lg px-4 py-3 text-white outline-none focus:border-[#2563eb] transition"></div>
+                <div class="bg-fuch-bg rounded-2xl p-5 border border-fuch-border mb-6 space-y-4">
+                    <div><label class="block text-xs text-gray-500 mb-1.5 uppercase font-bold tracking-wider">Имя</label><input type="text" id="edit-name" class="w-full bg-fuch-card border border-fuch-border rounded-lg px-4 py-3 text-white outline-none focus:border-fuch-accent transition"></div>
+                    <div><label class="block text-xs text-gray-500 mb-1.5 uppercase font-bold tracking-wider">Возраст</label><input type="number" id="edit-age" class="w-full bg-fuch-card border border-fuch-border rounded-lg px-4 py-3 text-white outline-none focus:border-fuch-accent transition"></div>
                     <button onclick="app.saveProfile()" class="w-full bg-white/5 hover:bg-white/10 text-white font-bold py-3 rounded-lg transition border border-white/5">Сохранить</button>
                 </div>
                 <button onclick="app.logout()" class="w-full border border-red-500/30 text-red-400 hover:bg-red-500/10 font-bold py-4 rounded-xl transition">Завершить сеанс</button>
@@ -142,55 +164,55 @@
     </div>
 
     <!-- DONATE MODAL -->
-    <div id="donate-modal" class="fixed inset-0 z-[110] bg-black/80 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300 flex items-center justify-center">
-        <div class="bg-[#121212] w-[90%] max-w-md p-8 rounded-3xl border border-[#262626] shadow-2xl relative text-center scale-95 transition-transform duration-300">
+    <div id="donate-modal" class="modal-overlay z-[110]">
+        <div class="auth-modal-content bg-fuch-card w-[90%] max-w-md p-8 rounded-3xl border border-fuch-border shadow-2xl relative text-center">
             <button onclick="document.getElementById('donate-modal').classList.remove('active')" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white transition"><i class="fas fa-times"></i></button>
             <div class="w-20 h-20 bg-gradient-to-tr from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-orange-500/20"><i class="fas fa-hand-holding-heart text-white text-3xl"></i></div>
             <h2 class="text-3xl font-bold text-white mb-2">Поддержать FUCH</h2>
             <div class="mb-8 text-left mt-8">
                 <div class="flex justify-between text-xs mb-2 font-bold uppercase tracking-wider text-gray-500"><span class="text-white">Собрано: 12 400 ₽</span><span>Цель: 50 000 ₽</span></div>
-                <div class="w-full bg-[#050505] rounded-full h-3 overflow-hidden border border-[#262626]"><div class="bg-gradient-to-r from-yellow-400 to-orange-500 h-full rounded-full" style="width: 25%"></div></div>
+                <div class="w-full bg-fuch-bg rounded-full h-3 overflow-hidden border border-fuch-border"><div class="bg-gradient-to-r from-yellow-400 to-orange-500 h-full rounded-full" style="width: 25%"></div></div>
             </div>
             <div class="mb-6">
                 <div class="relative flex items-center">
-                    <input type="number" id="custom-donate-amount" min="1" placeholder="Своя сумма" class="w-full bg-[#050505] border border-[#262626] rounded-xl pl-4 pr-12 py-4 text-white outline-none focus:border-yellow-500 transition text-lg font-bold">
+                    <input type="number" id="custom-donate-amount" min="1" placeholder="Своя сумма" class="w-full bg-fuch-bg border border-fuch-border rounded-xl pl-4 pr-12 py-4 text-white outline-none focus:border-yellow-500 transition text-lg font-bold">
                     <span class="absolute right-4 text-gray-500 font-bold">₽</span>
                 </div>
                 <button onclick="app.processCustomDonate()" class="w-full mt-3 bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-4 rounded-xl transition active:scale-[0.98]">Задонатить</button>
             </div>
             <div class="grid grid-cols-3 gap-3">
-                <button onclick="app.donate(100)" class="bg-[#050505] hover:bg-[#2563eb] hover:text-white border border-[#262626] py-3 rounded-xl font-bold transition">100 ₽</button>
-                <button onclick="app.donate(300)" class="bg-[#050505] hover:bg-[#2563eb] hover:text-white border border-[#262626] py-3 rounded-xl font-bold transition">300 ₽</button>
-                <button onclick="app.donate(500)" class="bg-[#050505] hover:bg-[#2563eb] hover:text-white border border-[#262626] py-3 rounded-xl font-bold transition">500 ₽</button>
+                <button onclick="app.donate(100)" class="bg-fuch-bg hover:bg-fuch-accent hover:text-white border border-fuch-border py-3 rounded-xl font-bold transition">100 ₽</button>
+                <button onclick="app.donate(300)" class="bg-fuch-bg hover:bg-fuch-accent hover:text-white border border-fuch-border py-3 rounded-xl font-bold transition">300 ₽</button>
+                <button onclick="app.donate(500)" class="bg-fuch-bg hover:bg-fuch-accent hover:text-white border border-fuch-border py-3 rounded-xl font-bold transition">500 ₽</button>
             </div>
         </div>
     </div>
 
     <!-- ONBOARDING MODAL -->
-    <div id="essence-modal" class="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300 flex items-center justify-center">
-        <div class="bg-[#121212] w-[90%] max-w-md p-8 rounded-3xl border border-[#262626] shadow-2xl text-center scale-95 transition-transform duration-300">
-            <div class="w-16 h-16 bg-gradient-to-tr from-[#ea580c] to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-orange-500/20"><i class="fas fa-bolt text-white text-3xl"></i></div>
+    <div id="essence-modal" class="modal-overlay z-[100]">
+        <div class="bg-fuch-card w-[90%] max-w-md p-8 rounded-3xl border border-fuch-border shadow-2xl text-center">
+            <div class="w-16 h-16 bg-gradient-to-tr from-fuch-essence to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-orange-500/20"><i class="fas fa-bolt text-white text-3xl"></i></div>
             <h2 class="text-2xl font-bold text-white mb-2">FUCH: Суть</h2>
             <p class="text-gray-400 mb-8 leading-relaxed">Режим скорочтения. Только факты, цифры и выводы. Экономьте время.</p>
-            <button onclick="app.closeEssenceModal()" class="w-full bg-[#ea580c] hover:bg-orange-600 text-white font-bold py-4 rounded-xl transition active:scale-[0.98]">Начать</button>
+            <button onclick="app.closeEssenceModal()" class="w-full bg-fuch-essence hover:bg-orange-600 text-white font-bold py-4 rounded-xl transition active:scale-[0.98]">Начать</button>
         </div>
     </div>
 
     <!-- HEADER -->
     <header class="glass-header h-16 flex items-center justify-between px-4 md:px-8 z-50 shrink-0">
         <div onclick="app.nav('feed')" class="flex flex-col cursor-pointer group">
-            <span class="text-2xl font-black tracking-tighter text-white leading-none group-hover:text-[#2563eb] transition">FUCH</span>
+            <span class="text-2xl font-black tracking-tighter text-white leading-none group-hover:text-fuch-accent transition">FUCH</span>
             <span class="text-[8px] text-gray-500 uppercase tracking-[0.2em] font-bold">Gewinn fixieren</span>
         </div>
         <nav class="hidden md:flex items-center gap-1 bg-white/5 p-1 rounded-full border border-white/5">
-            <button onclick="app.nav('feed')" id="btn-feed" class="nav-btn px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-[#2563eb] text-white shadow-lg shadow-blue-900/20">Главная</button>
-            <button onclick="app.nav('banks')" id="btn-banks" class="nav-btn px-4 py-1.5 rounded-full text-xs font-bold text-[#d4af37] hover:bg-[#d4af37]/10 transition-all flex items-center gap-1.5"><i class="fas fa-university text-[10px]"></i> Банки</button>
+            <button onclick="app.nav('feed')" id="btn-feed" class="nav-btn px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-fuch-accent text-white shadow-lg shadow-blue-900/20">Главная</button>
+            <button onclick="app.nav('banks')" id="btn-banks" class="nav-btn px-4 py-1.5 rounded-full text-xs font-bold text-fuch-gold hover:bg-fuch-gold/10 transition-all flex items-center gap-1.5"><i class="fas fa-university text-[10px]"></i> Банки</button>
             <button onclick="app.nav('zen')" id="btn-zen" class="nav-btn px-4 py-1.5 rounded-full text-xs font-medium text-gray-400 hover:text-white hover:bg-white/10 transition-all">Дзен</button>
-            <button onclick="app.nav('essence')" id="btn-essence" class="nav-btn px-4 py-1.5 rounded-full text-xs font-medium text-gray-400 hover:text-[#ea580c] hover:bg-white/10 transition-all flex items-center gap-1.5"><i class="fas fa-bolt text-[10px]"></i> Суть</button>
+            <button onclick="app.nav('essence')" id="btn-essence" class="nav-btn px-4 py-1.5 rounded-full text-xs font-medium text-gray-400 hover:text-fuch-essence hover:bg-white/10 transition-all flex items-center gap-1.5"><i class="fas fa-bolt text-[10px]"></i> Суть</button>
         </nav>
         <div class="flex items-center gap-3">
             <button onclick="document.getElementById('donate-modal').classList.add('active')" class="w-9 h-9 rounded-full border border-yellow-500/30 bg-yellow-500/5 flex items-center justify-center text-yellow-500 hover:bg-yellow-500 hover:text-black transition"><i class="fas fa-heart text-sm"></i></button>
-            <button id="user-profile-btn" onclick="app.openAuth()" class="h-9 px-4 rounded-full border border-[#262626] bg-white/5 flex items-center justify-center gap-2 text-gray-300 hover:text-white hover:border-[#2563eb] hover:bg-[#2563eb]/10 transition text-sm font-bold">
+            <button id="user-profile-btn" onclick="app.openAuth()" class="h-9 px-4 rounded-full border border-fuch-border bg-white/5 flex items-center justify-center gap-2 text-gray-300 hover:text-white hover:border-fuch-accent hover:bg-fuch-accent/10 transition text-sm font-bold">
                 <i class="far fa-user text-sm"></i> <span id="user-name-display" class="hidden md:inline">Войти</span>
             </button>
         </div>
@@ -201,52 +223,64 @@
 
     <!-- MAIN CONTENT -->
     <main class="flex-grow relative w-full overflow-hidden">
-        <section id="view-feed" class="absolute inset-0 overflow-y-auto h-[calc(100vh-128px)] p-4 md:p-8 bg-[#050505] hidden scroll-smooth">
+        <!-- FEED -->
+        <section id="view-feed" class="absolute inset-0 standard-feed bg-fuch-bg hidden">
             <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="standard-feed-container"></div>
             <div id="feed-loader" class="py-8 text-center text-gray-500 hidden"><i class="fas fa-circle-notch fa-spin mr-2"></i>Загрузка...</div>
         </section>
 
-        <section id="view-banks" class="absolute inset-0 overflow-y-auto h-[calc(100vh-128px)] p-4 md:p-8 bg-[#050505] hidden scroll-smooth">
+        <!-- BANKS -->
+        <section id="view-banks" class="absolute inset-0 standard-feed bg-fuch-bg hidden">
             <div class="max-w-5xl mx-auto">
-                <div class="flex items-center gap-4 mb-8 pb-4 border-b border-[#d4af37]/20">
-                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#d4af37] to-yellow-600 flex items-center justify-center text-black shadow-lg shadow-yellow-900/20"><i class="fas fa-university text-xl"></i></div>
-                    <div><h2 class="text-2xl font-bold text-white tracking-tight">Официальные каналы</h2><p class="text-xs text-[#d4af37]/80 uppercase tracking-widest font-bold mt-0.5">Прямые заявления регуляторов</p></div>
+                <div class="flex items-center gap-4 mb-8 pb-4 border-b border-fuch-gold/20">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-fuch-gold to-yellow-600 flex items-center justify-center text-black shadow-lg shadow-yellow-900/20"><i class="fas fa-university text-xl"></i></div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-white tracking-tight">Официальные каналы</h2>
+                        <p class="text-xs text-fuch-gold/80 uppercase tracking-widest font-bold mt-0.5">Прямые заявления регуляторов</p>
+                    </div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="banks-feed-container"></div>
             </div>
         </section>
 
-        <section id="view-zen" class="absolute inset-0 overflow-y-auto h-[calc(100vh-128px)] p-4 md:p-8 bg-[#050505] hidden scroll-smooth">
+        <!-- ZEN -->
+        <section id="view-zen" class="absolute inset-0 standard-feed bg-fuch-bg hidden">
             <div class="max-w-5xl mx-auto">
                 <div class="flex items-center gap-4 mb-8 pb-4 border-b border-purple-500/20">
                     <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center text-white shadow-lg shadow-purple-900/20"><i class="fas fa-fire text-xl"></i></div>
-                    <div><h2 class="text-2xl font-bold text-white tracking-tight">Популярное в Дзене</h2><p class="text-xs text-purple-400/80 uppercase tracking-widest font-bold mt-0.5">Самые обсуждаемые темы</p></div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-white tracking-tight">Популярное в Дзене</h2>
+                        <p class="text-xs text-purple-400/80 uppercase tracking-widest font-bold mt-0.5">Самые обсуждаемые темы</p>
+                    </div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="zen-feed-container"></div>
             </div>
         </section>
 
-        <section id="view-essence" class="absolute inset-0 bg-[#050505] hidden">
-            <div id="essence-mobile" class="flex md:hidden overflow-x-auto scroll-snap-type-x-mandatory h-[calc(100vh-128px)] pl-4 no-scrollbar" style="scroll-snap-type: x mandatory;"></div>
-            <div id="essence-desktop" class="hidden md:grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-6 p-8 overflow-y-auto h-[calc(100vh-128px)] no-scrollbar"></div>
+        <!-- ESSENCE -->
+        <section id="view-essence" class="absolute inset-0 bg-fuch-bg hidden">
+            <div id="essence-mobile" class="essence-scroll-mobile no-scrollbar md:hidden pl-4"></div>
+            <div id="essence-desktop" class="essence-grid-desktop no-scrollbar hidden md:block"></div>
         </section>
 
-        <section id="view-ideas" class="absolute inset-0 overflow-y-auto h-[calc(100vh-128px)] p-4 md:p-8 bg-[#050505] hidden scroll-smooth">
+        <!-- IDEAS -->
+        <section id="view-ideas" class="absolute inset-0 standard-feed bg-fuch-bg hidden">
             <div class="max-w-3xl mx-auto">
                 <h2 class="text-2xl font-bold text-white mb-8 border-l-4 border-purple-500 pl-4">Авторская аналитика</h2>
                 <div id="ideas-list" class="space-y-6"></div>
             </div>
         </section>
         
-        <section id="view-admin" class="absolute inset-0 overflow-y-auto h-[calc(100vh-128px)] p-4 md:p-8 bg-[#050505] z-50 hidden">
-             <div class="max-w-lg mx-auto bg-[#121212] p-8 rounded-2xl border border-[#262626] shadow-2xl mt-4">
+        <!-- ADMIN -->
+        <section id="view-admin" class="absolute inset-0 standard-feed bg-fuch-bg z-50 hidden">
+             <div class="max-w-lg mx-auto bg-fuch-card p-8 rounded-2xl border border-fuch-border shadow-2xl mt-4">
                 <h2 class="text-2xl font-bold text-white mb-6">Админка</h2>
                 <div id="admin-auth" class="space-y-4">
-                    <input type="password" id="adm-pass" class="w-full bg-[#050505] border border-[#262626] rounded-lg px-4 py-3 text-white" placeholder="Пароль (admin)">
-                    <button onclick="app.adminLogin()" class="w-full bg-[#2563eb] py-3 rounded-lg font-bold text-white">Войти</button>
+                    <input type="password" id="adm-pass" class="w-full bg-fuch-bg border border-fuch-border rounded-lg px-4 py-3 text-white" placeholder="Пароль (admin)">
+                    <button onclick="app.adminLogin()" class="w-full bg-fuch-accent py-3 rounded-lg font-bold text-white">Войти</button>
                 </div>
                 <div id="admin-editor" class="hidden space-y-4">
-                    <textarea id="new-body" rows="4" placeholder="Новая идея..." class="w-full bg-[#050505] border border-[#262626] rounded-lg p-4 text-white"></textarea>
+                    <textarea id="new-body" rows="4" placeholder="Новая идея..." class="w-full bg-fuch-bg border border-fuch-border rounded-lg p-4 text-white"></textarea>
                     <button onclick="app.addNews()" class="w-full bg-emerald-600 py-3 rounded-lg font-bold text-white">Опубликовать</button>
                 </div>
              </div>
@@ -255,98 +289,59 @@
 
     <!-- MOBILE TAB BAR -->
     <nav class="md:hidden tab-bar safe-bottom z-50 flex justify-around items-center h-[64px] shrink-0">
-        <button onclick="app.nav('feed')" class="flex flex-col items-center gap-1 w-full py-2 text-[#2563eb] transition" id="tab-feed"><i class="fas fa-newspaper text-lg"></i><span class="text-[10px] font-medium">Главная</span></button>
+        <button onclick="app.nav('feed')" class="flex flex-col items-center gap-1 w-full py-2 text-fuch-accent transition" id="tab-feed"><i class="fas fa-newspaper text-lg"></i><span class="text-[10px] font-medium">Главная</span></button>
         <button onclick="app.nav('banks')" class="flex flex-col items-center gap-1 w-full py-2 text-gray-500 transition" id="tab-banks"><i class="fas fa-university text-lg"></i><span class="text-[10px] font-medium">Банки</span></button>
         <button onclick="app.nav('zen')" class="flex flex-col items-center gap-1 w-full py-2 text-gray-500 transition" id="tab-zen"><i class="fas fa-fire text-lg"></i><span class="text-[10px] font-medium">Дзен</span></button>
         <button onclick="app.nav('essence')" class="flex flex-col items-center gap-1 w-full py-2 text-gray-500 transition" id="tab-essence"><i class="fas fa-bolt text-lg"></i><span class="text-[10px] font-medium">Суть</span></button>
     </nav>
 
-    <!-- INVESTOR TERMINAL BUTTON & WINDOW -->
-    <button onclick="app.toggleTerminal()" class="fixed bottom-24 md:bottom-8 right-4 md:right-8 w-14 h-14 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-full shadow-lg shadow-emerald-500/30 flex items-center justify-center text-white z-[80] hover:scale-105 transition active:scale-95 group border border-white/10">
-        <i class="fas fa-calculator text-2xl group-hover:animate-pulse"></i>
+    <!-- AI CHAT -->
+    <button onclick="app.toggleAiChat()" class="fixed bottom-24 md:bottom-8 right-4 md:right-8 w-14 h-14 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full shadow-lg shadow-indigo-500/30 flex items-center justify-center text-white z-[80] hover:scale-105 transition active:scale-95 group border border-white/10">
+        <i class="fas fa-robot text-2xl group-hover:animate-pulse"></i>
     </button>
-    
-    <div id="terminal-window" class="terminal-window">
-        <div class="bg-emerald-900/30 p-4 border-b border-white/5 flex justify-between items-center backdrop-blur-md">
-            <div class="flex items-center gap-2">
-                <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.6)]"></div>
-                <span class="font-bold text-white text-sm tracking-wide font-mono">FUCH_TERMINAL_V2.0</span>
-            </div>
-            <button onclick="app.toggleTerminal()" class="text-gray-400 hover:text-white transition"><i class="fas fa-times"></i></button>
+    <div id="ai-chat-window" class="ai-chat-window">
+        <div class="bg-indigo-900/30 p-4 border-b border-white/5 flex justify-between items-center backdrop-blur-md">
+            <div class="flex items-center gap-2"><div class="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div><span class="font-bold text-white text-sm tracking-wide">FUCH AI</span></div>
+            <button onclick="app.toggleAiChat()" class="text-gray-400 hover:text-white transition"><i class="fas fa-times"></i></button>
         </div>
-        
-        <div class="flex-1 overflow-y-auto p-4 space-y-4 bg-[#0a0a0a]">
-            <!-- Calculator Module -->
-            <div class="bg-[#121212] border border-[#262626] rounded-xl p-4">
-                <h3 class="text-xs font-bold text-emerald-500 uppercase tracking-wider mb-3 flex items-center gap-2"><i class="fas fa-balance-scale"></i> Калькулятор позиции</h3>
-                <div class="space-y-3">
-                    <div class="flex gap-2">
-                        <input type="number" id="calc-capital" placeholder="Капитал (₽)" class="flex-1 bg-[#050505] border border-[#262626] rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-emerald-500 transition font-mono">
-                        <input type="number" id="calc-risk" placeholder="Риск (%)" value="2" class="w-20 bg-[#050505] border border-[#262626] rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-emerald-500 transition font-mono">
-                    </div>
-                    <div class="flex gap-2">
-                        <input type="number" id="calc-entry" placeholder="Цена входа" class="flex-1 bg-[#050505] border border-[#262626] rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-emerald-500 transition font-mono">
-                        <input type="number" id="calc-stop" placeholder="Стоп-лосс" class="flex-1 bg-[#050505] border border-[#262626] rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-emerald-500 transition font-mono">
-                    </div>
-                    <button onclick="app.calculatePosition()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-lg transition text-sm font-mono uppercase tracking-wider">Рассчитать объем</button>
-                    <div id="calc-result" class="hidden mt-2 p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-center">
-                        <div class="text-xs text-emerald-400 mb-1">РЕКОМЕНДУЕМЫЙ ОБЪЕМ</div>
-                        <div class="text-xl font-bold text-white font-mono" id="calc-volume">0 лотов</div>
-                        <div class="text-[10px] text-gray-500 mt-1" id="calc-loss">Убыток при стопе: 0 ₽</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Currency Converter -->
-            <div class="bg-[#121212] border border-[#262626] rounded-xl p-4">
-                <h3 class="text-xs font-bold text-blue-500 uppercase tracking-wider mb-3 flex items-center gap-2"><i class="fas fa-exchange-alt"></i> Конвертер валют</h3>
-                <div class="flex items-center gap-2">
-                    <input type="number" id="conv-amount" value="1000" class="flex-1 bg-[#050505] border border-[#262626] rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-blue-500 transition font-mono">
-                    <select id="conv-currency" class="bg-[#050505] border border-[#262626] rounded-lg px-2 py-2 text-sm text-white outline-none focus:border-blue-500 font-mono">
-                        <option value="USD">USD</option>
-                        <option value="EUR">EUR</option>
-                        <option value="CNY">CNY</option>
-                    </select>
-                    <span class="text-gray-500 text-xs">→</span>
-                    <div class="flex-1 bg-[#050505] border border-[#262626] rounded-lg px-3 py-2 text-sm text-emerald-400 font-mono font-bold text-right" id="conv-result">0 RUB</div>
-                </div>
-            </div>
-
-            <!-- Quick Nav -->
-            <div class="grid grid-cols-2 gap-2">
-                <button onclick="app.nav('banks'); app.toggleTerminal();" class="bg-[#121212] border border-[#d4af37]/30 text-[#d4af37] py-3 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-[#d4af37]/10 transition font-mono"><i class="fas fa-university mr-1"></i> Банки</button>
-                <button onclick="app.nav('essence'); app.toggleTerminal();" class="bg-[#121212] border border-[#ea580c]/30 text-[#ea580c] py-3 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-[#ea580c]/10 transition font-mono"><i class="fas fa-bolt mr-1"></i> Суть</button>
+        <div class="bg-red-500/5 border-b border-red-500/10 px-3 py-2 text-[10px] text-red-400/80 text-center font-bold uppercase tracking-wider">⚠️ Не является ИИР</div>
+        <div id="ai-messages" class="flex-1 overflow-y-auto p-4 space-y-4 bg-fuch-bg">
+            <div class="flex gap-3">
+                <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center shrink-0 text-xs shadow-lg shadow-indigo-500/20"><i class="fas fa-robot"></i></div>
+                <div class="bg-white/5 p-3 rounded-2xl rounded-tl-none text-sm text-gray-300 border border-white/5">Привет! Я AI-ассистент FUCH. Задай вопрос по рынку РФ или макроэкономике.</div>
             </div>
         </div>
-        
-        <div class="p-2 border-t border-white/5 bg-[#0a0a0a] text-center">
-            <span class="text-[9px] text-gray-600 font-mono uppercase">FUCH Trading Tools • Offline Mode</span>
+        <div class="p-3 border-t border-white/5 bg-fuch-card">
+            <form onsubmit="app.sendAiMessage(event)" class="flex gap-2">
+                <input type="text" id="ai-input" class="flex-1 bg-fuch-bg border border-fuch-border rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-indigo-500 transition" placeholder="Ваш вопрос...">
+                <button type="submit" class="bg-indigo-600 text-white w-10 rounded-xl flex items-center justify-center hover:bg-indigo-500 transition shadow-lg shadow-indigo-900/20"><i class="fas fa-paper-plane text-xs"></i></button>
+            </form>
         </div>
     </div>
 
     <!-- READER MODAL -->
-    <div id="reader-modal" class="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300 flex items-center justify-center">
-        <div id="reader-paper" class="w-full h-full md:w-[800px] md:h-[90vh] md:rounded-3xl overflow-y-auto transition-all duration-300 bg-[#fafafa] text-[#171717]">
-            <div class="sticky top-0 z-10 px-4 md:px-8 py-4 flex justify-between items-center font-sans backdrop-blur bg-[#fafafa]/95 border-b border-[#e5e5e5]">
-                <button onclick="app.closeReader()" class="flex items-center gap-2 text-current opacity-60 hover:opacity-100 font-bold text-sm px-3 py-2 -ml-3 rounded-lg hover:bg-black/5 transition"><i class="fas fa-arrow-left"></i> Назад</button>
-                <button onclick="app.toggleReaderTheme()" class="w-9 h-9 rounded-full bg-black/5 flex items-center justify-center hover:bg-black/10 transition"><i id="theme-icon" class="fas fa-moon text-sm"></i></button>
+    <div id="reader-modal" class="modal-overlay">
+        <div id="reader-paper" class="reader-box reader-paper light">
+            <div class="reader-header sticky top-0 z-10 px-4 md:px-8 py-4 flex justify-between items-center font-sans backdrop-blur">
+                <button onclick="app.closeReader()" class="flex items-center gap-2 text-current opacity-60 hover:opacity-100 font-bold text-sm px-3 py-2 -ml-3 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition"><i class="fas fa-arrow-left"></i> Назад</button>
+                <button onclick="app.toggleReaderTheme()" class="w-9 h-9 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center hover:bg-black/10 dark:hover:bg-white/10 transition"><i id="theme-icon" class="fas fa-moon text-sm"></i></button>
             </div>
-            <article id="reader-content" class="max-w-[68ch] mx-auto px-4 md:px-8 py-8 font-serif leading-loose text-lg"></article>
-            <div class="max-w-[68ch] mx-auto px-4 md:px-8 pb-20 font-sans border-t border-black/10 mt-8 pt-8">
+            <article id="reader-content" class="prose-reader"></article>
+            <div class="max-w-[68ch] mx-auto px-4 md:px-8 pb-20 font-sans border-t border-current/10 mt-8 pt-8">
                 <div class="flex gap-3 mb-8">
-                    <button id="reader-like-btn" onclick="app.handleReaderLike()" class="flex-1 py-3.5 rounded-xl font-bold border border-[#e5e5e5] bg-white text-[#171717] flex items-center justify-center gap-2 transition active:scale-[0.98]"><i class="far fa-heart"></i> <span id="reader-like-count">0</span></button>
-                    <button onclick="app.handleReaderShare()" class="flex-1 py-3.5 rounded-xl font-bold bg-[#2563eb] text-white border-transparent flex items-center justify-center gap-2 transition active:scale-[0.98] shadow-lg shadow-blue-900/20"><i class="fas fa-share-alt"></i> Поделиться</button>
+                    <button id="reader-like-btn" onclick="app.handleReaderLike()" class="reader-btn flex-1 py-3.5 rounded-xl font-bold border flex items-center justify-center gap-2 transition active:scale-[0.98]"><i class="far fa-heart"></i> <span id="reader-like-count">0</span></button>
+                    <button onclick="app.handleReaderShare()" class="reader-btn flex-1 py-3.5 rounded-xl font-bold bg-fuch-accent text-white border-transparent flex items-center justify-center gap-2 transition active:scale-[0.98] shadow-lg shadow-blue-900/20"><i class="fas fa-share-alt"></i> Поделиться</button>
                 </div>
                 <h3 class="text-lg font-bold mb-4">Комментарии (<span id="comments-count">0</span>)</h3>
-                <div id="comment-section-logged-out" class="hidden bg-black/5 p-6 rounded-2xl text-center mb-6 border border-dashed border-black/20">
+                <div id="comment-section-logged-out" class="hidden bg-black/5 dark:bg-white/5 p-6 rounded-2xl text-center mb-6 border border-dashed border-current/20">
                     <p class="text-sm opacity-60 mb-3">Войдите как гость, чтобы комментировать</p>
-                    <button onclick="app.openAuth()" class="bg-[#2563eb] text-white px-6 py-2.5 rounded-lg font-bold text-sm hover:bg-blue-600 transition">Войти</button>
+                    <button onclick="app.openAuth()" class="bg-fuch-accent text-white px-6 py-2.5 rounded-lg font-bold text-sm hover:bg-blue-600 transition">Войти</button>
                 </div>
                 <div id="comment-section-logged-in" class="hidden flex gap-3 mb-6 items-start">
                     <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white font-bold shrink-0 shadow-md" id="comment-avatar">U</div>
                     <div class="flex-1 flex gap-2">
-                        <input type="text" id="comment-input" class="flex-1 px-4 py-3 rounded-xl border border-[#e5e5e5] bg-[#f5f5f5] outline-none text-sm transition focus:ring-2 focus:ring-[#2563eb]/20" placeholder="Написать комментарий...">
-                        <button onclick="app.postComment()" class="bg-[#2563eb] text-white w-12 h-12 rounded-xl flex items-center justify-center hover:bg-blue-600 transition shadow-lg shadow-blue-900/20 shrink-0"><i class="fas fa-paper-plane text-sm"></i></button>
+                        <input type="text" id="comment-input" class="comment-input flex-1 px-4 py-3 rounded-xl border outline-none text-sm transition focus:ring-2 focus:ring-fuch-accent/20" placeholder="Написать комментарий...">
+                        <button onclick="app.postComment()" class="bg-fuch-accent text-white w-12 h-12 rounded-xl flex items-center justify-center hover:bg-blue-600 transition shadow-lg shadow-blue-900/20 shrink-0"><i class="fas fa-paper-plane text-sm"></i></button>
                     </div>
                 </div>
                 <div id="comments-list" class="space-y-3"></div>
@@ -354,353 +349,297 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT LOGIC -->
-    <script>
-    const app = {
-        data: { 
-            news: [], banks: [], zen: [], posts: [], essenceFeed: [], generatedIds: new Set(),
-            feedLoading: false, essenceLoading: false, 
-            likes: JSON.parse(localStorage.getItem('ip_likes_v22') || '{}'),
-            comments: JSON.parse(localStorage.getItem('ip_comments_v22') || '{}'),
-            currentUser: JSON.parse(sessionStorage.getItem('fuch_guest') || 'null'),
-            currentItem: null, terminalOpen: false,
-            rates: { USD: 92.5, EUR: 100.2, CNY: 12.8 } // Курсы из тикера
-        },
+<script>
+const app = {
+    data: { 
+        news: [], banks: [], zen: [], posts: [], essenceFeed: [], generatedIds: new Set(),
+        feedLoading: false, essenceLoading: false, 
+        likes: JSON.parse(localStorage.getItem('ip_likes_v20') || '{}'),
+        comments: JSON.parse(localStorage.getItem('ip_comments_v20') || '{}'),
+        currentUser: JSON.parse(sessionStorage.getItem('fuch_guest') || 'null'),
+        currentItem: null, aiChatOpen: false
+    },
 
-        companies: ['Сбербанк', 'Газпром', 'Лукойл', 'Яндекс', 'Тинькофф', 'Магнит', 'Норникель', 'Полюс', 'Аэрофлот', 'Роснефть', 'МТС', 'Северсталь', 'НЛМК', 'Татнефть', 'Мосбиржа', 'VK', 'Ozon'],
-        bankNames: ['Сбербанк', 'ВТБ', 'Тинькофф', 'Альфа-Банк', 'Газпромбанк', 'Россельхозбанк', 'Открытие', 'Промсвязьбанк'],
-        
-        templates: {
-            essence: [
-                { tag: "Акции", gen: () => { const c = app.companies[Math.floor(Math.random()*app.companies.length)]; const n = Math.floor(Math.random()*40)+1; return { t: `${c}: прибыль +${n}%`, s: `• Прибыль: ${n} млрд\n• Дивиденды: Да\n• Рост`, hash: `ess_${c}_${n}` }; }},
-                { tag: "Макро", gen: () => { const v = (Math.random()*10).toFixed(1); return { t: `ЦБ: ставка ${v}%`, s: `• Инфляция под контролем\n• Жесткая политика`, hash: `ess_cb_${v}` }; }},
-                { tag: "Крипто", gen: () => { const p = Math.floor(Math.random()*50000)+1000; return { t: `BTC > $${p}`, s: `• Пробои уровня\n• Киты покупают`, hash: `ess_btc_${p}` }; }}
-            ],
-            feed: [
-                () => { const c = app.companies[Math.floor(Math.random()*app.companies.length)]; return { t: `${c} отчитался за квартал`, b: `Выручка выросла на фоне расширения бизнеса. Аналитики позитивны.`, hash: `feed_${c}` }; },
-                () => { const c = app.companies[Math.floor(Math.random()*app.companies.length)]; return { t: `Акции ${c} под давлением`, b: `Инвесторы фиксируют прибыль. Рынок ждет драйверов.`, hash: `feed_drop_${c}` }; }
-            ],
-            banks: [
-                () => { const b = app.bankNames[Math.floor(Math.random()*app.bankNames.length)]; return { t: `Официально: ${b}`, b: `Изменение условий по кредитным продуктам для юрлиц. Подробности в релизе.`, hash: `bank_${b}_${Date.now()}`, isOfficial: true, bankName: b }; },
-                () => { const b = app.bankNames[Math.floor(Math.random()*app.bankNames.length)]; return { t: `${b}: отчетность РСБУ`, b: `Чистая прибыль показала рост. Активы увеличились на 5%.`, hash: `bank_rsbsu_${b}`, isOfficial: true, bankName: b }; }
-            ],
-            zen: [
-                () => { const topics = ['Как я заработал миллион', 'Почему доллар рухнет', 'Секреты богатства', 'Куда вложить 100к']; const t = topics[Math.floor(Math.random()*topics.length)]; return { t: t, b: `Авторский блог. Читайте разбор и прогнозы.`, hash: `zen_${t}`, views: Math.floor(Math.random()*50)+'K' }; },
-                () => { return { t: 'Топ-5 акций для пенсии', b: `Разбираем надежные дивидендные фишки. Список внутри.`, hash: `zen_pension`, views: '120K' }; }
-            ]
-        },
+    aiConfig: {
+        knowledgeBase: [
+            { keywords: ['сбер', 'sber'], answer: "Сбербанк (SBER) демонстрирует рекордную рентабельность капитала (ROE > 20%). Дивидендная политика предполагает выплату 50% от прибыли." },
+            { keywords: ['газпром', 'gazp'], answer: "Газпром (GAZP) трансформирует бизнес-модель. Капекс высокий, дивиденды под вопросом. Риски превышают потенциал." },
+            { keywords: ['лукойл', 'lkoh'], answer: "Лукойл (LKOH) — главный дивидендный актив. Мощный FCF при Brent > $75. Доходность: 12-14%." },
+            { keywords: ['биткоин', 'btc', 'крипт'], answer: "Биткоин в зоне накопления. Поддержка: $60k, сопротивление: $72k. Высокая волатильность." },
+            { keywords: ['ставк', 'цб', 'ключевая'], answer: "ЦБ РФ сохраняет жесткую ДКП. Снижение ставки возможно не ранее II полугодия при инфляции < 4.5%." },
+            { keywords: ['нефть', 'brent'], answer: "Brent > $80 благодаря ОПЕК+. Геополитическая премия сохраняется. Цены комфортны для РФ." }
+        ]
+    },
 
-        generateUniqueID() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 9); },
-        
-        generateEssenceItem() {
-            let attempts = 0;
-            while(attempts < 50) {
-                const tmpl = this.templates.essence[Math.floor(Math.random() * this.templates.essence.length)];
-                const data = tmpl.gen();
-                if (!this.data.generatedIds.has(data.hash)) { this.data.generatedIds.add(data.hash); return { id: this.generateUniqueID(), title: data.t, summary: data.s, tag: tmpl.tag, source: 'FUCH News', date: 'Сегодня', sourceUrl: '#' }; }
-                attempts++;
-            }
-            return { id: this.generateUniqueID(), title: "Новости рынка", summary: "• Активные торги", tag: "Рынок", source: "FUCH", date: "Сейчас", sourceUrl: "#" };
-        },
+    companies: ['Сбербанк', 'Газпром', 'Лукойл', 'Яндекс', 'Тинькофф', 'Магнит', 'Норникель', 'Полюс', 'Аэрофлот', 'Роснефть', 'МТС', 'Северсталь', 'НЛМК', 'Татнефть', 'Мосбиржа', 'VK', 'Ozon'],
+    bankNames: ['Сбербанк', 'ВТБ', 'Тинькофф', 'Альфа-Банк', 'Газпромбанк', 'Россельхозбанк', 'Открытие', 'Промсвязьбанк'],
+    
+    templates: {
+        essence: [
+            { tag: "Акции", gen: () => { const c = app.companies[Math.floor(Math.random()*app.companies.length)]; const n = Math.floor(Math.random()*40)+1; return { t: `${c}: прибыль +${n}%`, s: `• Прибыль: ${n} млрд\n• Дивиденды: Да\n• Рост`, hash: `ess_${c}_${n}` }; }},
+            { tag: "Макро", gen: () => { const v = (Math.random()*10).toFixed(1); return { t: `ЦБ: ставка ${v}%`, s: `• Инфляция под контролем\n• Жесткая политика`, hash: `ess_cb_${v}` }; }},
+            { tag: "Крипто", gen: () => { const p = Math.floor(Math.random()*50000)+1000; return { t: `BTC > $${p}`, s: `• Пробои уровня\n• Киты покупают`, hash: `ess_btc_${p}` }; }}
+        ],
+        feed: [
+            () => { const c = app.companies[Math.floor(Math.random()*app.companies.length)]; return { t: `${c} отчитался за квартал`, b: `Выручка выросла на фоне расширения бизнеса. Аналитики позитивны.`, hash: `feed_${c}` }; },
+            () => { const c = app.companies[Math.floor(Math.random()*app.companies.length)]; return { t: `Акции ${c} под давлением`, b: `Инвесторы фиксируют прибыль. Рынок ждет драйверов.`, hash: `feed_drop_${c}` }; }
+        ],
+        banks: [
+            () => { const b = app.bankNames[Math.floor(Math.random()*app.bankNames.length)]; return { t: `Официально: ${b}`, b: `Изменение условий по кредитным продуктам для юрлиц. Подробности в релизе.`, hash: `bank_${b}_${Date.now()}`, isOfficial: true, bankName: b }; },
+            () => { const b = app.bankNames[Math.floor(Math.random()*app.bankNames.length)]; return { t: `${b}: отчетность РСБУ`, b: `Чистая прибыль показала рост. Активы увеличились на 5%.`, hash: `bank_rsbsu_${b}`, isOfficial: true, bankName: b }; }
+        ],
+        zen: [
+            () => { const topics = ['Как я заработал миллион', 'Почему доллар рухнет', 'Секреты богатства', 'Куда вложить 100к']; const t = topics[Math.floor(Math.random()*topics.length)]; return { t: t, b: `Авторский блог. Читайте разбор и прогнозы.`, hash: `zen_${t}`, views: Math.floor(Math.random()*50)+'K' }; },
+            () => { return { t: 'Топ-5 акций для пенсии', b: `Разбираем надежные дивидендные фишки. Список внутри.`, hash: `zen_pension`, views: '120K' }; }
+        ]
+    },
 
-        generateGenericItem(type) {
-            let attempts = 0;
-            while(attempts < 50) {
-                const gens = this.templates[type];
-                const gen = gens[Math.floor(Math.random() * gens.length)];
-                const data = gen();
-                const uniqueHash = type === 'banks' || type === 'zen' ? data.hash + '_' + Math.random().toString(36).substr(2,4) : data.hash;
+    generateUniqueID() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 9); },
+    
+    generateEssenceItem() {
+        let attempts = 0;
+        while(attempts < 50) {
+            const tmpl = this.templates.essence[Math.floor(Math.random() * this.templates.essence.length)];
+            const data = tmpl.gen();
+            if (!this.data.generatedIds.has(data.hash)) { this.data.generatedIds.add(data.hash); return { id: this.generateUniqueID(), title: data.t, summary: data.s, tag: tmpl.tag, source: 'FUCH News', date: 'Сегодня', sourceUrl: '#' }; }
+            attempts++;
+        }
+        return { id: this.generateUniqueID(), title: "Новости рынка", summary: "• Активные торги", tag: "Рынок", source: "FUCH", date: "Сейчас", sourceUrl: "#" };
+    },
+
+    generateGenericItem(type) {
+        let attempts = 0;
+        while(attempts < 50) {
+            const gens = this.templates[type];
+            const gen = gens[Math.floor(Math.random() * gens.length)];
+            const data = gen();
+            const uniqueHash = type === 'banks' || type === 'zen' ? data.hash + '_' + Math.random().toString(36).substr(2,4) : data.hash;
+            
+            if (!this.data.generatedIds.has(uniqueHash)) {
+                this.data.generatedIds.add(uniqueHash);
+                const keywords = type === 'banks' ? ['bank', 'finance', 'office'] : type === 'zen' ? ['people', 'money', 'success'] : ['business', 'chart', 'stock'];
+                const keyword = keywords[Math.floor(Math.random() * keywords.length)];
+                // Используем picsum для надежности, так как unsplash source иногда лагает
+                const safeImg = `https://picsum.photos/seed/${uniqueHash}/600/400`;
                 
-                if (!this.data.generatedIds.has(uniqueHash)) {
-                    this.data.generatedIds.add(uniqueHash);
-                    const safeImg = `https://picsum.photos/seed/${uniqueHash}/600/400`;
-                    
-                    return { 
-                        id: this.generateUniqueID(), title: data.t, body: data.b, full: `<p>${data.b}</p>`, 
-                        tag: type === 'banks' ? 'Официально' : type === 'zen' ? 'Блог' : 'Новости', 
-                        source: type === 'banks' ? data.bankName : type === 'zen' ? 'Дзен Автор' : 'РБК', 
-                        date: '2ч назад', image: safeImg, sourceUrl: '#',
-                        isOfficial: data.isOfficial || false, bankName: data.bankName || null, views: data.views || null
-                    };
+                return { 
+                    id: this.generateUniqueID(), title: data.t, body: data.b, full: `<p>${data.b}</p>`, 
+                    tag: type === 'banks' ? 'Официально' : type === 'zen' ? 'Блог' : 'Новости', 
+                    source: type === 'banks' ? data.bankName : type === 'zen' ? 'Дзен Автор' : 'РБК', 
+                    date: '2ч назад', image: safeImg, sourceUrl: '#',
+                    isOfficial: data.isOfficial || false, bankName: data.bankName || null, views: data.views || null
+                };
+            }
+            attempts++;
+        }
+        return { id: this.generateUniqueID(), title: "Загрузка...", body: "...", full: "...", tag: "Info", source: "System", date: "Сейчас", image: '', sourceUrl: "#" };
+    },
+
+    init() {
+        const savedPosts = localStorage.getItem('ip_posts_v20');
+        this.data.posts = savedPosts ? JSON.parse(savedPosts) : [{ id: 'post_1', title: "Нефтянка: покупать?", body: "Энергокризис начинается.", full: "<p>Дефицит инвестиций толкает цены вверх.</p>", tag: "Мнение", date: "2ч назад", isPost: true }];
+        this.updateAuthUI(); this.initTicker(); this.renderIdeas();
+        
+        for(let i=0; i<9; i++) this.data.news.push(this.generateGenericItem('feed'));
+        for(let i=0; i<6; i++) this.data.banks.push(this.generateGenericItem('banks'));
+        for(let i=0; i<6; i++) this.data.zen.push(this.generateGenericItem('zen'));
+        for(let i=0; i<5; i++) this.data.essenceFeed.push(this.generateEssenceItem());
+        
+        this.renderStandardFeed(this.data.news, 'standard-feed-container');
+        this.renderStandardFeed(this.data.banks, 'banks-feed-container', true);
+        this.renderStandardFeed(this.data.zen, 'zen-feed-container');
+        this.renderEssenceChunk(this.data.essenceFeed);
+        
+        document.getElementById('view-feed').addEventListener('scroll', () => this.checkScroll('feed'));
+        document.getElementById('view-banks').addEventListener('scroll', () => this.checkScroll('banks'));
+        document.getElementById('view-zen').addEventListener('scroll', () => this.checkScroll('zen'));
+        ['mobile', 'desktop'].forEach(dev => document.getElementById(`essence-${dev}`).addEventListener('scroll', () => this.checkEssenceScroll(dev)));
+        this.nav('feed');
+    },
+
+    openAuth() { 
+        document.getElementById('auth-modal').classList.add('active'); 
+        if (this.data.currentUser) this.showProfile(); 
+        else { document.getElementById('auth-login-form').classList.remove('hidden'); document.getElementById('profile-view').classList.add('hidden'); }
+    },
+    closeAuth() { document.getElementById('auth-modal').classList.remove('active'); },
+    guestLogin() {
+        const name = document.getElementById('guest-name').value.trim() || 'Гость';
+        const age = document.getElementById('guest-age').value;
+        const user = { name, age, isGuest: true, loginTime: Date.now() };
+        this.data.currentUser = user; sessionStorage.setItem('fuch_guest', JSON.stringify(user));
+        this.closeAuth(); this.updateAuthUI(); this.showToast(`Добро пожаловать, ${name}!`);
+    },
+    showProfile() {
+        document.getElementById('auth-login-form').classList.add('hidden'); document.getElementById('profile-view').classList.remove('hidden');
+        const u = this.data.currentUser;
+        document.getElementById('profile-name').innerText = u.name;
+        document.getElementById('profile-avatar-letter').innerText = u.name.charAt(0).toUpperCase();
+        document.getElementById('edit-name').value = u.name; document.getElementById('edit-age').value = u.age || '';
+    },
+    saveProfile() {
+        const newName = document.getElementById('edit-name').value.trim();
+        if(!newName) return this.showToast('Имя не может быть пустым');
+        this.data.currentUser.name = newName; this.data.currentUser.age = document.getElementById('edit-age').value;
+        sessionStorage.setItem('fuch_guest', JSON.stringify(this.data.currentUser));
+        this.updateAuthUI(); this.showProfile(); this.showToast('Данные обновлены');
+        if(this.data.currentItem) document.getElementById('comment-avatar').innerText = newName.charAt(0).toUpperCase();
+    },
+    logout() {
+        this.data.currentUser = null; sessionStorage.removeItem('fuch_guest');
+        this.updateAuthUI(); document.getElementById('auth-login-form').classList.remove('hidden'); document.getElementById('profile-view').classList.add('hidden');
+        this.showToast('Сеанс завершен');
+    },
+    updateAuthUI() { 
+        const b=document.getElementById('user-profile-btn'), s=document.getElementById('user-name-display'); 
+        if(this.data.currentUser){ s.innerText=this.data.currentUser.name.split(' ')[0]; b.classList.add('border-fuch-accent','text-white','bg-fuch-accent/10'); } 
+        else { s.innerText='Войти'; b.classList.remove('border-fuch-accent','text-white','bg-fuch-accent/10'); } 
+    },
+
+    toggleAiChat() {
+        this.data.aiChatOpen = !this.data.aiChatOpen;
+        const win = document.getElementById('ai-chat-window');
+        if(this.data.aiChatOpen) { win.classList.add('open'); setTimeout(() => document.getElementById('ai-input').focus(), 300); } 
+        else { win.classList.remove('open'); }
+    },
+    async sendAiMessage(e) {
+        e.preventDefault(); const input = document.getElementById('ai-input'); const msg = input.value.trim(); if(!msg) return;
+        const chat = document.getElementById('ai-messages');
+        chat.innerHTML += `<div class="flex gap-3 justify-end fade-in"><div class="bg-indigo-600 p-3 rounded-2xl rounded-tr-none text-sm text-white max-w-[85%] shadow-lg">${msg}</div></div>`;
+        input.value = ''; chat.scrollTop = chat.scrollHeight;
+        const typingId = 'typing-' + Date.now();
+        chat.innerHTML += `<div id="${typingId}" class="flex gap-3 fade-in"><div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center shrink-0 text-xs"><i class="fas fa-robot"></i></div><div class="bg-white/5 p-3 rounded-2xl rounded-tl-none text-sm text-gray-400 flex items-center gap-1 border border-white/5"><span class="animate-bounce">.</span><span class="animate-bounce delay-100">.</span><span class="animate-bounce delay-200">.</span></div></div>`;
+        chat.scrollTop = chat.scrollHeight;
+        setTimeout(() => {
+            const response = this.getAiResponse(msg);
+            const typingEl = document.getElementById(typingId); if(typingEl) typingEl.remove();
+            chat.innerHTML += `<div class="flex gap-3 fade-in"><div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center shrink-0 text-xs shadow-lg shadow-indigo-500/20"><i class="fas fa-robot"></i></div><div class="bg-white/5 border border-white/5 p-3 rounded-2xl rounded-tl-none text-sm text-gray-200 max-w-[85%] leading-relaxed">${response}</div></div>`;
+            chat.scrollTop = chat.scrollHeight;
+        }, 1200 + Math.random() * 800);
+    },
+    getAiResponse(query) {
+        const q = query.toLowerCase();
+        for (const item of this.aiConfig.knowledgeBase) { if (item.keywords.some(k => q.includes(k))) return `${item.answer}<br><br><span class="text-red-400 text-[10px] font-bold">⚠️ Не является ИИР</span>`; }
+        const relevantNews = this.data.news.filter(n => n.title.toLowerCase().includes(q) || n.body.toLowerCase().includes(q)).slice(0, 2);
+        if (relevantNews.length > 0) { const summary = relevantNews.map(n => `• ${n.title}: ${n.body.substring(0, 60)}...`).join('<br>'); return `На основе новостей FUCH:<br><br>${summary}<br><br><span class="text-red-400 text-[10px] font-bold">⚠️ Не является ИИР</span>`; }
+        const fallbacks = ["Уточните тикер актива.", "Следите за ставкой ЦБ.", "Изучите отчетность сектора.", "Рынок в зоне неопределенности."];
+        return `${fallbacks[Math.floor(Math.random() * fallbacks.length)]}<br><br><span class="text-red-400 text-[10px] font-bold">⚠️ Не является индивидуальной инвестиционной рекомендацией</span>`;
+    },
+
+    donate(amount) { this.showToast(`Переход к оплате ${amount}₽...`); },
+    processCustomDonate() { const input = document.getElementById('custom-donate-amount'); const amount = parseInt(input.value); if (!amount || amount <= 0) return this.showToast('Введите сумму'); this.donate(amount); input.value = ''; },
+
+    adminLogin() { if(document.getElementById('adm-pass').value==='admin'){document.getElementById('admin-auth').classList.add('hidden');document.getElementById('admin-editor').classList.remove('hidden');} },
+    initTicker() { const d=[{n:'IMOEX',v:'3,245',c:'+1.2%',u:1},{n:'S&P',v:'5,432',c:'-0.4%',u:0},{n:'BTC',v:'68K',c:'+2.1%',u:1},{n:'Brent',v:'82',c:'-1.1%',u:0}]; document.getElementById('ticker-content').innerHTML=d.map(i=>`<div class="ticker-item"><span class="font-bold text-gray-300">${i.n}</span> <span class="${i.u?'text-green-500':'text-red-500'}">${i.c}</span></div>`).join('').repeat(6); },
+    
+    nav(v) { 
+        this.data.currentView=v; 
+        document.querySelectorAll('main > section').forEach(el=>el.classList.add('hidden')); 
+        document.getElementById(`view-${v}`).classList.remove('hidden'); 
+        
+        ['feed','banks','zen','essence','ideas'].forEach(x=>{
+            const b=document.getElementById(`btn-${x}`);
+            if(b) {
+                if(x===v) {
+                    if(x==='banks') b.className = 'nav-btn px-4 py-1.5 rounded-full text-xs font-bold bg-fuch-gold/20 text-fuch-gold border border-fuch-gold/50 shadow-[0_0_10px_rgba(212,175,55,0.1)]';
+                    else if(x==='essence') b.className = 'nav-btn px-4 py-1.5 rounded-full text-xs font-bold bg-fuch-essence text-white shadow-lg shadow-orange-900/20';
+                    else b.className = 'nav-btn px-4 py-1.5 rounded-full text-xs font-bold bg-fuch-accent text-white shadow-lg shadow-blue-900/20';
+                } else {
+                    if(x==='banks') b.className = 'nav-btn px-4 py-1.5 rounded-full text-xs font-bold text-fuch-gold/60 hover:text-fuch-gold hover:bg-fuch-gold/10 transition-all';
+                    else b.className = 'nav-btn px-4 py-1.5 rounded-full text-xs font-medium text-gray-400 hover:text-white hover:bg-white/10 transition-all';
                 }
-                attempts++;
             }
-            return { id: this.generateUniqueID(), title: "Загрузка...", body: "...", full: "...", tag: "Info", source: "System", date: "Сейчас", image: '', sourceUrl: "#" };
-        },
-
-        init() {
-            const savedPosts = localStorage.getItem('ip_posts_v22');
-            this.data.posts = savedPosts ? JSON.parse(savedPosts) : [{ id: 'post_1', title: "Нефтянка: покупать?", body: "Энергокризис начинается.", full: "<p>Дефицит инвестиций толкает цены вверх.</p>", tag: "Мнение", date: "2ч назад", isPost: true }];
-            this.updateAuthUI(); this.initTicker(); this.renderIdeas();
-            
-            for(let i=0; i<9; i++) this.data.news.push(this.generateGenericItem('feed'));
-            for(let i=0; i<6; i++) this.data.banks.push(this.generateGenericItem('banks'));
-            for(let i=0; i<6; i++) this.data.zen.push(this.generateGenericItem('zen'));
-            for(let i=0; i<5; i++) this.data.essenceFeed.push(this.generateEssenceItem());
-            
-            this.renderStandardFeed(this.data.news, 'standard-feed-container');
-            this.renderStandardFeed(this.data.banks, 'banks-feed-container', true);
-            this.renderStandardFeed(this.data.zen, 'zen-feed-container');
-            this.renderEssenceChunk(this.data.essenceFeed);
-            
-            document.getElementById('view-feed').addEventListener('scroll', () => this.checkScroll('feed'));
-            document.getElementById('view-banks').addEventListener('scroll', () => this.checkScroll('banks'));
-            document.getElementById('view-zen').addEventListener('scroll', () => this.checkScroll('zen'));
-            ['mobile', 'desktop'].forEach(dev => document.getElementById(`essence-${dev}`).addEventListener('scroll', () => this.checkEssenceScroll(dev)));
-            
-            // Terminal Listener
-            document.getElementById('conv-amount').addEventListener('input', () => this.convertCurrency());
-            document.getElementById('conv-currency').addEventListener('change', () => this.convertCurrency());
-            
-            this.nav('feed');
-        },
-
-        // --- TERMINAL LOGIC ---
-        toggleTerminal() {
-            this.data.terminalOpen = !this.data.terminalOpen;
-            const win = document.getElementById('terminal-window');
-            if(this.data.terminalOpen) { 
-                win.classList.add('open'); 
-                this.convertCurrency(); // Обновить курс при открытии
-            } else { 
-                win.classList.remove('open'); 
-            }
-        },
-
-        calculatePosition() {
-            const capital = parseFloat(document.getElementById('calc-capital').value) || 0;
-            const riskPct = parseFloat(document.getElementById('calc-risk').value) || 0;
-            const entry = parseFloat(document.getElementById('calc-entry').value) || 0;
-            const stop = parseFloat(document.getElementById('calc-stop').value) || 0;
-
-            if(capital <= 0 || riskPct <= 0 || entry <= 0 || stop <= 0 || entry === stop) {
-                this.showToast('Заполните все поля корректно');
-                return;
-            }
-
-            const riskAmount = capital * (riskPct / 100);
-            const lossPerUnit = Math.abs(entry - stop);
-            const volume = Math.floor(riskAmount / lossPerUnit);
-            const totalLoss = volume * lossPerUnit;
-
-            document.getElementById('calc-volume').innerText = `${volume} шт.`;
-            document.getElementById('calc-loss').innerText = `Риск: ${totalLoss.toFixed(0)} ₽ (${riskPct}%)`;
-            document.getElementById('calc-result').classList.remove('hidden');
-        },
-
-        convertCurrency() {
-            const amount = parseFloat(document.getElementById('conv-amount').value) || 0;
-            const currency = document.getElementById('conv-currency').value;
-            const rate = this.data.rates[currency] || 1;
-            const result = (amount * rate).toFixed(2);
-            document.getElementById('conv-result').innerText = `${result} RUB`;
-        },
-
-        openAuth() { 
-            const modal = document.getElementById('auth-modal');
-            modal.classList.add('active'); 
-            modal.querySelector('div').classList.replace('scale-95', 'scale-100');
-            if (this.data.currentUser) this.showProfile(); 
-            else { document.getElementById('auth-login-form').classList.remove('hidden'); document.getElementById('profile-view').classList.add('hidden'); }
-        },
-        closeAuth() { 
-            const modal = document.getElementById('auth-modal');
-            modal.classList.remove('active'); 
-            modal.querySelector('div').classList.replace('scale-100', 'scale-95');
-        },
-        guestLogin() {
-            const name = document.getElementById('guest-name').value.trim() || 'Гость';
-            const age = document.getElementById('guest-age').value;
-            const user = { name, age, isGuest: true, loginTime: Date.now() };
-            this.data.currentUser = user; sessionStorage.setItem('fuch_guest', JSON.stringify(user));
-            this.closeAuth(); this.updateAuthUI(); this.showToast(`Добро пожаловать, ${name}!`);
-        },
-        showProfile() {
-            document.getElementById('auth-login-form').classList.add('hidden'); document.getElementById('profile-view').classList.remove('hidden');
-            const u = this.data.currentUser;
-            document.getElementById('profile-name').innerText = u.name;
-            document.getElementById('profile-avatar-letter').innerText = u.name.charAt(0).toUpperCase();
-            document.getElementById('edit-name').value = u.name; document.getElementById('edit-age').value = u.age || '';
-        },
-        saveProfile() {
-            const newName = document.getElementById('edit-name').value.trim();
-            if(!newName) return this.showToast('Имя не может быть пустым');
-            this.data.currentUser.name = newName; this.data.currentUser.age = document.getElementById('edit-age').value;
-            sessionStorage.setItem('fuch_guest', JSON.stringify(this.data.currentUser));
-            this.updateAuthUI(); this.showProfile(); this.showToast('Данные обновлены');
-            if(this.data.currentItem) document.getElementById('comment-avatar').innerText = newName.charAt(0).toUpperCase();
-        },
-        logout() {
-            this.data.currentUser = null; sessionStorage.removeItem('fuch_guest');
-            this.updateAuthUI(); document.getElementById('auth-login-form').classList.remove('hidden'); document.getElementById('profile-view').classList.add('hidden');
-            this.showToast('Сеанс завершен');
-        },
-        updateAuthUI() { 
-            const b=document.getElementById('user-profile-btn'), s=document.getElementById('user-name-display'); 
-            if(this.data.currentUser){ s.innerText=this.data.currentUser.name.split(' ')[0]; b.classList.add('border-[#2563eb]','text-white','bg-[#2563eb]/10'); } 
-            else { s.innerText='Войти'; b.classList.remove('border-[#2563eb]','text-white','bg-[#2563eb]/10'); } 
-        },
-
-        donate(amount) { this.showToast(`Переход к оплате ${amount}₽...`); },
-        processCustomDonate() { const input = document.getElementById('custom-donate-amount'); const amount = parseInt(input.value); if (!amount || amount <= 0) return this.showToast('Введите сумму'); this.donate(amount); input.value = ''; },
-
-        adminLogin() { if(document.getElementById('adm-pass').value==='admin'){document.getElementById('admin-auth').classList.add('hidden');document.getElementById('admin-editor').classList.remove('hidden');} },
-        initTicker() { const d=[{n:'IMOEX',v:'3,245',c:'+1.2%',u:1},{n:'S&P',v:'5,432',c:'-0.4%',u:0},{n:'BTC',v:'68K',c:'+2.1%',u:1},{n:'Brent',v:'82',c:'-1.1%',u:0}]; document.getElementById('ticker-content').innerHTML=d.map(i=>`<div class="ticker-item"><span class="font-bold text-gray-300">${i.n}</span> <span class="${i.u?'text-green-500':'text-red-500'}">${i.c}</span></div>`).join('').repeat(6); },
-        
-        nav(v) { 
-            this.data.currentView=v; 
-            document.querySelectorAll('main > section').forEach(el=>el.classList.add('hidden')); 
-            document.getElementById(`view-${v}`).classList.remove('hidden'); 
-            
-            ['feed','banks','zen','essence','ideas'].forEach(x=>{
-                const b=document.getElementById(`btn-${x}`);
-                if(b) {
-                    if(x===v) {
-                        if(x==='banks') b.className = 'nav-btn px-4 py-1.5 rounded-full text-xs font-bold bg-[#d4af37]/20 text-[#d4af37] border border-[#d4af37]/50 shadow-[0_0_10px_rgba(212,175,55,0.1)]';
-                        else if(x==='essence') b.className = 'nav-btn px-4 py-1.5 rounded-full text-xs font-bold bg-[#ea580c] text-white shadow-lg shadow-orange-900/20';
-                        else b.className = 'nav-btn px-4 py-1.5 rounded-full text-xs font-bold bg-[#2563eb] text-white shadow-lg shadow-blue-900/20';
-                    } else {
-                        if(x==='banks') b.className = 'nav-btn px-4 py-1.5 rounded-full text-xs font-bold text-[#d4af37]/60 hover:text-[#d4af37] hover:bg-[#d4af37]/10 transition-all';
-                        else b.className = 'nav-btn px-4 py-1.5 rounded-full text-xs font-medium text-gray-400 hover:text-white hover:bg-white/10 transition-all';
-                    }
-                }
-            });
-
-            ['feed','banks','zen','essence'].forEach(x=>{
-                const t=document.getElementById(`tab-${x}`);
-                if(t) {
-                    if(x===v) t.classList.replace('text-gray-500', x==='banks'?'text-[#d4af37]':x==='essence'?'text-[#ea580c]':'text-[#2563eb]');
-                    else t.classList.replace(x==='banks'?'text-[#d4af37]':x==='essence'?'text-[#ea580c]':'text-[#2563eb]', 'text-gray-500');
-                }
-            });
-
-            if(v==='essence'&&!localStorage.getItem('ip_essence_seen'))document.getElementById('essence-modal').classList.add('active'); 
-        },
-        
-        closeEssenceModal() { document.getElementById('essence-modal').classList.remove('active'); localStorage.setItem('ip_essence_seen','true'); },
-        showToast(m) { 
-            const t=document.getElementById('toast'); 
-            document.getElementById('toast-msg').innerText=m; 
-            t.classList.remove('opacity-0', 'translate-y-[100px]'); 
-            setTimeout(()=>t.classList.add('opacity-0', 'translate-y-[100px]'),2000); 
-        },
-        
-        toggleLike(b,id) { if(!this.data.currentUser)return this.openAuth(); const l=this.data.likes[id]; if(l){delete this.data.likes[id];b.classList.remove('text-red-500');b.querySelector('i').classList.replace('fas','far');}else{this.data.likes[id]=true;b.classList.add('text-red-500');b.querySelector('i').classList.replace('far','fas');} localStorage.setItem('ip_likes_v22',JSON.stringify(this.data.likes));this.updateLikeUI(id); },
-        updateLikeUI(id) { const l=this.data.likes[id]; document.getElementById('reader-like-count').innerText=l?151:150; const b=document.getElementById('reader-like-btn'); if(l){b.classList.add('text-red-500');b.querySelector('i').className='fas fa-heart';}else{b.classList.remove('text-red-500');b.querySelector('i').className='far fa-heart';} },
-        handleReaderLike() { if(this.data.currentItem)this.toggleLike(document.getElementById('reader-like-btn'),this.data.currentItem.id); },
-        handleReaderShare() { this.showToast('Ссылка скопирована'); },
-        
-        postComment() { if(!this.data.currentUser)return this.openAuth(); const i=document.getElementById('comment-input'),t=i.value.trim(); if(!t)return; const id=this.data.currentItem.id; if(!this.data.comments[id])this.data.comments[id]=[]; this.data.comments[id].unshift({text:t,author:this.data.currentUser.name,date:new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}); localStorage.setItem('ip_comments_v22',JSON.stringify(this.data.comments)); i.value=''; this.renderComments(id); this.showToast('Отправлено'); },
-        renderComments(id) { const l=document.getElementById('comments-list'); document.getElementById('comments-count').innerText=(this.data.comments[id]||[]).length; if(this.data.currentUser){document.getElementById('comment-section-logged-in').classList.remove('hidden');document.getElementById('comment-section-logged-out').classList.add('hidden');document.getElementById('comment-avatar').innerText=this.data.currentUser.name.charAt(0);}else{document.getElementById('comment-section-logged-in').classList.add('hidden');document.getElementById('comment-section-logged-out').classList.remove('hidden');} l.innerHTML=(this.data.comments[id]||[]).map(c=>`<div class="bg-black/5 dark:bg-white/5 p-4 rounded-xl border border-black/5 dark:border-white/5"><div class="flex justify-between text-xs font-bold mb-1.5 opacity-60"><span>${c.author}</span><span>${c.date}</span></div><p class="text-sm leading-relaxed">${c.text}</p></div>`).join(''); },
-        
-        openReader(id,isE=false) { 
-            let item;
-            if(isE) item = this.data.essenceFeed.find(i=>i.id==id);
-            else item = [...this.data.news, ...this.data.posts, ...this.data.banks, ...this.data.zen].find(i=>i.id==id);
-            if(!item)return; 
-            this.data.currentItem=item; 
-            const m=document.getElementById('reader-modal'),p=document.getElementById('reader-paper'),c=document.getElementById('reader-content'); 
-            
-            const isDark = localStorage.getItem('ip_theme') === 'dark';
-            p.className = `w-full h-full md:w-[800px] md:h-[90vh] md:rounded-3xl overflow-y-auto transition-all duration-300 ${isDark ? 'bg-[#171717] text-[#e5e5e5]' : 'bg-[#fafafa] text-[#171717]'}`;
-            
-            const header = p.querySelector('.sticky');
-            const inputs = p.querySelectorAll('input');
-            if(isDark) {
-                header.className = 'sticky top-0 z-10 px-4 md:px-8 py-4 flex justify-between items-center font-sans backdrop-blur bg-[#171717]/95 border-b border-[#262626]';
-                inputs.forEach(i => { i.className = 'flex-1 px-4 py-3 rounded-xl border border-[#262626] bg-[#0a0a0a] text-[#e5e5e5] outline-none text-sm transition focus:ring-2 focus:ring-[#2563eb]/20'; });
-            } else {
-                header.className = 'sticky top-0 z-10 px-4 md:px-8 py-4 flex justify-between items-center font-sans backdrop-blur bg-[#fafafa]/95 border-b border-[#e5e5e5]';
-                inputs.forEach(i => { i.className = 'flex-1 px-4 py-3 rounded-xl border border-[#e5e5e5] bg-[#f5f5f5] text-[#171717] outline-none text-sm transition focus:ring-2 focus:ring-[#2563eb]/20'; });
-            }
-
-            let h=item.full||item.body; 
-            if(isE&&item.summary)h=`<div class="bg-black/5 dark:bg-white/5 p-6 rounded-2xl mb-8 border-l-4 border-[#ea580c]"><h3 class="font-bold text-lg mb-3 font-sans flex items-center gap-2"><i class="fas fa-bolt text-[#ea580c]"></i> Главное</h3><p class="whitespace-pre-line">${item.summary}</p></div>`+h; 
-            
-            let headerHtml = '';
-            if(item.isOfficial) {
-                headerHtml = `<div class="flex items-center gap-4 mb-8 p-5 rounded-2xl bg-gradient-to-r from-yellow-900/10 to-transparent border border-[#d4af37]/20"><div class="w-12 h-12 rounded-full bg-[#d4af37] flex items-center justify-center text-black shadow-lg shadow-yellow-900/10"><i class="fas fa-university text-lg"></i></div><div><div class="text-[#d4af37] font-bold uppercase text-[10px] tracking-[0.15em] mb-0.5">Официальный канал</div><div class="text-2xl font-black tracking-tight text-gold-gradient">${item.bankName}</div></div></div>`;
-            } else {
-                headerHtml = `<div class="font-sans text-xs opacity-40 uppercase tracking-widest mb-6 flex gap-3 items-center"><span class="bg-black/5 dark:bg-white/10 px-2 py-1 rounded font-bold">${item.tag}</span><span>•</span><span>${item.source}</span></div>`;
-            }
-
-            c.innerHTML=`${headerHtml}<h1 class="text-3xl md:text-4xl font-black mb-8 font-sans tracking-tight leading-tight">${item.title}</h1><div class="mb-10">${h}</div>`; 
-            this.updateLikeUI(id);this.renderComments(id);
-            
-            m.classList.add('active');
-            document.body.style.overflow='hidden'; 
-        },
-        closeReader() { document.getElementById('reader-modal').classList.remove('active');document.body.style.overflow=''; },
-        toggleReaderTheme() { 
-            const cur = localStorage.getItem('ip_theme') === 'dark' ? 'light' : 'dark'; 
-            localStorage.setItem('ip_theme', cur); 
-            if(this.data.currentItem) this.openReader(this.data.currentItem.id, this.data.essenceFeed.some(i => i.id === this.data.currentItem.id));
-            document.getElementById('theme-icon').className = cur === 'light' ? 'fas fa-moon text-sm' : 'fas fa-sun text-sm'; 
-        },
-        
-        checkScroll(viewType) { 
-            if(this.data.currentView!==viewType)return; 
-            const el = document.getElementById(viewType === 'feed' ? 'view-feed' : viewType === 'banks' ? 'view-banks' : 'view-zen');
-            const isLoading = viewType === 'feed' ? this.data.feedLoading : false;
-            if(isLoading) return;
-            if(el.scrollTop+el.clientHeight>=el.scrollHeight-300) this.loadMore(viewType);
-        },
-
-        async loadMore(type) {
-            if(type === 'feed') this.data.feedLoading = true;
-            const loader = type === 'feed' ? document.getElementById('feed-loader') : null;
-            if(loader) loader.classList.remove('hidden');
-            setTimeout(()=>{
-                const n=[]; const count = type === 'feed' ? 6 : 3;
-                for(let i=0;i<count;i++) n.push(this.generateGenericItem(type));
-                if(type === 'feed') { this.data.news=[...this.data.news,...n]; this.renderStandardFeed(n, 'standard-feed-container'); this.data.feedLoading=false; if(loader) loader.classList.add('hidden'); }
-                if(type === 'banks') { this.data.banks=[...this.data.banks,...n]; this.renderStandardFeed(n, 'banks-feed-container', true); }
-                if(type === 'zen') { this.data.zen=[...this.data.zen,...n]; this.renderStandardFeed(n, 'zen-feed-container'); }
-            },800); 
-        },
-
-        renderStandardFeed(items, containerId, isBankFeed = false) { 
-            const c=document.getElementById(containerId); 
-            c.insertAdjacentHTML('beforeend',items.map(n=>{
-                const cardClass = n.isOfficial ? 'bank-card' : 'bg-[#121212] hover:bg-zinc-900 border border-[#262626] hover:border-white/10 transition-all duration-300';
-                const badge = n.isOfficial 
-                    ? `<div class="absolute top-3 left-3 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-lg border border-[#d4af37]/30 flex items-center gap-1.5 shadow-lg"><i class="fas fa-check-circle text-[#d4af37] text-[10px]"></i><span class="text-[10px] font-bold text-[#d4af37] uppercase tracking-wider">Официально</span></div>`
-                    : `<div class="absolute top-3 left-3 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-lg text-[10px] font-bold text-white uppercase tracking-wider border border-white/10">${n.tag}</div>`;
-                const views = n.views ? `<span class="flex items-center gap-1 text-gray-500"><i class="far fa-eye text-[10px]"></i> ${n.views}</span>` : '';
-                const titleColor = n.isOfficial ? 'text-gold-gradient' : 'text-white group-hover:text-[#2563eb]';
-
-                return `<div onclick="app.openReader('${n.id}')" class="${cardClass} rounded-2xl overflow-hidden cursor-pointer group flex flex-col h-full"><div class="h-48 overflow-hidden relative bg-gray-900"><img src="${n.image}" class="w-full h-full object-cover group-hover:scale-105 transition duration-700 opacity-80 group-hover:opacity-100" loading="lazy">${badge}</div><div class="p-5 flex flex-col flex-grow"><h3 class="text-lg font-bold ${titleColor} transition mb-2 leading-snug line-clamp-2">${n.title}</h3><p class="text-sm text-gray-400 line-clamp-3 mb-4 flex-grow leading-relaxed">${n.body}</p><div class="flex items-center justify-between text-[10px] text-gray-500 mt-auto pt-4 border-t border-white/5 uppercase tracking-wider font-medium"><span class="${n.isOfficial ? 'text-[#d4af37]/80' : ''}">${n.source}</span><div class="flex gap-3 items-center">${views}<span>${n.date}</span></div></div></div></div>`
-            }).join('')); 
-        },
-
-        checkEssenceScroll(d) { if(this.data.currentView!=='essence'||this.data.essenceLoading)return; const e=document.getElementById(`essence-${d}`); const end=d==='mobile'?e.scrollLeft+e.clientWidth>=e.scrollWidth-300:e.scrollTop+e.clientHeight>=e.scrollHeight-300; if(end)this.loadMoreEssence(); },
-        async loadMoreEssence() { this.data.essenceLoading=true; setTimeout(()=>{const n=[];for(let i=0;i<3;i++)n.push(this.generateEssenceItem());this.data.essenceFeed=[...this.data.essenceFeed,...n];this.renderEssenceChunk(n);this.data.essenceLoading=false;},800); },
-        renderEssenceChunk(items) { const m=document.getElementById('essence-mobile'),d=document.getElementById('essence-desktop'); const g=['from-orange-900 to-black','from-amber-900 to-black','from-yellow-900 to-black']; items.forEach(i=>{const gr=g[Math.abs(String(i.id).split('').reduce((a,b)=>a+b.charCodeAt(0),0))%g.length]; const inner=`<div class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent z-10"></div><div class="relative z-20 h-full flex flex-col justify-end p-6 cursor-pointer" onclick="app.openReader('${i.id}',true)"><div class="flex items-center gap-2 mb-3"><span class="px-2.5 py-1 rounded-lg bg-[#ea580c]/20 backdrop-blur text-[10px] font-bold text-[#ea580c] uppercase tracking-wider border border-[#ea580c]/30">#${i.tag}</span></div><h2 class="text-2xl font-bold text-white mb-3 leading-tight">${i.title}</h2><div class="bg-black/40 backdrop-blur-md p-4 rounded-xl border border-white/10 mb-4 shadow-xl"><p class="text-sm text-gray-200 whitespace-pre-line leading-relaxed">${i.summary}</p></div><div class="mt-auto"><span class="block w-full py-3.5 rounded-xl font-bold text-center text-sm bg-[#ea580c] text-white shadow-lg shadow-orange-900/20 hover:bg-orange-600 transition">Читать источник</span></div></div>`; m.insertAdjacentHTML('beforeend',`<div class="flex-[0_0_90vw] h-full scroll-snap-align-center mr-4 rounded-3xl relative overflow-hidden border border-[#262626] bg-gradient-to-br ${gr} shadow-2xl" style="scroll-snap-align: center;">${inner}</div>`); d.insertAdjacentHTML('beforeend',`<div class="h-[500px] rounded-[20px] relative overflow-hidden transition-transform duration-200 flex flex-col border border-[#262626] hover:-translate-y-1 hover:border-[#ea580c] bg-gradient-to-br ${gr} shadow-xl">${inner}</div>`);}); },
-        addNews() { const b=document.getElementById('new-body').value; if(!b)return; const n={id:this.generateUniqueID(),title:"Новая идея",body:b,full:`<p>${b}</p>`,tag:"Мнение",source:'Автор',date:'Сейчас',isPost:true}; this.data.posts.unshift(n);localStorage.setItem('ip_posts_v22',JSON.stringify(this.data.posts));this.renderIdeas();this.nav('ideas'); },
-        renderIdeas() { document.getElementById('ideas-list').innerHTML=this.data.posts.map(p=>`<div onclick="app.openReader('${p.id}')" class="bg-[#121212] p-6 rounded-2xl border border-[#262626] cursor-pointer hover:border-purple-500/30 hover:bg-zinc-900 transition-all group"><div class="text-xs text-purple-400 font-bold mb-3 uppercase tracking-wider flex items-center gap-2"><i class="fas fa-pen-nib"></i> Мнение • ${p.date}</div><h3 class="text-xl font-bold mb-3 group-hover:text-purple-400 transition">${p.title}</h3><p class="text-sm text-gray-400 leading-relaxed">${p.body}</p></div>`).join(''); }
-    };
-
-    document.addEventListener('DOMContentLoaded', () => {
-        document.querySelectorAll('.modal-overlay').forEach(modal => {
-            const observer = new MutationObserver((mutations) => {
-                mutations.forEach((mutation) => {
-                    if (mutation.attributeName === 'class') {
-                        const isActive = modal.classList.contains('active');
-                        const content = modal.querySelector('div');
-                        if (isActive) {
-                            modal.classList.remove('opacity-0', 'pointer-events-none');
-                            setTimeout(() => content.classList.replace('scale-95', 'scale-100'), 10);
-                        } else {
-                            content.classList.replace('scale-100', 'scale-95');
-                            setTimeout(() => modal.classList.add('opacity-0', 'pointer-events-none'), 300);
-                        }
-                    }
-                });
-            });
-            observer.observe(modal, { attributes: true });
         });
-        app.init();
-    });
-    </script>
+
+        ['feed','banks','zen','essence'].forEach(x=>{
+            const t=document.getElementById(`tab-${x}`);
+            if(t) {
+                if(x===v) t.classList.replace('text-gray-500', x==='banks'?'text-fuch-gold':x==='essence'?'text-fuch-essence':'text-fuch-accent');
+                else t.classList.replace(x==='banks'?'text-fuch-gold':x==='essence'?'text-fuch-essence':'text-fuch-accent', 'text-gray-500');
+            }
+        });
+
+        if(v==='essence'&&!localStorage.getItem('ip_essence_seen'))document.getElementById('essence-modal').classList.add('active'); 
+    },
+    
+    closeEssenceModal() { document.getElementById('essence-modal').classList.remove('active'); localStorage.setItem('ip_essence_seen','true'); },
+    showToast(m) { const t=document.getElementById('toast'); document.getElementById('toast-msg').innerText=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2000); },
+    
+    toggleLike(b,id) { if(!this.data.currentUser)return this.openAuth(); const l=this.data.likes[id]; if(l){delete this.data.likes[id];b.classList.remove('text-red-500');b.querySelector('i').classList.replace('fas','far');}else{this.data.likes[id]=true;b.classList.add('text-red-500');b.querySelector('i').classList.replace('far','fas');} localStorage.setItem('ip_likes_v20',JSON.stringify(this.data.likes));this.updateLikeUI(id); },
+    updateLikeUI(id) { const l=this.data.likes[id]; document.getElementById('reader-like-count').innerText=l?151:150; const b=document.getElementById('reader-like-btn'); if(l){b.classList.add('text-red-500');b.querySelector('i').className='fas fa-heart';}else{b.classList.remove('text-red-500');b.querySelector('i').className='far fa-heart';} },
+    handleReaderLike() { if(this.data.currentItem)this.toggleLike(document.getElementById('reader-like-btn'),this.data.currentItem.id); },
+    handleReaderShare() { this.showToast('Ссылка скопирована'); },
+    
+    postComment() { if(!this.data.currentUser)return this.openAuth(); const i=document.getElementById('comment-input'),t=i.value.trim(); if(!t)return; const id=this.data.currentItem.id; if(!this.data.comments[id])this.data.comments[id]=[]; this.data.comments[id].unshift({text:t,author:this.data.currentUser.name,date:new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}); localStorage.setItem('ip_comments_v20',JSON.stringify(this.data.comments)); i.value=''; this.renderComments(id); this.showToast('Отправлено'); },
+    renderComments(id) { const l=document.getElementById('comments-list'); document.getElementById('comments-count').innerText=(this.data.comments[id]||[]).length; if(this.data.currentUser){document.getElementById('comment-section-logged-in').classList.remove('hidden');document.getElementById('comment-section-logged-out').classList.add('hidden');document.getElementById('comment-avatar').innerText=this.data.currentUser.name.charAt(0);}else{document.getElementById('comment-section-logged-in').classList.add('hidden');document.getElementById('comment-section-logged-out').classList.remove('hidden');} l.innerHTML=(this.data.comments[id]||[]).map(c=>`<div class="bg-black/5 dark:bg-white/5 p-4 rounded-xl border border-black/5 dark:border-white/5"><div class="flex justify-between text-xs font-bold mb-1.5 opacity-60"><span>${c.author}</span><span>${c.date}</span></div><p class="text-sm leading-relaxed">${c.text}</p></div>`).join(''); },
+    
+    openReader(id,isE=false) { 
+        let item;
+        if(isE) item = this.data.essenceFeed.find(i=>i.id==id);
+        else item = [...this.data.news, ...this.data.posts, ...this.data.banks, ...this.data.zen].find(i=>i.id==id);
+        if(!item)return; 
+        this.data.currentItem=item; 
+        const m=document.getElementById('reader-modal'),p=document.getElementById('reader-paper'),c=document.getElementById('reader-content'); 
+        p.className=`reader-box reader-paper ${localStorage.getItem('ip_theme')==='dark'?'dark':'light'}`; 
+        let h=item.full||item.body; 
+        if(isE&&item.summary)h=`<div class="bg-black/5 dark:bg-white/5 p-6 rounded-2xl mb-8 border-l-4 border-fuch-essence"><h3 class="font-bold text-lg mb-3 font-sans flex items-center gap-2"><i class="fas fa-bolt text-fuch-essence"></i> Главное</h3><p class="whitespace-pre-line">${item.summary}</p></div>`+h; 
+        
+        let headerHtml = '';
+        if(item.isOfficial) {
+            headerHtml = `<div class="flex items-center gap-4 mb-8 p-5 rounded-2xl bg-gradient-to-r from-yellow-900/10 to-transparent border border-fuch-gold/20"><div class="w-12 h-12 rounded-full bg-fuch-gold flex items-center justify-center text-black shadow-lg shadow-yellow-900/10"><i class="fas fa-university text-lg"></i></div><div><div class="text-fuch-gold font-bold uppercase text-[10px] tracking-[0.15em] mb-0.5">Официальный канал</div><div class="text-2xl font-black tracking-tight text-gold-gradient">${item.bankName}</div></div></div>`;
+        } else {
+            headerHtml = `<div class="font-sans text-xs opacity-40 uppercase tracking-widest mb-6 flex gap-3 items-center"><span class="bg-black/5 dark:bg-white/10 px-2 py-1 rounded font-bold">${item.tag}</span><span>•</span><span>${item.source}</span></div>`;
+        }
+
+        c.innerHTML=`${headerHtml}<h1 class="text-3xl md:text-4xl font-black mb-8 font-sans tracking-tight leading-tight">${item.title}</h1><div class="mb-10">${h}</div>`; 
+        this.updateLikeUI(id);this.renderComments(id);m.classList.add('active');document.body.style.overflow='hidden'; 
+    },
+    closeReader() { document.getElementById('reader-modal').classList.remove('active');document.body.style.overflow=''; },
+    toggleReaderTheme() { const c=localStorage.getItem('ip_theme')==='dark'?'light':'dark'; localStorage.setItem('ip_theme',c); document.getElementById('reader-paper').className=`reader-box reader-paper ${c}`; document.getElementById('theme-icon').className=c==='light'?'fas fa-moon text-sm':'fas fa-sun text-sm'; },
+    
+    checkScroll(viewType) { 
+        if(this.data.currentView!==viewType)return; 
+        const el = document.getElementById(viewType === 'feed' ? 'view-feed' : viewType === 'banks' ? 'view-banks' : 'view-zen');
+        const isLoading = viewType === 'feed' ? this.data.feedLoading : false;
+        if(isLoading) return;
+        if(el.scrollTop+el.clientHeight>=el.scrollHeight-300) this.loadMore(viewType);
+    },
+
+    async loadMore(type) {
+        if(type === 'feed') this.data.feedLoading = true;
+        const loader = type === 'feed' ? document.getElementById('feed-loader') : null;
+        if(loader) loader.classList.remove('hidden');
+        setTimeout(()=>{
+            const n=[]; const count = type === 'feed' ? 6 : 3;
+            for(let i=0;i<count;i++) n.push(this.generateGenericItem(type));
+            if(type === 'feed') { this.data.news=[...this.data.news,...n]; this.renderStandardFeed(n, 'standard-feed-container'); this.data.feedLoading=false; if(loader) loader.classList.add('hidden'); }
+            if(type === 'banks') { this.data.banks=[...this.data.banks,...n]; this.renderStandardFeed(n, 'banks-feed-container', true); }
+            if(type === 'zen') { this.data.zen=[...this.data.zen,...n]; this.renderStandardFeed(n, 'zen-feed-container'); }
+        },800); 
+    },
+
+    renderStandardFeed(items, containerId, isBankFeed = false) { 
+        const c=document.getElementById(containerId); 
+        c.insertAdjacentHTML('beforeend',items.map(n=>{
+            const cardClass = n.isOfficial ? 'bank-card' : 'bg-fuch-card hover:bg-zinc-900 border border-fuch-border hover:border-white/10 transition-all duration-300';
+            const badge = n.isOfficial 
+                ? `<div class="absolute top-3 left-3 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-lg border border-fuch-gold/30 flex items-center gap-1.5 shadow-lg"><i class="fas fa-check-circle text-fuch-gold text-[10px]"></i><span class="text-[10px] font-bold text-fuch-gold uppercase tracking-wider">Официально</span></div>`
+                : `<div class="absolute top-3 left-3 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-lg text-[10px] font-bold text-white uppercase tracking-wider border border-white/10">${n.tag}</div>`;
+            const views = n.views ? `<span class="flex items-center gap-1 text-gray-500"><i class="far fa-eye text-[10px]"></i> ${n.views}</span>` : '';
+            const titleColor = n.isOfficial ? 'text-gold-gradient' : 'text-white group-hover:text-fuch-accent';
+
+            return `<div onclick="app.openReader('${n.id}')" class="${cardClass} rounded-2xl overflow-hidden cursor-pointer group flex flex-col h-full"><div class="h-48 overflow-hidden relative bg-gray-900"><img src="${n.image}" class="w-full h-full object-cover group-hover:scale-105 transition duration-700 opacity-80 group-hover:opacity-100" loading="lazy">${badge}</div><div class="p-5 flex flex-col flex-grow"><h3 class="text-lg font-bold ${titleColor} transition mb-2 leading-snug line-clamp-2">${n.title}</h3><p class="text-sm text-gray-400 line-clamp-3 mb-4 flex-grow leading-relaxed">${n.body}</p><div class="flex items-center justify-between text-[10px] text-gray-500 mt-auto pt-4 border-t border-white/5 uppercase tracking-wider font-medium"><span class="${n.isOfficial ? 'text-fuch-gold/80' : ''}">${n.source}</span><div class="flex gap-3 items-center">${views}<span>${n.date}</span></div></div></div></div>`
+        }).join('')); 
+    },
+
+    checkEssenceScroll(d) { if(this.data.currentView!=='essence'||this.data.essenceLoading)return; const e=document.getElementById(`essence-${d}`); const end=d==='mobile'?e.scrollLeft+e.clientWidth>=e.scrollWidth-300:e.scrollTop+e.clientHeight>=e.scrollHeight-300; if(end)this.loadMoreEssence(); },
+    async loadMoreEssence() { this.data.essenceLoading=true; setTimeout(()=>{const n=[];for(let i=0;i<3;i++)n.push(this.generateEssenceItem());this.data.essenceFeed=[...this.data.essenceFeed,...n];this.renderEssenceChunk(n);this.data.essenceLoading=false;},800); },
+    renderEssenceChunk(items) { const m=document.getElementById('essence-mobile'),d=document.getElementById('essence-desktop'); const g=['from-orange-900 to-black','from-amber-900 to-black','from-yellow-900 to-black']; items.forEach(i=>{const gr=g[Math.abs(String(i.id).split('').reduce((a,b)=>a+b.charCodeAt(0),0))%g.length]; const inner=`<div class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent z-10"></div><div class="relative z-20 h-full flex flex-col justify-end p-6 cursor-pointer" onclick="app.openReader('${i.id}',true)"><div class="flex items-center gap-2 mb-3"><span class="px-2.5 py-1 rounded-lg bg-fuch-essence/20 backdrop-blur text-[10px] font-bold text-fuch-essence uppercase tracking-wider border border-fuch-essence/30">#${i.tag}</span></div><h2 class="text-2xl font-bold text-white mb-3 leading-tight">${i.title}</h2><div class="bg-black/40 backdrop-blur-md p-4 rounded-xl border border-white/10 mb-4 shadow-xl"><p class="text-sm text-gray-200 whitespace-pre-line leading-relaxed">${i.summary}</p></div><div class="mt-auto"><span class="block w-full py-3.5 rounded-xl font-bold text-center text-sm bg-fuch-essence text-white shadow-lg shadow-orange-900/20 hover:bg-orange-600 transition">Читать источник</span></div></div>`; m.insertAdjacentHTML('beforeend',`<div class="essence-card-mobile bg-gradient-to-br ${gr} shadow-2xl">${inner}</div>`); d.insertAdjacentHTML('beforeend',`<div class="essence-card-desktop bg-gradient-to-br ${gr} shadow-xl">${inner}</div>`);}); },
+    addNews() { const b=document.getElementById('new-body').value; if(!b)return; const n={id:this.generateUniqueID(),title:"Новая идея",body:b,full:`<p>${b}</p>`,tag:"Мнение",source:'Автор',date:'Сейчас',isPost:true}; this.data.posts.unshift(n);localStorage.setItem('ip_posts_v20',JSON.stringify(this.data.posts));this.renderIdeas();this.nav('ideas'); },
+    renderIdeas() { document.getElementById('ideas-list').innerHTML=this.data.posts.map(p=>`<div onclick="app.openReader('${p.id}')" class="bg-fuch-card p-6 rounded-2xl border border-fuch-border cursor-pointer hover:border-purple-500/30 hover:bg-zinc-900 transition-all group"><div class="text-xs text-purple-400 font-bold mb-3 uppercase tracking-wider flex items-center gap-2"><i class="fas fa-pen-nib"></i> Мнение • ${p.date}</div><h3 class="text-xl font-bold mb-3 group-hover:text-purple-400 transition">${p.title}</h3><p class="text-sm text-gray-400 leading-relaxed">${p.body}</p></div>`).join(''); }
+};
+
+document.addEventListener('DOMContentLoaded', () => app.init());
+</script>
 </body>
 </html>
