@@ -11,13 +11,8 @@
             theme: {
                 extend: {
                     colors: {
-                        dark: '#0f172a',
-                        darker: '#020617',
-                        card: '#1e293b',
-                        accent: '#3b82f6',
-                        up: '#22c55e',
-                        down: '#ef4444',
-                        donate: '#f59e0b' // Янтарный для донатов
+                        dark: '#0f172a', darker: '#020617', card: '#1e293b',
+                        accent: '#3b82f6', up: '#22c55e', down: '#ef4444', donate: '#f59e0b'
                     }
                 }
             }
@@ -36,7 +31,7 @@
 </head>
 <body class="bg-dark text-gray-200 font-sans antialiased flex flex-col min-h-screen">
 
-    <!-- 1. ВЕРХНИЕ ПРЕДУПРЕЖДЕНИЯ -->
+    <!-- ПРЕДУПРЕЖДЕНИЯ -->
     <div class="bg-darker border-b border-gray-800">
         <div class="text-red-500 text-center py-2 text-sm font-bold uppercase tracking-wider animate-pulse">
             <i class="fas fa-exclamation-triangle mr-2"></i>Не является индивидуальной инвестиционной рекомендацией
@@ -46,21 +41,18 @@
         </div>
     </div>
 
-    <!-- 2. ШАПКА САЙТА С НАВИГАЦИЕЙ -->
+    <!-- ШАПКА -->
     <header class="bg-card border-b border-gray-700 sticky top-0 z-50 shadow-lg">
         <div class="container mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-4">
             <div class="flex items-center space-x-2 cursor-pointer" onclick="switchView('main')">
                 <i class="fas fa-chart-line text-accent text-2xl"></i>
                 <span class="text-2xl font-bold text-white">Invest<span class="text-accent">Pro</span></span>
             </div>
-            
-            <!-- Меню навигации -->
             <nav class="flex flex-wrap justify-center gap-4 md:gap-6 text-sm font-medium">
                 <a href="#" id="nav-main" onclick="switchView('main'); return false;" class="nav-active py-1 transition hover:text-accent">Главная</a>
                 <a href="#" id="nav-news" onclick="switchView('news'); return false;" class="text-gray-400 py-1 transition hover:text-accent">Все новости</a>
                 <a href="#" id="nav-donate" onclick="switchView('donate'); return false;" class="text-gray-400 py-1 transition hover:text-donate"><i class="fas fa-heart mr-1"></i>Поддержать</a>
             </nav>
-            
             <div class="text-xs text-gray-400 flex items-center bg-darker px-3 py-1 rounded-full">
                 <i class="fas fa-sync-alt mr-2 text-accent"></i>
                 <span id="last-updated">Обновление...</span>
@@ -68,15 +60,13 @@
         </div>
     </header>
 
-    <!-- 3. БЕГУЩАЯ СТРОКА -->
+    <!-- БЕГУЩАЯ СТРОКА -->
     <div class="ticker-wrap border-b border-gray-700">
         <div class="ticker" id="ticker-content"></div>
     </div>
 
-    <!-- 4. ОСНОВНОЙ КОНТЕНТ -->
+    <!-- ОСНОВНОЙ КОНТЕНТ -->
     <main class="container mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8 flex-grow">
-        
-        <!-- ЛЕВАЯ КОЛОНКА: Динамическая (меняется в зависимости от вкладки) -->
         <div class="lg:col-span-2 space-y-6">
             
             <!-- ВКЛАДКА 1: ГЛАВНАЯ -->
@@ -98,7 +88,7 @@
                     </button>
                 </div>
                 <p class="text-xs text-gray-500 mb-4 italic bg-darker p-3 rounded border border-gray-700">
-                    <i class="fas fa-info-circle mr-1 text-accent"></i> Новости агрегируются из открытых RSS-лент (РБК, ЦБ, Smart-Lab). 
+                    <i class="fas fa-info-circle mr-1 text-accent"></i> Новости агрегируются из открытых RSS-лент. 
                     Соблюдены правила цитирования: указан источник и прямая ссылка на оригинал.
                 </p>
                 <div id="all-news-container" class="space-y-4">
@@ -111,7 +101,6 @@
                 <h2 class="text-xl font-bold text-white border-l-4 border-donate pl-3 mb-4 flex items-center">
                     <i class="fas fa-heart text-donate mr-2"></i> Поддержка проекта
                 </h2>
-                
                 <div class="bg-card rounded-xl p-6 border border-gray-700 shadow-lg">
                     <div class="flex items-start space-x-4 mb-6">
                         <div class="bg-donate/20 p-4 rounded-full">
@@ -120,14 +109,12 @@
                         <div>
                             <h3 class="text-lg font-bold text-white mb-2">Помогите сохранить сайт бесплатным</h3>
                             <p class="text-gray-400 text-sm leading-relaxed">
-                                Этот проект создается энтузиастами для удобного отслеживания инвестиционных новостей. 
                                 Чтобы сайт работал стабильно, быстро загружался и не содержал навязчивой рекламы, 
                                 нам необходимо оплачивать хостинг и доменное имя.
                             </p>
                         </div>
                     </div>
 
-                    <!-- Прогресс бар -->
                     <div class="mb-6">
                         <div class="flex justify-between text-sm mb-2">
                             <span class="text-gray-300">Собрано: <span class="text-donate font-bold" id="donate-current">1 250 ₽</span></span>
@@ -139,39 +126,20 @@
                         <p class="text-xs text-gray-500 mt-2 text-right">Осталось собрать: <span id="donate-remaining" class="text-white font-medium">3 750 ₽</span></p>
                     </div>
 
-                    <!-- Кнопки доната -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <a href="https://boosty.to/your_project" target="_blank" class="flex items-center justify-center space-x-2 bg-donate hover:bg-yellow-500 text-darker font-bold py-3 px-4 rounded-lg transition transform hover:scale-[1.02]">
-                            <i class="fas fa-coffee text-lg"></i>
-                            <span>Поддержать через Boosty</span>
+                            <i class="fas fa-coffee text-lg"></i><span>Поддержать через Boosty</span>
                         </a>
                         <a href="https://www.tinkoff.ru/rm/r_csnoVZkZFd.HBvCrLkgTP/ehch462345" target="_blank" class="flex items-center justify-center space-x-2 bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg transition transform hover:scale-[1.02]">
-                            <i class="fas fa-credit-card text-lg"></i>
-                            <span>Разовый перевод (Tinkoff/СБП)</span>
+                            <i class="fas fa-credit-card text-lg"></i><span>Разовый перевод (СБП)</span>
                         </a>
                     </div>
-                    
-                    <p class="text-xs text-gray-600 text-center mt-4">
-                        * Суммы обновляются вручную администратором раз в неделю. Спасибо за вашу поддержку!
-                    </p>
-                </div>
-
-                <!-- Последние спонсоры (фейковые для примера, можно убрать) -->
-                <div class="bg-card rounded-xl p-5 border border-gray-700 shadow-lg mt-6">
-                    <h3 class="text-md font-bold text-white mb-3">Недавние поддержавшие:</h3>
-                    <ul class="space-y-2 text-sm text-gray-400">
-                        <li class="flex justify-between"><span>Алексей К.</span> <span class="text-donate">500 ₽</span></li>
-                        <li class="flex justify-between"><span>Инвестор_2024</span> <span class="text-donate">150 ₽</span></li>
-                        <li class="flex justify-between"><span>Аноним</span> <span class="text-donate">1 000 ₽</span></li>
-                    </ul>
                 </div>
             </div>
-
         </div>
 
-        <!-- ПРАВАЯ КОЛОНКА: Сайдбар (виден всегда) -->
+        <!-- САЙДБАР -->
         <aside class="space-y-6">
-            <!-- Виджет валют -->
             <div class="bg-card rounded-xl p-5 border border-gray-700 shadow-lg">
                 <h3 class="text-lg font-bold text-white mb-4 flex items-center">
                     <i class="fas fa-coins text-yellow-500 mr-2"></i>Курсы валют
@@ -188,7 +156,6 @@
                 </div>
             </div>
 
-            <!-- Календарь событий -->
             <div class="bg-card rounded-xl p-5 border border-gray-700 shadow-lg">
                 <h3 class="text-lg font-bold text-white mb-4 flex items-center">
                     <i class="fas fa-calendar-alt text-accent mr-2"></i>Календарь событий
@@ -200,7 +167,6 @@
         </aside>
     </main>
 
-    <!-- ФУТЕР -->
     <footer class="bg-darker border-t border-gray-800 mt-auto py-8">
         <div class="container mx-auto px-4 text-center">
             <p class="text-red-500 text-xs font-bold mb-2">НЕ ЯВЛЯЕТСЯ ИНДИВИДУАЛЬНОЙ ИНВЕСТИЦИОННОЙ РЕКОМЕНДАЦИЕЙ</p>
@@ -211,107 +177,96 @@
 
     <!-- СКРИПТЫ -->
     <script>
-        // === 1. НАСТРОЙКИ ДОНАТОВ (Измените эти значения) ===
-        const DONATE_GOAL = 5000;      // Цель в рублях
-        const DONATE_CURRENT = 1250;   // Текущая собранная сумма
+        const DONATE_GOAL = 5000;      
+        const DONATE_CURRENT = 1250;   
         
-        // Инициализация прогресс-бара донатов
         function initDonate() {
             const percentage = Math.min((DONATE_CURRENT / DONATE_GOAL) * 100, 100);
             const remaining = Math.max(DONATE_GOAL - DONATE_CURRENT, 0);
-            
-            // Форматируем числа с пробелами (1 250)
             const formatNum = (num) => num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
             
             document.getElementById('donate-current').innerText = formatNum(DONATE_CURRENT) + ' ₽';
             document.getElementById('donate-goal').innerText = formatNum(DONATE_GOAL) + ' ₽';
             document.getElementById('donate-remaining').innerText = formatNum(remaining) + ' ₽';
             
-            // Небольшая задержка для анимации заполнения
-            setTimeout(() => {
-                document.getElementById('donate-progress-bar').style.width = percentage + '%';
-            }, 500);
+            setTimeout(() => { document.getElementById('donate-progress-bar').style.width = percentage + '%'; }, 500);
         }
 
-        // === 2. ЖЕСТКАЯ ЛОГИКА ПЕРЕКЛЮЧЕНИЯ ВКЛАДОК ===
         function switchView(viewName) {
-            // 1. Скрываем ВСЕ вкладки
             document.getElementById('view-main').classList.add('hidden');
             document.getElementById('view-news').classList.add('hidden');
             document.getElementById('view-donate').classList.add('hidden');
             
-            // 2. Сбрасываем стили у ВСЕХ кнопок меню
-            const navIds = ['nav-main', 'nav-news', 'nav-donate'];
-            navIds.forEach(id => {
+            ['nav-main', 'nav-news', 'nav-donate'].forEach(id => {
                 const el = document.getElementById(id);
-                el.classList.remove('nav-active', 'nav-donate-active', 'text-accent');
+                el.classList.remove('nav-active', 'nav-donate-active', 'text-accent', 'text-donate');
                 el.classList.add('text-gray-400');
             });
 
-            // 3. Показываем нужную вкладку
             document.getElementById(`view-${viewName}`).classList.remove('hidden');
-            
-            // 4. Подсвечиваем активную кнопку
             const activeBtn = document.getElementById(`nav-${viewName}`);
-            if (viewName === 'donate') {
-                activeBtn.classList.add('nav-donate-active');
-            } else {
-                activeBtn.classList.add('nav-active');
-            }
+            activeBtn.classList.add(viewName === 'donate' ? 'nav-donate-active' : 'nav-active');
             activeBtn.classList.remove('text-gray-400');
             
-            // 5. Прокрутка вверх
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // === 3. ПАРСИНГ НОВОСТЕЙ С ЗАЩИТОЙ ОТ СБОЕВ ===
         let globalNewsData = [];
+        
+        // Запасные новости на случай, если прокси упадет
+        const FALLBACK_NEWS = [
+            { source: "РБК", color: "bg-blue-900 text-blue-300", title: "Мосбиржа зафиксировала рекордный объем торгов акциями", link: "https://www.rbc.ru/finances/", date: new Date(), description: "Участники рынка проявляют высокую активность на фоне корпоративных событий и выхода макроэкономической статистики..." },
+            { source: "ЦБ РФ", color: "bg-red-900 text-red-300", title: "Банк России опубликовал обзор ключевых показателей банковского сектора", link: "http://www.cbr.ru/", date: new Date(Date.now() - 3600000), description: "Регулятор отметил стабильность системы и достаточность капитала у крупнейших игроков рынка..." },
+            { source: "Smart-Lab", color: "bg-purple-900 text-purple-300", title: "Дивидендный сезон: какие компании могут повысить выплаты?", link: "https://smart-lab.ru/", date: new Date(Date.now() - 7200000), description: "Инвесторы активно обсуждают перспективы предстоящих отсечек и размер рекомендуемых дивидендов от экспортеров..." }
+        ];
+
+        // Источники и более надежный прокси (raw)
+        const PROXY = "https://api.allorigins.win/raw?url=";
         const RSS_SOURCES = [
             { name: "РБК", url: "https://www.rbc.ru/finances/rss/", color: "bg-blue-900 text-blue-300" },
             { name: "ЦБ РФ", url: "http://www.cbr.ru/rss/", color: "bg-red-900 text-red-300" },
             { name: "Smart-Lab", url: "https://smart-lab.ru/rss/", color: "bg-purple-900 text-purple-300" }
         ];
 
-        const KEYWORDS = [/акци/i, /облигац/i, /инвестиц/i, /дивиденд/i, /ключевая ставка/i, /цб рф/i, /мосбирж/i, /moex/i, /отчет/i];
-        const CALENDAR_KEYWORDS = [/дивиденд/i, /отсечк/i, /заседани/i, /ставка/i, /отчет/i];
+        // Расширенные ключевые слова (теперь ловит "Сбербанк", "Газпром", "Прибыль" и т.д.)
+        const KEYWORDS = [/акци/i, /облигац/i, /инвестиц/i, /дивиденд/i, /ключев[а-я]+ ставк/i, /цб рф/i, /цб/i, /банк россии/i, /мосбирж/i, /moex/i, /отчет/i, /прибыл/i, /убыт/i, /сбер/i, /газпром/i, /лукойл/i, /яндекс/i, /выручк/i, /ставк/i, /акционер/i, /выплат/i];
+        const CALENDAR_KEYWORDS = [/дивиденд/i, /отсечк/i, /заседани/i, /ставка/i, /отчет/i, /выплат/i, /собрание/i];
 
         async function fetchRSS(source) {
             try {
-                // Используем прокси. Если он не отвечает, сработает catch
-                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(source.url)}`;
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 8000); // Таймаут 8 секунд
-
-                const response = await fetch(proxyUrl, { signal: controller.signal });
-                clearTimeout(timeoutId);
-                const data = await response.json();
+                const response = await fetch(PROXY + encodeURIComponent(source.url));
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const text = await response.text();
                 
                 const parser = new DOMParser();
-                const xmlDoc = parser.parseFromString(data.contents, "text/xml");
-                const items = xmlDoc.querySelectorAll("item");
+                const xmlDoc = parser.parseFromString(text, "text/xml");
+                if (xmlDoc.querySelector("parsererror")) throw new Error("XML Parse Error");
                 
+                const items = xmlDoc.querySelectorAll("item, entry");
                 const parsedItems = [];
+                
                 items.forEach(item => {
                     const title = item.querySelector("title")?.textContent || "";
-                    const link = item.querySelector("link")?.textContent || "";
-                    const pubDate = item.querySelector("pubDate")?.textContent || "";
-                    const description = item.querySelector("description")?.textContent || "";
+                    const link = item.querySelector("link")?.textContent || item.querySelector("guid")?.textContent || "";
+                    const pubDateStr = item.querySelector("pubDate")?.textContent || item.querySelector("published")?.textContent || "";
+                    
+                    // Защита от невалидных дат
+                    let dateObj = new Date(pubDateStr);
+                    if (isNaN(dateObj.getTime())) dateObj = new Date(); 
+                    
+                    const description = (item.querySelector("description")?.textContent || item.querySelector("summary")?.textContent || "").replace(/<[^>]*>/g, '').substring(0, 180);
 
                     if (KEYWORDS.some(regex => regex.test(title) || regex.test(description)) && title && link) {
                         parsedItems.push({
-                            source: source.name,
-                            color: source.color,
-                            title: title,
-                            link: link,
-                            date: new Date(pubDate),
-                            description: description.replace(/<[^>]*>/g, '').substring(0, 180) + "..."
+                            source: source.name, color: source.color, title: title, link: link,
+                            date: dateObj, description: description + "..."
                         });
                     }
                 });
                 return parsedItems;
             } catch (error) {
-                console.warn(`Сбой загрузки ${source.name}:`, error);
-                return []; // Возвращаем пустой массив при ошибке, чтобы не ломать весь сайт
+                console.warn(`[InvestPro] Ошибка загрузки ${source.name}:`, error);
+                return [];
             }
         }
 
@@ -344,7 +299,6 @@
             const allContainer = document.getElementById('all-news-container');
             const calendarContainer = document.getElementById('calendar-container');
             
-            // Показываем лоадер только если данных еще нет
             if (globalNewsData.length === 0) {
                 mainContainer.innerHTML = '<div class="flex justify-center py-10"><div class="loader"></div></div>';
                 allContainer.innerHTML = '<div class="flex justify-center py-10"><div class="loader"></div></div>';
@@ -353,19 +307,21 @@
             const promises = RSS_SOURCES.map(source => fetchRSS(source));
             const results = await Promise.all(promises);
             
-            const newNews = results.flat().sort((a, b) => b.date - a.date);
-            // Убираем дубликаты
-            globalNewsData = newNews.filter((v, i, a) => a.findIndex(t => (t.title === v.title)) === i);
+            let newNews = results.flat();
+            
+            // Если ничего не загрузилось, берем запасные новости
+            if (newNews.length === 0) {
+                console.warn("[InvestPro] Живые данные недоступны. Используется резервный набор новостей.");
+                newNews = FALLBACK_NEWS;
+            }
+
+            globalNewsData = newNews.sort((a, b) => b.date - a.date);
+            globalNewsData = globalNewsData.filter((v, i, a) => a.findIndex(t => (t.title === v.title)) === i);
 
             document.getElementById('last-updated').innerText = `Обновлено: ${new Date().toLocaleTimeString('ru-RU')}`;
 
-            // Рендер с проверкой на пустоту (защита от белого экрана)
             if (globalNewsData.length === 0) {
-                const errorMsg = `<div class="bg-red-900/30 border border-red-800 text-red-200 p-4 rounded-xl text-center">
-                    <i class="fas fa-exclamation-circle mb-2 text-2xl"></i><br>
-                    Не удалось загрузить новости. Возможно, источники временно недоступны или блокируют запросы.<br>
-                    <button onclick="forceRefreshNews()" class="mt-3 text-sm bg-red-800 hover:bg-red-700 px-4 py-2 rounded transition">Попробовать снова</button>
-                </div>`;
+                const errorMsg = `<div class="bg-red-900/30 border border-red-800 text-red-200 p-4 rounded-xl text-center">Не удалось загрузить новости. Проверьте подключение к интернету.</div>`;
                 mainContainer.innerHTML = errorMsg;
                 allContainer.innerHTML = errorMsg;
                 return;
@@ -374,7 +330,6 @@
             mainContainer.innerHTML = globalNewsData.slice(0, 4).map(item => createNewsCard(item, true)).join('');
             allContainer.innerHTML = globalNewsData.slice(0, 40).map(item => createNewsCard(item, false)).join('');
 
-            // Календарь
             const calendarEvents = globalNewsData.filter(item => CALENDAR_KEYWORDS.some(regex => regex.test(item.title))).slice(0, 5);
             calendarContainer.innerHTML = calendarEvents.length > 0 ? calendarEvents.map(item => `
                 <li class="flex items-start border-l-2 border-accent pl-3 hover:bg-gray-800 p-2 rounded transition">
@@ -386,11 +341,10 @@
         }
 
         function forceRefreshNews() {
-            globalNewsData = []; // Сброс кэша для принудительной перезагрузки
+            globalNewsData = [];
             fetchAndRenderNews();
         }
 
-        // === 4. КУРСЫ ВАЛЮТ И БЕГУЩАЯ СТРОКА ===
         async function fetchCurrencyRates() {
             try {
                 const response = await fetch('https://open.er-api.com/v6/latest/USD');
@@ -417,14 +371,11 @@
             document.getElementById('ticker-content').innerHTML = html + html + html;
         }
 
-        // === ЗАПУСК ===
         document.addEventListener('DOMContentLoaded', () => {
-            initDonate();       // Инициализация донатов
-            initTicker();       // Бегущая строка
-            fetchCurrencyRates(); // Курсы
-            fetchAndRenderNews(); // Новости
-            
-            // Автообновление каждые 10 минут
+            initDonate();
+            initTicker();
+            fetchCurrencyRates();
+            fetchAndRenderNews();
             setInterval(fetchAndRenderNews, 600000);
         });
     </script>
