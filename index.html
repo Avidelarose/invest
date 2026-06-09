@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>InvestPro | Hybrid Edition</title>
+    <title>FUCH | Gewinn fixieren</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -15,10 +15,11 @@
             theme: {
                 extend: {
                     colors: {
-                        dark: '#0b1120', darker: '#020617', card: '#1e293b',
-                        accent: '#3b82f6', up: '#10b981', down: '#ef4444', 
-                        essence: '#F59E0B', // Цвет для вкладки Суть
-                        ios: { gray: '#8E8E93', red: '#FF453A' }
+                        fuch: { 
+                            bg: '#09090b', card: '#18181b', border: '#27272a',
+                            accent: '#3b82f6', essence: '#f97316', text: '#e4e4e7'
+                        },
+                        vk: '#0077FF'
                     },
                     fontFamily: { sans: ['Inter', 'sans-serif'], serif: ['Merriweather', 'serif'] }
                 }
@@ -27,53 +28,51 @@
     </script>
     
     <style>
-        body { background-color: #0b1120; -webkit-tap-highlight-color: transparent; overflow: hidden; }
+        body { background-color: #09090b; color: #e4e4e7; -webkit-tap-highlight-color: transparent; overflow: hidden; }
         
-        /* --- БЕГУЩАЯ СТРОКА --- */
-        .ticker-wrap { height: 32px; line-height: 32px; overflow: hidden; background: #111827; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        /* Ticker */
+        .ticker-wrap { height: 32px; line-height: 32px; overflow: hidden; background: #000; border-bottom: 1px solid #27272a; }
         .ticker { display: inline-block; white-space: nowrap; padding-left: 100%; animation: ticker 40s linear infinite; }
-        .ticker-item { display: inline-block; padding: 0 1.5rem; font-size: 0.75rem; color: #9ca3af; }
+        .ticker-item { display: inline-block; padding: 0 1.5rem; font-size: 0.75rem; color: #71717a; }
         @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
 
-        /* --- ОБЫЧНАЯ ЛЕНТА (Вертикальная) --- */
-        .standard-feed { overflow-y: auto; height: calc(100vh - 96px); /* Header + Ticker */ padding: 1rem; }
+        /* Feeds */
+        .standard-feed { overflow-y: auto; height: calc(100vh - 96px); padding: 1rem; scroll-behavior: smooth; }
         @media (min-width: 768px) { .standard-feed { padding: 2rem; } }
 
-        /* --- СУТЬ / ФАРШ (TikTok Style Mobile / Grid Desktop) --- */
         .essence-scroll-mobile { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; height: calc(100vh - 96px); padding-left: 1rem; }
-        .essence-card-mobile { flex: 0 0 90vw; height: 100%; scroll-snap-align: center; margin-right: 1rem; border-radius: 24px; position: relative; overflow: hidden; }
-        
+        .essence-card-mobile { flex: 0 0 90vw; height: 100%; scroll-snap-align: center; margin-right: 1rem; border-radius: 24px; position: relative; overflow: hidden; border: 1px solid #27272a; }
         .essence-grid-desktop { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; padding: 2rem; overflow-y: auto; height: calc(100vh - 96px); }
-        .essence-card-desktop { height: 500px; border-radius: 20px; position: relative; overflow: hidden; transition: transform 0.2s; display: flex; flex-direction: column; }
-        .essence-card-desktop:hover { transform: translateY(-5px); }
+        .essence-card-desktop { height: 500px; border-radius: 20px; position: relative; overflow: hidden; transition: transform 0.2s; display: flex; flex-direction: column; border: 1px solid #27272a; }
+        .essence-card-desktop:hover { transform: translateY(-5px); border-color: #f97316; }
 
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* --- UI & MODALS --- */
-        .glass-header { backdrop-filter: blur(16px); background: rgba(11, 17, 32, 0.9); border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .tab-bar { backdrop-filter: saturate(180%) blur(20px); background-color: rgba(11, 17, 32, 0.95); border-top: 1px solid rgba(255,255,255,0.05); }
+        /* UI */
+        .glass-header { backdrop-filter: blur(16px); background: rgba(9, 9, 11, 0.9); border-bottom: 1px solid #27272a; }
+        .tab-bar { backdrop-filter: saturate(180%) blur(20px); background-color: rgba(9, 9, 11, 0.95); border-top: 1px solid #27272a; }
         
-        .modal-overlay { position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); opacity: 0; pointer-events: none; transition: opacity 0.3s; display: flex; align-items: center; justify-content: center; }
+        .modal-overlay { position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); opacity: 0; pointer-events: none; transition: opacity 0.3s; display: flex; align-items: center; justify-content: center; }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
         
+        /* Auth Modal Animations */
+        .auth-modal-content { transform: scale(0.95); opacity: 0; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .modal-overlay.active .auth-modal-content { transform: scale(1); opacity: 1; }
+
+        /* Reader */
         .reader-box { width: 100%; height: 100%; overflow-y: auto; transition: all 0.3s; }
         @media (min-width: 768px) { .reader-box { width: 800px; height: 90vh; border-radius: 20px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); } }
-
-        /* Reader Themes */
-        .reader-paper.light { background: #fdfbf7; color: #2d3748; }
-        .reader-paper.light .prose-reader p { color: #4a5568; }
-        .reader-paper.light .prose-reader h2 { color: #1a202c; }
-        .reader-paper.light .reader-header { background: rgba(253, 251, 247, 0.95); border-bottom: 1px solid rgba(0,0,0,0.05); }
-        .reader-paper.light .reader-btn { background: white; border-color: #e2e8f0; color: #4a5568; }
-        .reader-paper.light .comment-input { background: #f7fafc; border-color: #e2e8f0; color: #2d3748; }
-        
-        .reader-paper.dark { background: #1a202c; color: #cbd5e1; }
-        .reader-paper.dark .prose-reader p { color: #a0aec0; }
-        .reader-paper.dark .prose-reader h2 { color: #f7fafc; }
-        .reader-paper.dark .reader-header { background: rgba(26, 32, 44, 0.95); border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .reader-paper.dark .reader-btn { background: #2d3748; border-color: #4a5568; color: #e2e8f0; }
-        .reader-paper.dark .comment-input { background: #1a202c; border-color: #4a5568; color: #e2e8f0; }
+        .reader-paper.light { background: #fafafa; color: #18181b; }
+        .reader-paper.light .prose-reader p { color: #3f3f46; }
+        .reader-paper.light .reader-header { background: rgba(250, 250, 250, 0.95); border-bottom: 1px solid #e4e4e7; }
+        .reader-paper.light .reader-btn { background: white; border-color: #e4e4e7; color: #18181b; }
+        .reader-paper.light .comment-input { background: #f4f4f5; border-color: #e4e4e7; color: #18181b; }
+        .reader-paper.dark { background: #18181b; color: #e4e4e7; }
+        .reader-paper.dark .prose-reader p { color: #a1a1aa; }
+        .reader-paper.dark .reader-header { background: rgba(24, 24, 27, 0.95); border-bottom: 1px solid #27272a; }
+        .reader-paper.dark .reader-btn { background: #27272a; border-color: #3f3f46; color: #e4e4e7; }
+        .reader-paper.dark .comment-input { background: #09090b; border-color: #27272a; color: #e4e4e7; }
 
         .prose-reader { max-width: 68ch; margin: 0 auto; padding: 2rem 1.5rem; font-family: 'Merriweather', serif; line-height: 1.9; }
         .prose-reader p { margin-bottom: 1.8em; font-size: 1.15rem; }
@@ -83,28 +82,83 @@
         @keyframes likePop { 0% { transform: scale(1); } 50% { transform: scale(1.4); } 100% { transform: scale(1); } }
         .like-animate { animation: likePop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         
-        #toast { position: fixed; bottom: 6rem; left: 50%; transform: translateX(-50%) translateY(100px); background: #1e293b; color: white; padding: 0.75rem 1.5rem; border-radius: 999px; font-size: 0.875rem; font-weight: 600; box-shadow: 0 10px 25px rgba(0,0,0,0.3); z-index: 9999; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: none; border: 1px solid rgba(255,255,255,0.1); }
+        #toast { position: fixed; bottom: 6rem; left: 50%; transform: translateX(-50%) translateY(100px); background: #18181b; color: white; padding: 0.75rem 1.5rem; border-radius: 999px; font-size: 0.875rem; font-weight: 600; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 9999; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: none; border: 1px solid #27272a; }
         #toast.show { transform: translateX(-50%) translateY(0); }
     </style>
 </head>
-<body class="text-gray-300 antialiased h-screen flex flex-col selection:bg-accent selection:text-white">
+<body class="antialiased h-screen flex flex-col selection:bg-fuch-accent selection:text-white">
 
-    <!-- TOAST -->
-    <div id="toast"><i class="fas fa-check-circle mr-2 text-accent"></i><span id="toast-msg">Готово</span></div>
+    <div id="toast"><i class="fas fa-check-circle mr-2 text-fuch-accent"></i><span id="toast-msg">Готово</span></div>
+
+    <!-- AUTH MODAL (Login / Register) -->
+    <div id="auth-modal" class="modal-overlay z-[120]">
+        <div class="auth-modal-content bg-fuch-card w-[90%] max-w-sm p-6 rounded-3xl border border-fuch-border shadow-2xl relative">
+            <!-- Кнопка назад / закрыть -->
+            <button onclick="app.closeAuth()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition">
+                <i class="fas fa-times"></i>
+            </button>
+
+            <!-- Логин Форма -->
+            <div id="auth-login-form">
+                <h2 class="text-2xl font-bold text-white mb-1">Вход в FUCH</h2>
+                <p class="text-xs text-gray-500 mb-6">Войдите, чтобы комментировать и ставить лайки</p>
+                
+                <div class="space-y-3 mb-6">
+                    <input type="email" id="login-email" class="w-full bg-fuch-bg border border-fuch-border rounded-xl px-4 py-3 text-white outline-none focus:border-fuch-accent transition text-sm" placeholder="Email">
+                    <input type="password" id="login-pass" class="w-full bg-fuch-bg border border-fuch-border rounded-xl px-4 py-3 text-white outline-none focus:border-fuch-accent transition text-sm" placeholder="Пароль">
+                </div>
+
+                <button onclick="app.loginUser()" class="w-full bg-fuch-accent hover:bg-blue-600 text-white font-bold py-3 rounded-xl transition active:scale-95 mb-4">Войти</button>
+                
+                <div class="relative flex py-2 items-center mb-4">
+                    <div class="flex-grow border-t border-fuch-border"></div>
+                    <span class="flex-shrink-0 mx-4 text-gray-500 text-xs uppercase">или</span>
+                    <div class="flex-grow border-t border-fuch-border"></div>
+                </div>
+
+                <button onclick="app.vkLoginMock()" class="w-full bg-vk hover:bg-blue-600 text-white font-bold py-3 rounded-xl transition active:scale-95 flex items-center justify-center gap-2 mb-4">
+                    <i class="fab fa-vk text-lg"></i> Войти через VK
+                </button>
+
+                <p class="text-center text-sm text-gray-400">
+                    Нет аккаунта? <button onclick="app.toggleAuthMode('register')" class="text-fuch-accent font-bold hover:underline">Создать</button>
+                </p>
+            </div>
+
+            <!-- Регистрация Форма (Скрыта по умолчанию) -->
+            <div id="auth-register-form" class="hidden">
+                <h2 class="text-2xl font-bold text-white mb-1">Регистрация</h2>
+                <p class="text-xs text-gray-500 mb-6">Присоединяйтесь к сообществу инвесторов</p>
+                
+                <div class="space-y-3 mb-6">
+                    <input type="text" id="reg-name" class="w-full bg-fuch-bg border border-fuch-border rounded-xl px-4 py-3 text-white outline-none focus:border-fuch-accent transition text-sm" placeholder="Имя / Никнейм">
+                    <input type="email" id="reg-email" class="w-full bg-fuch-bg border border-fuch-border rounded-xl px-4 py-3 text-white outline-none focus:border-fuch-accent transition text-sm" placeholder="Email">
+                    <input type="password" id="reg-pass" class="w-full bg-fuch-bg border border-fuch-border rounded-xl px-4 py-3 text-white outline-none focus:border-fuch-accent transition text-sm" placeholder="Придумайте пароль">
+                </div>
+
+                <button onclick="app.registerUser()" class="w-full bg-fuch-essence hover:bg-orange-600 text-black font-bold py-3 rounded-xl transition active:scale-95 mb-4">Зарегистрироваться</button>
+
+                <p class="text-center text-sm text-gray-400">
+                    Уже есть аккаунт? <button onclick="app.toggleAuthMode('login')" class="text-fuch-accent font-bold hover:underline">Войти</button>
+                </p>
+            </div>
+        </div>
+    </div>
 
     <!-- ONBOARDING MODAL (СУТЬ) -->
     <div id="essence-modal" class="modal-overlay z-[110]">
-        <div class="bg-card w-[90%] max-w-md p-8 rounded-3xl border border-white/10 shadow-2xl text-center">
-            <div class="w-16 h-16 bg-gradient-to-tr from-essence to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-orange-500/20">
+        <div class="bg-fuch-card w-[90%] max-w-md p-8 rounded-3xl border border-fuch-border shadow-2xl text-center">
+            <div class="w-16 h-16 bg-gradient-to-tr from-fuch-essence to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-orange-500/20">
                 <i class="fas fa-bolt text-white text-3xl"></i>
             </div>
-            <h2 class="text-2xl font-bold text-white mb-4">Время — это деньги</h2>
+            <h2 class="text-2xl font-bold text-white mb-2">FUCH: Суть</h2>
+            <p class="text-xs text-fuch-essence uppercase tracking-widest mb-6 font-bold">Gewinn fixieren</p>
             <p class="text-gray-400 mb-8 leading-relaxed">
                 Здесь только <strong class="text-white">сухая выжимка</strong> фактов из 100+ источников. Никакой воды.
                 <br><br>
-                Листай, читай суть за 5 секунд, переходи к источнику только если нужно.
+                Листай, читай суть за 5 секунд, переходи к источнику только если нужно. Время — деньги.
             </p>
-            <button onclick="app.closeEssenceModal()" class="w-full bg-essence hover:bg-orange-500 text-black font-bold py-4 rounded-xl transition active:scale-95">
+            <button onclick="app.closeEssenceModal()" class="w-full bg-fuch-essence hover:bg-orange-500 text-black font-bold py-4 rounded-xl transition active:scale-95">
                 Понятно, погнали
             </button>
         </div>
@@ -112,18 +166,22 @@
 
     <!-- HEADER -->
     <header class="glass-header h-16 flex items-center justify-between px-4 md:px-8 z-50 shrink-0">
-        <div onclick="app.nav('feed')" class="flex items-center gap-2 cursor-pointer group">
-            <div class="w-8 h-8 rounded bg-gradient-to-tr from-accent to-blue-500 flex items-center justify-center text-white text-xs shadow-lg shadow-accent/20"><i class="fas fa-chart-line"></i></div>
-            <span class="text-lg font-bold text-white tracking-tight">Invest<span class="text-accent">Pro</span></span>
+        <div onclick="app.nav('feed')" class="flex flex-col cursor-pointer group">
+            <span class="text-2xl font-black tracking-tighter text-white leading-none">FUCH</span>
+            <span class="text-[9px] text-gray-500 uppercase tracking-widest font-medium group-hover:text-fuch-essence transition">Gewinn fixieren</span>
         </div>
-        <nav class="hidden md:flex items-center gap-1 bg-white/5 p-1 rounded-full border border-white/5">
-            <button onclick="app.nav('feed')" id="btn-feed" class="nav-btn px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-accent text-white shadow-lg shadow-accent/25">Лента</button>
-            <button onclick="app.nav('essence')" id="btn-essence" class="nav-btn px-4 py-1.5 rounded-full text-xs font-medium text-gray-400 hover:text-essence hover:bg-white/10 transition-all flex items-center gap-1"><i class="fas fa-bolt text-[10px]"></i> Суть</button>
+        <nav class="hidden md:flex items-center gap-1 bg-white/5 p-1 rounded-full border border-fuch-border">
+            <button onclick="app.nav('feed')" id="btn-feed" class="nav-btn px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-fuch-accent text-white shadow-lg shadow-blue-500/20">Лента</button>
+            <button onclick="app.nav('essence')" id="btn-essence" class="nav-btn px-4 py-1.5 rounded-full text-xs font-medium text-gray-400 hover:text-fuch-essence hover:bg-white/10 transition-all flex items-center gap-1"><i class="fas fa-bolt text-[10px]"></i> Суть</button>
             <button onclick="app.nav('ideas')" id="btn-ideas" class="nav-btn px-4 py-1.5 rounded-full text-xs font-medium text-gray-400 hover:text-white hover:bg-white/10 transition-all">Мнения</button>
         </nav>
         <div class="flex items-center gap-3">
-            <button onclick="app.showEssenceInfo()" class="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center text-gray-400 hover:text-white transition" title="Что такое Суть?"><i class="fas fa-question text-xs"></i></button>
-            <button onclick="app.toggleAdmin()" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white transition"><i class="fas fa-cog text-xs"></i></button>
+            <button onclick="app.showEssenceInfo()" class="w-8 h-8 rounded-full border border-fuch-border flex items-center justify-center text-gray-400 hover:text-white transition" title="Что такое Суть?"><i class="fas fa-question text-xs"></i></button>
+            
+            <!-- Кнопка профиля / Вход -->
+            <button id="user-profile-btn" onclick="app.openAuth()" class="h-8 px-3 rounded-full border border-fuch-border flex items-center justify-center gap-2 text-gray-400 hover:text-white hover:border-fuch-accent transition text-xs font-bold">
+                <i class="far fa-user"></i> <span id="user-name-display">Войти</span>
+            </button>
         </div>
     </header>
 
@@ -132,55 +190,46 @@
 
     <!-- MAIN CONTENT -->
     <main class="flex-grow relative w-full overflow-hidden">
-        
-        <!-- VIEW: STANDARD FEED -->
-        <section id="view-feed" class="absolute inset-0 standard-feed bg-dark hidden">
+        <section id="view-feed" class="absolute inset-0 standard-feed bg-fuch-bg hidden">
             <div class="max-w-4xl mx-auto space-y-4" id="standard-feed-container"></div>
             <div id="feed-loader" class="py-8 text-center text-gray-500 hidden"><i class="fas fa-circle-notch fa-spin mr-2"></i>Загрузка...</div>
         </section>
 
-        <!-- VIEW: ESSENCE (FARSH) -->
-        <section id="view-essence" class="absolute inset-0 bg-dark hidden">
-            <!-- Mobile: Horizontal Swipe -->
+        <section id="view-essence" class="absolute inset-0 bg-fuch-bg hidden">
             <div id="essence-mobile" class="essence-scroll-mobile no-scrollbar md:hidden pl-4"></div>
-            <!-- Desktop: Grid -->
             <div id="essence-desktop" class="essence-grid-desktop no-scrollbar hidden md:block"></div>
-            
-            <div id="essence-loader" class="absolute bottom-8 left-1/2 -translate-x-1/2 text-gray-500 text-sm hidden bg-card px-4 py-2 rounded-full border border-white/10 z-30">
+            <div id="essence-loader" class="absolute bottom-8 left-1/2 -translate-x-1/2 text-gray-500 text-sm hidden bg-fuch-card px-4 py-2 rounded-full border border-fuch-border z-30">
                 <i class="fas fa-circle-notch fa-spin mr-2"></i>Анализ...
             </div>
         </section>
 
-        <!-- VIEW: IDEAS -->
-        <section id="view-ideas" class="absolute inset-0 standard-feed bg-dark hidden">
+        <section id="view-ideas" class="absolute inset-0 standard-feed bg-fuch-bg hidden">
             <div class="max-w-3xl mx-auto">
                 <h2 class="text-2xl font-bold text-white mb-6 border-l-4 border-purple-500 pl-3">Авторская аналитика</h2>
                 <div id="ideas-list" class="space-y-6"></div>
             </div>
         </section>
 
-        <!-- VIEW: ADMIN -->
-        <section id="view-admin" class="absolute inset-0 standard-feed bg-dark z-50 hidden">
-            <div class="max-w-lg mx-auto bg-card p-8 rounded-2xl border border-white/10 shadow-2xl mt-4">
-                <h2 class="text-2xl font-bold text-white mb-6">Редактор</h2>
+        <section id="view-admin" class="absolute inset-0 standard-feed bg-fuch-bg z-50 hidden">
+            <div class="max-w-lg mx-auto bg-fuch-card p-8 rounded-2xl border border-fuch-border shadow-2xl mt-4">
+                <h2 class="text-2xl font-bold text-white mb-6">Редактор FUCH</h2>
                 <div id="admin-auth" class="space-y-4">
-                    <input type="password" id="adm-pass" class="w-full bg-darker border border-white/10 rounded-lg px-4 py-3 text-white outline-none" placeholder="Пароль (admin)">
-                    <button onclick="app.login()" class="w-full bg-accent py-3 rounded-lg font-bold text-white">Войти</button>
+                    <input type="password" id="adm-pass" class="w-full bg-fuch-bg border border-fuch-border rounded-lg px-4 py-3 text-white outline-none focus:border-fuch-accent" placeholder="Пароль админа (admin)">
+                    <button onclick="app.adminLogin()" class="w-full bg-fuch-accent py-3 rounded-lg font-bold text-white">Войти как админ</button>
                 </div>
                 <div id="admin-editor" class="hidden space-y-4">
-                    <select id="new-tag" class="w-full bg-darker border border-white/10 rounded-lg px-4 py-3 text-white outline-none"><option value="news">Новость</option><option value="idea">Мнение</option></select>
-                    <input type="text" id="new-title" placeholder="Заголовок" class="w-full bg-darker border-b border-white/10 text-xl font-bold text-white py-3 outline-none">
-                    <textarea id="new-body" rows="6" placeholder="Текст..." class="w-full bg-darker border border-white/10 rounded-lg p-4 font-mono text-sm text-gray-300 outline-none"></textarea>
+                    <select id="new-tag" class="w-full bg-fuch-bg border border-fuch-border rounded-lg px-4 py-3 text-white outline-none"><option value="news">Новость</option><option value="idea">Мнение</option></select>
+                    <input type="text" id="new-title" placeholder="Заголовок" class="w-full bg-fuch-bg border-b border-fuch-border text-xl font-bold text-white py-3 outline-none focus:border-fuch-accent">
+                    <textarea id="new-body" rows="6" placeholder="Текст..." class="w-full bg-fuch-bg border border-fuch-border rounded-lg p-4 font-mono text-sm text-gray-300 outline-none focus:border-fuch-accent"></textarea>
                     <button onclick="app.addNews()" class="w-full bg-emerald-600 py-3 rounded-lg font-bold text-white">Опубликовать</button>
                 </div>
             </div>
         </section>
-
     </main>
 
     <!-- MOBILE TAB BAR -->
     <nav class="md:hidden tab-bar safe-bottom z-50 flex justify-around items-center h-[64px] shrink-0">
-        <button onclick="app.nav('feed')" class="flex flex-col items-center gap-1 w-full py-2 text-accent transition" id="tab-feed">
+        <button onclick="app.nav('feed')" class="flex flex-col items-center gap-1 w-full py-2 text-fuch-accent transition" id="tab-feed">
             <i class="fas fa-newspaper text-lg"></i><span class="text-[10px] font-medium">Лента</span>
         </button>
         <button onclick="app.nav('essence')" class="flex flex-col items-center gap-1 w-full py-2 text-gray-500 transition" id="tab-essence">
@@ -196,22 +245,35 @@
         <div id="reader-paper" class="reader-box reader-paper light">
             <div class="reader-header sticky top-0 z-10 px-6 py-3 flex justify-between items-center font-sans backdrop-blur">
                 <button onclick="app.closeReader()" class="flex items-center gap-2 text-current opacity-70 hover:opacity-100 font-bold text-sm"><i class="fas fa-arrow-left"></i> Назад</button>
-                <button onclick="app.toggleReaderTheme()" class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/10 transition"><i id="theme-icon" class="fas fa-moon text-xs"></i></button>
+                <div class="flex items-center gap-3">
+                    <span class="text-[10px] font-bold uppercase tracking-widest opacity-50 hidden sm:block">FUCH READER</span>
+                    <button onclick="app.toggleReaderTheme()" class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/10 transition"><i id="theme-icon" class="fas fa-moon text-xs"></i></button>
+                </div>
             </div>
             <article id="reader-content" class="prose-reader"></article>
             <div class="max-w-[68ch] mx-auto px-6 pb-20 font-sans border-t border-current/10 mt-8 pt-8">
                 <div class="flex gap-3 mb-8">
                     <button id="reader-like-btn" onclick="app.handleReaderLike()" class="reader-btn flex-1 py-3 rounded-xl font-bold border flex items-center justify-center gap-2 transition active:scale-95"><i class="far fa-heart"></i> <span id="reader-like-count">0</span></button>
-                    <button onclick="app.handleReaderShare()" class="reader-btn flex-1 py-3 rounded-xl font-bold bg-accent text-white border-transparent flex items-center justify-center gap-2 transition active:scale-95"><i class="fas fa-share-alt"></i> Поделиться</button>
+                    <button onclick="app.handleReaderShare()" class="reader-btn flex-1 py-3 rounded-xl font-bold bg-fuch-accent text-white border-transparent flex items-center justify-center gap-2 transition active:scale-95"><i class="fas fa-share-alt"></i> Поделиться</button>
                 </div>
                 <a id="reader-source-link" href="#" target="_blank" class="block w-full py-3 mb-8 rounded-xl font-bold text-center bg-black text-white dark:bg-white dark:text-black no-underline hidden">Перейти к источнику</a>
                 
                 <h3 class="text-lg font-bold mb-4">Комментарии (<span id="comments-count">0</span>)</h3>
-                <div class="flex gap-2 mb-6">
-                    <input type="text" id="comment-nick" class="comment-input flex-1 px-4 py-3 rounded-xl border outline-none text-sm font-bold w-1/3" placeholder="Ник">
-                    <input type="text" id="comment-input" class="comment-input flex-1 px-4 py-3 rounded-xl border outline-none text-sm" placeholder="Комментарий...">
-                    <button onclick="app.postComment()" class="bg-accent text-white w-12 rounded-xl flex items-center justify-center"><i class="fas fa-paper-plane text-xs"></i></button>
+                
+                <!-- Блок комментариев (меняется в зависимости от авторизации) -->
+                <div id="comment-section-logged-out" class="hidden bg-black/5 dark:bg-white/5 p-4 rounded-xl text-center mb-6">
+                    <p class="text-sm opacity-70 mb-3">Войдите, чтобы оставить комментарий</p>
+                    <button onclick="app.openAuth()" class="bg-fuch-accent text-white px-6 py-2 rounded-lg text-sm font-bold">Войти / Регистрация</button>
                 </div>
+
+                <div id="comment-section-logged-in" class="hidden flex gap-2 mb-6">
+                    <div class="w-10 h-10 rounded-full bg-fuch-accent flex items-center justify-center text-white font-bold text-sm shrink-0" id="comment-avatar">U</div>
+                    <div class="flex-1 flex gap-2">
+                        <input type="text" id="comment-input" class="comment-input flex-1 px-4 py-3 rounded-xl border outline-none text-sm" placeholder="Написать комментарий...">
+                        <button onclick="app.postComment()" class="bg-fuch-accent text-white w-12 rounded-xl flex items-center justify-center"><i class="fas fa-paper-plane text-xs"></i></button>
+                    </div>
+                </div>
+
                 <div id="comments-list" class="space-y-3"></div>
             </div>
         </div>
@@ -224,9 +286,10 @@ const app = {
         feedPage: 0, essencePage: 0, 
         feedLoading: false, essenceLoading: false, 
         readerTheme: localStorage.getItem('ip_theme') || 'light',
-        likes: JSON.parse(localStorage.getItem('ip_likes_v7') || '{}'),
-        comments: JSON.parse(localStorage.getItem('ip_comments_v7') || '{}'),
-        userNick: localStorage.getItem('ip_nick') || '',
+        likes: JSON.parse(localStorage.getItem('ip_likes_v9') || '{}'),
+        comments: JSON.parse(localStorage.getItem('ip_comments_v9') || '{}'),
+        users: JSON.parse(localStorage.getItem('fuch_users') || '[]'),
+        currentUser: JSON.parse(localStorage.getItem('fuch_current_user') || 'null'),
         currentItem: null, rssSources: []
     },
 
@@ -234,33 +297,157 @@ const app = {
         this.generateRSSSources();
         this.seedData();
         
-        const savedPosts = localStorage.getItem('ip_posts_v7');
+        const savedPosts = localStorage.getItem('ip_posts_v9');
         this.data.posts = savedPosts ? JSON.parse(savedPosts) : [
             { id: 101, title: "Почему я покупаю нефтянку", body: "Энергетический кризис только начинается.", full: "<p>Многие боятся рецессии, но я вижу точку входа.</p><h2>Причины</h2><p>Дефицит инвестиций в добычу создает предпосылки для роста цен.</p>", tag: "Мнение", date: "2ч назад", isPost: true }
         ];
 
-        if(this.data.userNick) document.getElementById('comment-nick').value = this.data.userNick;
-        
-        // Проверка онбординга
-        if (!localStorage.getItem('ip_essence_seen')) {
-            // Показываем только если пользователь сам зашел, но для демо покажем сразу при первой загрузке сути
-        }
-
+        this.updateAuthUI();
         this.initTicker();
         this.renderIdeas();
         this.renderStandardFeed(this.data.news.slice(0, 10));
         this.renderEssenceChunk(this.data.essenceFeed.slice(0, 5));
         
-        // Listeners
         document.getElementById('view-feed').addEventListener('scroll', () => this.checkStandardScroll());
         ['mobile', 'desktop'].forEach(dev => {
             document.getElementById(`essence-${dev}`).addEventListener('scroll', () => this.checkEssenceScroll(dev));
         });
 
-        // Nav default
         this.nav('feed');
     },
 
+    // --- AUTH SYSTEM ---
+    openAuth() {
+        if (this.data.currentUser) {
+            // Если уже вошел - показываем меню выхода
+            if(confirm(`Вы вошли как ${this.data.currentUser.name}. Выйти из аккаунта?`)) {
+                this.logout();
+            }
+        } else {
+            document.getElementById('auth-modal').classList.add('active');
+            this.toggleAuthMode('login');
+        }
+    },
+
+    closeAuth() {
+        document.getElementById('auth-modal').classList.remove('active');
+    },
+
+    toggleAuthMode(mode) {
+        const loginForm = document.getElementById('auth-login-form');
+        const regForm = document.getElementById('auth-register-form');
+        
+        if (mode === 'register') {
+            loginForm.classList.add('hidden');
+            regForm.classList.remove('hidden');
+        } else {
+            loginForm.classList.remove('hidden');
+            regForm.classList.add('hidden');
+        }
+    },
+
+    registerUser() {
+        const name = document.getElementById('reg-name').value.trim();
+        const email = document.getElementById('reg-email').value.trim();
+        const pass = document.getElementById('reg-pass').value;
+
+        if (!name || !email || !pass) return this.showToast('Заполните все поля');
+        if (pass.length < 4) return this.showToast('Пароль слишком короткий');
+        if (this.data.users.find(u => u.email === email)) return this.showToast('Email уже занят');
+
+        const newUser = { name, email, pass, id: Date.now() };
+        this.data.users.push(newUser);
+        localStorage.setItem('fuch_users', JSON.stringify(this.data.users));
+        
+        // Автоматический вход после регистрации
+        this.loginAs(newUser);
+        this.showToast('Регистрация успешна!');
+    },
+
+    loginUser() {
+        const email = document.getElementById('login-email').value.trim();
+        const pass = document.getElementById('login-pass').value;
+
+        const user = this.data.users.find(u => u.email === email && u.pass === pass);
+        if (!user) return this.showToast('Неверный email или пароль');
+
+        this.loginAs(user);
+        this.showToast(`Добро пожаловать, ${user.name}!`);
+    },
+
+    vkLoginMock() {
+        // Имитация входа через VK
+        const mockUser = { 
+            name: 'VK User', 
+            email: 'vk@user.com', 
+            pass: '', 
+            id: 'vk_' + Date.now(),
+            isVk: true 
+        };
+        
+        // Проверяем, есть ли уже такой VK юзер
+        let existing = this.data.users.find(u => u.isVk);
+        if (!existing) {
+            this.data.users.push(mockUser);
+            localStorage.setItem('fuch_users', JSON.stringify(this.data.users));
+            existing = mockUser;
+        }
+        
+        this.loginAs(existing);
+        this.showToast('Вход через VK выполнен');
+    },
+
+    loginAs(user) {
+        this.data.currentUser = user;
+        localStorage.setItem('fuch_current_user', JSON.stringify(user));
+        this.closeAuth();
+        this.updateAuthUI();
+        
+        // Обновляем ридер если открыт
+        if (this.data.currentItem) {
+            this.renderComments(this.data.currentItem.id);
+        }
+    },
+
+    logout() {
+        this.data.currentUser = null;
+        localStorage.removeItem('fuch_current_user');
+        this.updateAuthUI();
+        this.showToast('Вы вышли из аккаунта');
+        
+        if (this.data.currentItem) {
+            this.renderComments(this.data.currentItem.id);
+        }
+    },
+
+    updateAuthUI() {
+        const btn = document.getElementById('user-profile-btn');
+        const nameSpan = document.getElementById('user-name-display');
+        const icon = btn.querySelector('i');
+        
+        if (this.data.currentUser) {
+            nameSpan.innerText = this.data.currentUser.name.split(' ')[0];
+            icon.className = 'fas fa-user-check text-fuch-accent';
+            btn.classList.add('border-fuch-accent', 'text-white');
+            btn.classList.remove('text-gray-400');
+        } else {
+            nameSpan.innerText = 'Войти';
+            icon.className = 'far fa-user';
+            btn.classList.remove('border-fuch-accent', 'text-white');
+            btn.classList.add('text-gray-400');
+        }
+    },
+
+    // --- ADMIN ---
+    toggleAdmin() { this.nav('admin'); },
+    adminLogin() { 
+        if(document.getElementById('adm-pass').value==='admin') { 
+            document.getElementById('admin-auth').classList.add('hidden'); 
+            document.getElementById('admin-editor').classList.remove('hidden'); 
+        } else this.showToast('Неверный пароль админа'); 
+    },
+
+    // --- CORE FEATURES ---
     seedData() {
         this.data.news = [
             { id: 's1', title: "Сбербанк: рекордная прибыль", body: "Чистая прибыль превысила 400 млрд руб.", full: "<p>Сбербанк опубликовал сильную отчетность.</p><h2>Детали</h2><p>Маржа выросла до 5.8%.</p>", tag: "Акции", source: "РБК", date: "1ч", sourceUrl: "https://rbc.ru" },
@@ -269,7 +456,6 @@ const app = {
             { id: 's4', title: "Газпром: новый НПЗ", body: "Инвестиции 300 млрд.", full: "<p>Увеличение переработки.</p>", tag: "Сырье", source: "Ведомости", date: "6ч", sourceUrl: "https://vedomosti.ru" },
             { id: 's5', title: "Яндекс GPT 5", body: "Лучше чем GPT-4?", full: "<p>Ставка на мультимодальность.</p>", tag: "IT", source: "Habr", date: "7ч", sourceUrl: "https://habr.com" }
         ];
-        
         this.data.essenceFeed = [
             { id: 'e1', title: "ЦБ сохранил ставку 16%", summary: "• Ставка без изменений\n• Инфляция замедляется медленно\n• Жесткая политика продлится до конца года", tag: "Макро", source: "ЦБ РФ", date: "10:30", sourceUrl: "https://cbr.ru" },
             { id: 'e2', title: "Лукойл: дивиденды", summary: "• Рекомендация: 520 руб. на акцию\n• Отсечка: 15 мая\n• Доходность: ~14% годовых", tag: "Дивиденды", source: "Интерфакс", date: "09:15", sourceUrl: "https://interfax.ru" },
@@ -292,26 +478,23 @@ const app = {
         document.querySelectorAll('main > section').forEach(el => el.classList.add('hidden'));
         document.getElementById(`view-${view}`).classList.remove('hidden');
         
-        // Desktop Nav
         ['feed', 'essence', 'ideas'].forEach(v => {
             const btn = document.getElementById(`btn-${v}`);
             if(v === view) {
-                if(v === 'essence') { btn.className = 'nav-btn px-4 py-1.5 rounded-full text-xs font-bold bg-essence text-black shadow-lg shadow-orange-500/20 transition-all'; }
-                else { btn.className = 'nav-btn px-4 py-1.5 rounded-full text-xs font-bold bg-accent text-white shadow-lg shadow-accent/25 transition-all'; }
+                if(v === 'essence') btn.className = 'nav-btn px-4 py-1.5 rounded-full text-xs font-bold bg-fuch-essence text-black shadow-lg shadow-orange-500/20 transition-all';
+                else btn.className = 'nav-btn px-4 py-1.5 rounded-full text-xs font-bold bg-fuch-accent text-white shadow-lg shadow-blue-500/20 transition-all';
             } else {
                 btn.className = 'nav-btn px-4 py-1.5 rounded-full text-xs font-medium text-gray-400 hover:text-white hover:bg-white/10 transition-all';
             }
         });
 
-        // Mobile Tab Bar
         ['feed', 'essence', 'ideas'].forEach(v => {
             const tab = document.getElementById(`tab-${v}`);
-            const color = v === 'essence' ? 'text-essence' : 'text-accent';
+            const color = v === 'essence' ? 'text-fuch-essence' : 'text-fuch-accent';
             if(v === view) { tab.classList.remove('text-gray-500'); tab.classList.add(color); }
             else { tab.classList.remove(color); tab.classList.add('text-gray-500'); }
         });
 
-        // Onboarding check for Essence
         if(view === 'essence' && !localStorage.getItem('ip_essence_seen')) {
             document.getElementById('essence-modal').classList.add('active');
         }
@@ -321,19 +504,16 @@ const app = {
         document.getElementById('essence-modal').classList.remove('active');
         localStorage.setItem('ip_essence_seen', 'true');
     },
-
-    showEssenceInfo() {
-        document.getElementById('essence-modal').classList.add('active');
-    },
-
+    showEssenceInfo() { document.getElementById('essence-modal').classList.add('active'); },
     showToast(msg) { const t = document.getElementById('toast'); document.getElementById('toast-msg').innerText = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000); },
 
     toggleLike(btn, id) {
+        if (!this.data.currentUser) return this.openAuth();
         if (!id) return;
         const isLiked = this.data.likes[id];
-        if (isLiked) { delete this.data.likes[id]; btn.classList.remove('text-ios-red'); btn.querySelector('i').classList.replace('fas', 'far'); } 
-        else { this.data.likes[id] = true; btn.classList.add('text-ios-red'); btn.querySelector('i').classList.replace('far', 'fas'); btn.querySelector('i').classList.add('like-animate'); setTimeout(() => btn.querySelector('i').classList.remove('like-animate'), 300); }
-        localStorage.setItem('ip_likes_v7', JSON.stringify(this.data.likes));
+        if (isLiked) { delete this.data.likes[id]; btn.classList.remove('text-red-500'); btn.querySelector('i').classList.replace('fas', 'far'); } 
+        else { this.data.likes[id] = true; btn.classList.add('text-red-500'); btn.querySelector('i').classList.replace('far', 'fas'); btn.querySelector('i').classList.add('like-animate'); setTimeout(() => btn.querySelector('i').classList.remove('like-animate'), 300); }
+        localStorage.setItem('ip_likes_v9', JSON.stringify(this.data.likes));
         this.updateLikeUI(id);
     },
 
@@ -343,40 +523,67 @@ const app = {
         const total = isLiked ? base + 1 : base;
         const c = document.getElementById('reader-like-count'); if(c) c.innerText = total;
         const b = document.getElementById('reader-like-btn'); 
-        if(b) { if(isLiked) { b.classList.add('text-ios-red'); b.querySelector('i').className='fas fa-heart'; } else { b.classList.remove('text-ios-red'); b.querySelector('i').className='far fa-heart'; } }
+        if(b) { if(isLiked) { b.classList.add('text-red-500'); b.querySelector('i').className='fas fa-heart'; } else { b.classList.remove('text-red-500'); b.querySelector('i').className='far fa-heart'; } }
     },
 
     handleReaderLike() { if(this.data.currentItem) this.toggleLike(document.getElementById('reader-like-btn'), this.data.currentItem.id); },
     handleReaderShare() { if(this.data.currentItem) { try{navigator.share({title:this.data.currentItem.title, url:location.href})}catch(e){navigator.clipboard.writeText(location.href); this.showToast('Скопировано')} } },
 
     postComment() {
+        if(!this.data.currentUser) return this.openAuth();
         if(!this.data.currentItem) return;
-        const nick = document.getElementById('comment-nick').value.trim() || 'Аноним';
-        const text = document.getElementById('comment-input').value.trim();
+        const input = document.getElementById('comment-input');
+        const text = input.value.trim();
         if(!text) return;
-        localStorage.setItem('ip_nick', nick);
+        
         const id = this.data.currentItem.id;
         if(!this.data.comments[id]) this.data.comments[id] = [];
-        this.data.comments[id].unshift({text, author: nick, date: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})});
-        localStorage.setItem('ip_comments_v7', JSON.stringify(this.data.comments));
-        document.getElementById('comment-input').value = '';
+        this.data.comments[id].unshift({
+            text, 
+            author: this.data.currentUser.name, 
+            date: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
+        });
+        localStorage.setItem('ip_comments_v9', JSON.stringify(this.data.comments));
+        input.value = '';
         this.renderComments(id);
-        this.showToast('Отправлено');
+        this.showToast('Комментарий добавлен');
     },
 
     renderComments(id) {
         const list = document.getElementById('comments-list');
         const count = document.getElementById('comments-count');
+        const loggedInSection = document.getElementById('comment-section-logged-in');
+        const loggedOutSection = document.getElementById('comment-section-logged-out');
+        const avatar = document.getElementById('comment-avatar');
+        
         const coms = this.data.comments[id] || [];
         count.innerText = coms.length;
-        list.innerHTML = coms.map(c => `<div class="bg-black/5 dark:bg-white/5 p-3 rounded-xl"><div class="flex justify-between text-xs font-bold mb-1 opacity-70"><span>${c.author}</span><span>${c.date}</span></div><p class="text-sm">${c.text}</p></div>`).join('');
+        
+        // Показываем нужный блок ввода
+        if (this.data.currentUser) {
+            loggedInSection.classList.remove('hidden');
+            loggedOutSection.classList.add('hidden');
+            avatar.innerText = this.data.currentUser.name.charAt(0).toUpperCase();
+        } else {
+            loggedInSection.classList.add('hidden');
+            loggedOutSection.classList.remove('hidden');
+        }
+
+        list.innerHTML = coms.map(c => `
+            <div class="bg-black/5 dark:bg-white/5 p-3 rounded-xl">
+                <div class="flex justify-between text-xs font-bold mb-1 opacity-70">
+                    <span>${c.author}</span>
+                    <span>${c.date}</span>
+                </div>
+                <p class="text-sm">${c.text}</p>
+            </div>
+        `).join('');
     },
 
     openReader(id, isEssence = false) {
         const item = isEssence 
             ? this.data.essenceFeed.find(i => i.id == id) 
             : [...this.data.news, ...this.data.posts].find(i => i.id == id);
-            
         if(!item) return;
         this.data.currentItem = item;
         
@@ -389,12 +596,11 @@ const app = {
         else { paper.classList.add('light'); paper.classList.remove('dark'); }
         
         document.getElementById('theme-icon').className = this.data.readerTheme === 'light' ? 'fas fa-moon text-xs' : 'fas fa-sun text-xs';
-        
         if(item.sourceUrl) { srcLink.href = item.sourceUrl; srcLink.classList.remove('hidden'); } else { srcLink.classList.add('hidden'); }
 
         let bodyHtml = item.full || item.body;
         if (isEssence && item.summary) {
-            bodyHtml = `<div class="bg-black/5 dark:bg-white/5 p-6 rounded-2xl mb-8 border-l-4 border-essence"><h3 class="font-bold text-lg mb-3 flex items-center gap-2 font-sans"><i class="fas fa-bolt text-essence"></i> Главное</h3><p class="whitespace-pre-line font-medium">${item.summary}</p></div>` + bodyHtml;
+            bodyHtml = `<div class="bg-black/5 dark:bg-white/5 p-6 rounded-2xl mb-8 border-l-4 border-fuch-essence"><h3 class="font-bold text-lg mb-3 flex items-center gap-2 font-sans"><i class="fas fa-bolt text-fuch-essence"></i> Главное</h3><p class="whitespace-pre-line font-medium">${item.summary}</p></div>` + bodyHtml;
         }
 
         content.innerHTML = `
@@ -427,7 +633,6 @@ const app = {
         localStorage.setItem('ip_theme', this.data.readerTheme);
     },
 
-    // --- STANDARD FEED LOGIC ---
     checkStandardScroll() {
         if (this.data.currentView !== 'feed' || this.data.feedLoading) return;
         const el = document.getElementById('view-feed');
@@ -438,7 +643,6 @@ const app = {
         if(this.data.feedLoading) return;
         this.data.feedLoading = true;
         document.getElementById('feed-loader').classList.remove('hidden');
-        // Симуляция загрузки RSS
         setTimeout(() => {
             const newItems = [
                 { id: 'gen_'+Date.now(), title: "Отчетность Газпрома", body: "Чистая прибыль упала на 40%. Дивидендов не будет.", full: "<p>Подробности отчета...</p>", tag: "Акции", source: "Ведомости", date: "Сегодня", sourceUrl: "#" },
@@ -454,16 +658,15 @@ const app = {
     renderStandardFeed(items) {
         const container = document.getElementById('standard-feed-container');
         const html = items.map(n => `
-            <div onclick="app.openReader('${n.id}')" class="bg-card/50 hover:bg-card border border-white/5 hover:border-accent/30 rounded-xl p-5 cursor-pointer transition-all group">
-                <div class="flex justify-between mb-2"><span class="text-xs font-bold text-accent bg-accent/10 px-2 py-1 rounded">${n.tag}</span><span class="text-xs text-gray-500">${n.date}</span></div>
-                <h3 class="text-lg font-bold text-white group-hover:text-accent transition mb-2">${n.title}</h3>
+            <div onclick="app.openReader('${n.id}')" class="bg-fuch-card hover:bg-zinc-800 border border-fuch-border hover:border-fuch-accent/50 rounded-xl p-5 cursor-pointer transition-all group">
+                <div class="flex justify-between mb-2"><span class="text-xs font-bold text-fuch-accent bg-fuch-accent/10 px-2 py-1 rounded">${n.tag}</span><span class="text-xs text-gray-500">${n.date}</span></div>
+                <h3 class="text-lg font-bold text-white group-hover:text-fuch-accent transition mb-2">${n.title}</h3>
                 <p class="text-sm text-gray-400 line-clamp-2">${n.body}</p>
             </div>
         `).join('');
         container.insertAdjacentHTML('beforeend', html);
     },
 
-    // --- ESSENCE FEED LOGIC ---
     checkEssenceScroll(device) {
         if (this.data.currentView !== 'essence' || this.data.essenceLoading) return;
         const el = document.getElementById(`essence-${device}`);
@@ -497,30 +700,25 @@ const app = {
         const html = items.map(i => {
             const liked = this.data.likes[i.id];
             const g = grads[Math.abs(String(i.id).split('').reduce((a,b)=>a+b.charCodeAt(0),0)) % grads.length];
-            
             const inner = `
                 <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent pointer-events-none z-10"></div>
                 <div class="absolute top-4 right-4 flex gap-2 z-20">
-                    <button onclick="event.stopPropagation(); app.toggleLike(this, '${i.id}')" class="w-10 h-10 rounded-full bg-white/10 backdrop-blur flex items-center justify-center ${liked?'text-ios-red':'text-white/80'} transition active:scale-90 border border-white/10"><i class="${liked?'fas':'far'} fa-heart"></i></button>
+                    <button onclick="event.stopPropagation(); app.toggleLike(this, '${i.id}')" class="w-10 h-10 rounded-full bg-white/10 backdrop-blur flex items-center justify-center ${liked?'text-red-500':'text-white/80'} transition active:scale-90 border border-white/10"><i class="${liked?'fas':'far'} fa-heart"></i></button>
                 </div>
                 <div class="relative z-20 h-full flex flex-col justify-end p-6 cursor-pointer" onclick="app.openReader('${i.id}', true)">
-                    <div class="flex items-center gap-2 mb-3"><span class="px-2 py-0.5 rounded bg-essence/20 backdrop-blur text-[10px] font-bold text-essence uppercase tracking-wide border border-essence/30">#${i.tag}</span><span class="text-white/60 text-xs font-medium">${i.date}</span></div>
+                    <div class="flex items-center gap-2 mb-3"><span class="px-2 py-0.5 rounded bg-fuch-essence/20 backdrop-blur text-[10px] font-bold text-fuch-essence uppercase tracking-wide border border-fuch-essence/30">#${i.tag}</span><span class="text-white/60 text-xs font-medium">${i.date}</span></div>
                     <h2 class="text-2xl font-bold text-white leading-tight mb-3 drop-shadow-md">${i.title}</h2>
-                    
                     <div class="bg-black/40 backdrop-blur-sm p-4 rounded-xl border border-white/10 mb-4">
-                        <div class="text-essence text-xs font-bold uppercase mb-2 flex items-center gap-1"><i class="fas fa-bolt"></i> Выжимка</div>
+                        <div class="text-fuch-essence text-xs font-bold uppercase mb-2 flex items-center gap-1"><i class="fas fa-bolt"></i> Выжимка</div>
                         <p class="text-sm text-gray-200 whitespace-pre-line leading-snug">${i.summary}</p>
                     </div>
-
                     <div class="mt-auto">
-                        <a href="${i.sourceUrl}" target="_blank" onclick="event.stopPropagation()" class="block w-full py-3 rounded-xl font-bold text-center text-sm bg-essence text-black hover:bg-orange-400 transition active:scale-95 no-underline">Читать источник <i class="fas fa-external-link-alt ml-2 text-xs"></i></a>
+                        <a href="${i.sourceUrl}" target="_blank" onclick="event.stopPropagation()" class="block w-full py-3 rounded-xl font-bold text-center text-sm bg-fuch-essence text-black hover:bg-orange-400 transition active:scale-95 no-underline">Читать источник <i class="fas fa-external-link-alt ml-2 text-xs"></i></a>
                     </div>
                 </div>
             `;
-
-            const mCard = `<div class="essence-card-mobile bg-gradient-to-br ${g} shadow-2xl border border-white/5 group">${inner}</div>`;
-            const dCard = `<div class="essence-card-desktop bg-gradient-to-br ${g} shadow-xl border border-white/5 group hover:shadow-2xl hover:border-white/20">${inner}</div>`;
-
+            const mCard = `<div class="essence-card-mobile bg-gradient-to-br ${g} shadow-2xl group">${inner}</div>`;
+            const dCard = `<div class="essence-card-desktop bg-gradient-to-br ${g} shadow-xl group hover:shadow-2xl hover:border-fuch-essence">${inner}</div>`;
             return { mCard, dCard };
         });
 
@@ -528,19 +726,17 @@ const app = {
         dContainer.insertAdjacentHTML('beforeend', html.map(h => h.dCard).join(''));
     },
 
-    toggleAdmin() { this.nav('admin'); },
-    login() { if(document.getElementById('adm-pass').value==='admin') { document.getElementById('admin-auth').classList.add('hidden'); document.getElementById('admin-editor').classList.remove('hidden'); } else alert('Неверно'); },
     addNews() {
         const t=document.getElementById('new-title').value, b=document.getElementById('new-body').value, type=document.getElementById('new-tag').value;
         if(!t||!b) return alert('Заполните');
         const n={id:Date.now(), title:t, body:b.substring(0,150)+'...', full:`<p>${b.replace(/\n/g,'</p><p>')}</p>`, tag:type==='idea'?'Мнение':'Новости', source:'Автор', date:'Сейчас', isPost:type==='idea', sourceUrl:'#'};
-        if(type==='idea') { this.data.posts.unshift(n); localStorage.setItem('ip_posts_v7',JSON.stringify(this.data.posts)); this.renderIdeas(); }
+        if(type==='idea') { this.data.posts.unshift(n); localStorage.setItem('ip_posts_v9',JSON.stringify(this.data.posts)); this.renderIdeas(); }
         else { this.data.news.unshift(n); this.renderStandardFeed([n]); }
         alert('OK'); this.nav(type==='idea'?'ideas':'feed');
     },
     renderIdeas() { 
         document.getElementById('ideas-list').innerHTML = this.data.posts.map(p => `
-            <div onclick="app.openReader('${p.id}')" class="bg-card p-6 rounded-2xl border border-white/5 active:scale-95 transition cursor-pointer hover:border-purple-500/50 group">
+            <div onclick="app.openReader('${p.id}')" class="bg-fuch-card p-6 rounded-2xl border border-fuch-border active:scale-95 transition cursor-pointer hover:border-purple-500/50 group">
                 <div class="text-xs text-purple-400 font-bold mb-3 uppercase tracking-wider flex items-center gap-2"><i class="fas fa-pen-nib"></i> Мнение • ${p.date}</div>
                 <h3 class="text-xl font-bold mb-3 group-hover:text-purple-400 transition">${p.title}</h3>
                 <p class="text-sm text-gray-400 line-clamp-3 leading-relaxed">${p.body}</p>
