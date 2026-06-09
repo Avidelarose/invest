@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>InvestPro - Аналитика и Новости Рынков</title>
-    <!-- Подключаем Tailwind CSS для современного и быстрого дизайна -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Иконки -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
         tailwind.config = {
@@ -25,36 +23,17 @@
         }
     </script>
     <style>
-        /* Анимация для бегущей строки */
-        .ticker-wrap {
-            width: 100%;
-            overflow: hidden;
-            background-color: #1e293b;
-            padding-left: 100%;
-            box-sizing: border-box;
-        }
-        .ticker {
-            display: inline-block;
-            white-space: nowrap;
-            padding-right: 100%;
-            box-sizing: border-box;
-            animation: ticker 30s linear infinite;
-        }
-        .ticker-item {
-            display: inline-block;
-            padding: 0 2rem;
-            font-size: 0.9rem;
-            color: #e2e8f0;
-        }
-        @keyframes ticker {
-            0% { transform: translate3d(0, 0, 0); }
-            100% { transform: translate3d(-100%, 0, 0); }
-        }
+        .ticker-wrap { width: 100%; overflow: hidden; background-color: #1e293b; padding-left: 100%; box-sizing: border-box; }
+        .ticker { display: inline-block; white-space: nowrap; padding-right: 100%; box-sizing: border-box; animation: ticker 35s linear infinite; }
+        .ticker-item { display: inline-block; padding: 0 2rem; font-size: 0.9rem; color: #e2e8f0; }
+        @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
+        .loader { border: 3px solid #1e293b; border-top: 3px solid #3b82f6; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="bg-dark text-gray-200 font-sans antialiased">
 
-    <!-- 1. ВЕРХНИЕ ПРЕДУПРЕЖДЕНИЯ (Требование) -->
+    <!-- 1. ВЕРХНИЕ ПРЕДУПРЕЖДЕНИЯ -->
     <div class="bg-darker border-b border-gray-800">
         <div class="text-red-500 text-center py-2 text-sm font-bold uppercase tracking-wider animate-pulse">
             <i class="fas fa-exclamation-triangle mr-2"></i>Не является индивидуальной инвестиционной рекомендацией
@@ -73,154 +52,83 @@
             </div>
             <nav class="hidden md:flex space-x-6 text-sm font-medium">
                 <a href="#" class="hover:text-accent transition">Главная</a>
-                <a href="#" class="hover:text-accent transition">Новости</a>
+                <a href="#" class="text-accent font-bold">Новости</a>
                 <a href="#" class="hover:text-accent transition">Акции РФ</a>
                 <a href="#" class="hover:text-accent transition">Облигации</a>
-                <a href="#" class="hover:text-accent transition">Идеи</a>
             </nav>
-            <button class="bg-accent hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition">
-                <i class="fas fa-user mr-2"></i>Войти
-            </button>
+            <div class="text-xs text-gray-400" id="last-updated">Обновление...</div>
         </div>
     </header>
 
-    <!-- 3. БЕГУЩАЯ СТРОКА (Котировки) -->
+    <!-- 3. БЕГУЩАЯ СТРОКА -->
     <div class="ticker-wrap border-b border-gray-700">
-        <div class="ticker" id="ticker-content">
-            <!-- Заполняется через JS -->
-        </div>
+        <div class="ticker" id="ticker-content"></div>
     </div>
 
     <!-- 4. ОСНОВНОЙ КОНТЕНТ -->
     <main class="container mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        <!-- ЛЕВАЯ КОЛОНКА: Новости и Посты (2/3 ширины) -->
+        <!-- ЛЕВАЯ КОЛОНКА: Динамические Новости -->
         <div class="lg:col-span-2 space-y-6">
-            <h2 class="text-xl font-bold text-white border-l-4 border-accent pl-3 mb-4">Последние новости и аналитика</h2>
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-white border-l-4 border-accent pl-3">Последние новости рынков</h2>
+                <button onclick="fetchAndRenderNews()" class="text-xs bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded transition">
+                    <i class="fas fa-sync-alt mr-1"></i> Обновить
+                </button>
+            </div>
             
-            <!-- Карточка новости 1 -->
-            <article class="bg-card rounded-xl p-5 border border-gray-700 hover:border-accent transition shadow-lg">
-                <div class="flex justify-between items-start mb-3">
-                    <span class="bg-blue-900 text-blue-300 text-xs px-2 py-1 rounded">Аналитика</span>
-                    <span class="text-gray-500 text-xs">Сегодня, 10:45</span>
-                </div>
-                <h3 class="text-xl font-bold text-white mb-2 hover:text-accent cursor-pointer">ЦБ РФ сохранил ключевую ставку: что это значит для рынка акций?</h3>
-                <p class="text-gray-400 text-sm mb-4">
-                    Регулятор принял ожидаемое решение. Аналитики считают, что сектор банковского кредитования останется под давлением, в то время как экспортёры могут показать рост...
-                </p>
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-2">
-                        <div class="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center text-xs">АИ</div>
-                        <span class="text-sm text-gray-300">Алексей Инвесторов</span>
-                    </div>
-                    <button class="text-accent text-sm hover:underline">Читать далее <i class="fas fa-arrow-right ml-1"></i></button>
-                </div>
-            </article>
-
-            <!-- Карточка новости 2 -->
-            <article class="bg-card rounded-xl p-5 border border-gray-700 hover:border-accent transition shadow-lg">
-                <div class="flex justify-between items-start mb-3">
-                    <span class="bg-green-900 text-green-300 text-xs px-2 py-1 rounded">Отчетность</span>
-                    <span class="text-gray-500 text-xs">Вчера, 18:20</span>
-                </div>
-                <h3 class="text-xl font-bold text-white mb-2 hover:text-accent cursor-pointer">Лукойл опубликовал рекордную чистую прибыль за квартал</h3>
-                <p class="text-gray-400 text-sm mb-4">
-                    Компания превзошла ожидания консенсус-прогноза. Совет директоров может рекомендовать повышенные дивиденды по итогам периода.
-                </p>
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-2">
-                        <div class="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center text-xs">РК</div>
-                        <span class="text-sm text-gray-300">Редакция</span>
-                    </div>
-                    <button class="text-accent text-sm hover:underline">Читать далее <i class="fas fa-arrow-right ml-1"></i></button>
-                </div>
-            </article>
-
-            <!-- Место для виджета TradingView (График) -->
-            <div class="bg-card rounded-xl p-1 border border-gray-700 h-80 flex items-center justify-center">
-                <p class="text-gray-500 text-sm"><i class="fas fa-chart-area mr-2"></i>Здесь будет интерактивный график (например, виджет TradingView)</p>
+            <!-- Контейнер для новостей (заполняется JS) -->
+            <div id="news-container" class="space-y-4">
+                <div class="flex justify-center py-10"><div class="loader"></div></div>
             </div>
         </div>
 
-        <!-- ПРАВАЯ КОЛОНКА: Сайдбар (1/3 ширины) -->
+        <!-- ПРАВАЯ КОЛОНКА: Сайдбар -->
         <aside class="space-y-6">
             
-            <!-- Виджет валют (Данные подгружаются JS) -->
+            <!-- Виджет валют -->
             <div class="bg-card rounded-xl p-5 border border-gray-700 shadow-lg">
                 <h3 class="text-lg font-bold text-white mb-4 flex items-center">
-                    <i class="fas fa-coins text-yellow-500 mr-2"></i>Курсы валют (ЦБ/Биржа)
+                    <i class="fas fa-coins text-yellow-500 mr-2"></i>Курсы валют
                 </h3>
                 <div class="space-y-3" id="currency-rates">
                     <div class="flex justify-between items-center p-2 bg-darker rounded">
-                        <div class="flex items-center"><img src="https://flagcdn.com/w20/us.png" class="mr-2 rounded"> USD/RUB</div>
-                        <div class="text-right">
-                            <div class="font-bold text-white" id="usd-rate">Загрузка...</div>
-                            <div class="text-xs text-up" id="usd-change">+0.45%</div>
-                        </div>
+                        <div class="flex items-center"><span class="mr-2">🇺🇸</span> USD/RUB</div>
+                        <div class="text-right"><div class="font-bold text-white" id="usd-rate">...</div></div>
                     </div>
                     <div class="flex justify-between items-center p-2 bg-darker rounded">
-                        <div class="flex items-center"><img src="https://flagcdn.com/w20/eu.png" class="mr-2 rounded"> EUR/RUB</div>
-                        <div class="text-right">
-                            <div class="font-bold text-white" id="eur-rate">Загрузка...</div>
-                            <div class="text-xs text-down" id="eur-change">-0.12%</div>
-                        </div>
+                        <div class="flex items-center"><span class="mr-2">🇪🇺</span> EUR/RUB</div>
+                        <div class="text-right"><div class="font-bold text-white" id="eur-rate">...</div></div>
                     </div>
                     <div class="flex justify-between items-center p-2 bg-darker rounded">
-                        <div class="flex items-center"><img src="https://flagcdn.com/w20/cn.png" class="mr-2 rounded"> CNY/RUB</div>
-                        <div class="text-right">
-                            <div class="font-bold text-white" id="cny-rate">Загрузка...</div>
-                            <div class="text-xs text-up" id="cny-change">+0.05%</div>
-                        </div>
+                        <div class="flex items-center"><span class="mr-2">🇨🇳</span> CNY/RUB</div>
+                        <div class="text-right"><div class="font-bold text-white" id="cny-rate">...</div></div>
                     </div>
                 </div>
-                <button class="w-full mt-4 bg-gray-700 hover:bg-gray-600 text-xs text-white py-2 rounded transition">Все валюты</button>
             </div>
 
-            <!-- Лидеры роста и падения (Добавлено от себя) -->
+            <!-- Динамический Календарь событий (заполняется из новостей JS) -->
+            <div class="bg-card rounded-xl p-5 border border-gray-700 shadow-lg">
+                <h3 class="text-lg font-bold text-white mb-4 flex items-center">
+                    <i class="fas fa-calendar-alt text-accent mr-2"></i>Календарь событий
+                </h3>
+                <p class="text-xs text-gray-500 mb-3">Сформирован автоматически из свежих новостей</p>
+                <ul id="calendar-container" class="space-y-3 text-sm">
+                    <div class="flex justify-center py-4"><div class="loader"></div></div>
+                </ul>
+            </div>
+
+            <!-- Лидеры дня (Статика для примера, можно тоже сделать динамической) -->
             <div class="bg-card rounded-xl p-5 border border-gray-700 shadow-lg">
                 <h3 class="text-lg font-bold text-white mb-4 flex items-center">
                     <i class="fas fa-fire text-orange-500 mr-2"></i>Лидеры дня (IMOEX)
                 </h3>
                 <div class="space-y-3">
-                    <div class="flex justify-between items-center text-sm">
-                        <span class="text-gray-300">SBER</span>
-                        <span class="text-up font-bold">+3.24%</span>
-                    </div>
-                    <div class="w-full bg-gray-700 h-1 rounded"><div class="bg-up h-1 rounded" style="width: 70%"></div></div>
-                    
-                    <div class="flex justify-between items-center text-sm mt-3">
-                        <span class="text-gray-300">GAZP</span>
-                        <span class="text-down font-bold">-1.85%</span>
-                    </div>
-                    <div class="w-full bg-gray-700 h-1 rounded"><div class="bg-down h-1 rounded" style="width: 40%"></div></div>
-
-                    <div class="flex justify-between items-center text-sm mt-3">
-                        <span class="text-gray-300">YNDX</span>
-                        <span class="text-up font-bold">+2.10%</span>
-                    </div>
-                    <div class="w-full bg-gray-700 h-1 rounded"><div class="bg-up h-1 rounded" style="width: 55%"></div></div>
+                    <div class="flex justify-between items-center text-sm"><span class="text-gray-300">SBER</span><span class="text-up font-bold">+2.14%</span></div>
+                    <div class="w-full bg-gray-700 h-1 rounded"><div class="bg-up h-1 rounded" style="width: 65%"></div></div>
+                    <div class="flex justify-between items-center text-sm mt-3"><span class="text-gray-300">GAZP</span><span class="text-down font-bold">-0.85%</span></div>
+                    <div class="w-full bg-gray-700 h-1 rounded"><div class="bg-down h-1 rounded" style="width: 30%"></div></div>
                 </div>
-            </div>
-
-            <!-- Календарь инвестора (Добавлено от себя) -->
-            <div class="bg-card rounded-xl p-5 border border-gray-700 shadow-lg">
-                <h3 class="text-lg font-bold text-white mb-4 flex items-center">
-                    <i class="fas fa-calendar-alt text-accent mr-2"></i>Календарь событий
-                </h3>
-                <ul class="space-y-3 text-sm">
-                    <li class="flex items-start border-l-2 border-accent pl-3">
-                        <div>
-                            <div class="text-gray-400 text-xs">Завтра, 19:00 МСК</div>
-                            <div class="text-white font-medium">Заседание ФРС США</div>
-                        </div>
-                    </li>
-                    <li class="flex items-start border-l-2 border-yellow-500 pl-3">
-                        <div>
-                            <div class="text-gray-400 text-xs">15 июня, 07:00 МСК</div>
-                            <div class="text-white font-medium">Дивидендная отсечка Татнефть</div>
-                        </div>
-                    </li>
-                </ul>
             </div>
 
         </aside>
@@ -231,66 +139,179 @@
         <div class="container mx-auto px-4 text-center">
             <p class="text-red-500 text-xs font-bold mb-2">НЕ ЯВЛЯЕТСЯ ИНДИВИДУАЛЬНОЙ ИНВЕСТИЦИОННОЙ РЕКОМЕНДАЦИЕЙ</p>
             <p class="text-gray-600 text-xs mb-4">Любые действия, совершенные на основании информации с сайта, вы совершаете на свой страх и риск.</p>
-            <div class="text-gray-500 text-sm">
-                &copy; 2026 InvestPro. Все права защищены.
-            </div>
+            <div class="text-gray-500 text-sm">&copy; 2026 InvestPro. Данные предоставлены в ознакомительных целях.</div>
         </div>
     </footer>
 
-    <!-- СКРИПТЫ ДЛЯ ПОЛУЧЕНИЯ ДАННЫХ -->
+    <!-- СКРИПТЫ: АВТОМАТИЧЕСКИЙ ПАРСИНГ И ОБНОВЛЕНИЕ -->
     <script>
-        // 1. Получение реальных курсов валют (бесплатный API без ключа)
+        // === 1. КОНФИГУРАЦИЯ ПАРСЕРА ===
+        const RSS_SOURCES = [
+            { name: "РБК Финансы", url: "https://www.rbc.ru/finances/rss/", color: "bg-blue-900 text-blue-300" },
+            { name: "ЦБ РФ", url: "http://www.cbr.ru/rss/", color: "bg-red-900 text-red-300" },
+            { name: "Smart-Lab", url: "https://smart-lab.ru/rss/", color: "bg-purple-900 text-purple-300" }
+        ];
+
+        // Ключевые слова для фильтрации (регулярные выражения)
+        const KEYWORDS = [
+            /акци[ю|и|ям|ях|ями]?/i, /облигац/i, /инвестиц/i, /дивиденд/i, 
+            /ключевая ставка/i, /цб рф/i, /центральный банк/i, /мосбирж/i, 
+            /moex/i, /отчетность/i, /прибыль/i, /отсечк/i
+        ];
+
+        // Ключевые слова специально для календаря
+        const CALENDAR_KEYWORDS = [
+            /дивиденд/i, /отсечк/i, /заседани/i, /ставка/i, /отчет/i, /публикаци/i, /рекоменд/i
+        ];
+
+        // === 2. ФУНКЦИЯ ПОЛУЧЕНИЯ RSS ЧЕРЕЗ CORS-ПРОКСИ ===
+        async function fetchRSS(source) {
+            try {
+                // Используем allorigins как бесплатный CORS-прокси
+                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(source.url)}`;
+                const response = await fetch(proxyUrl);
+                const data = await response.json();
+                
+                // Парсим XML
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(data.contents, "text/xml");
+                const items = xmlDoc.querySelectorAll("item");
+                
+                const parsedItems = [];
+                items.forEach(item => {
+                    const title = item.querySelector("title")?.textContent || "";
+                    const link = item.querySelector("link")?.textContent || "";
+                    const pubDate = item.querySelector("pubDate")?.textContent || "";
+                    const description = item.querySelector("description")?.textContent || "";
+
+                    // Фильтрация по ключевым словам
+                    const isRelevant = KEYWORDS.some(regex => regex.test(title) || regex.test(description));
+                    
+                    if (isRelevant && title && link) {
+                        parsedItems.push({
+                            source: source.name,
+                            color: source.color,
+                            title: title,
+                            link: link,
+                            date: new Date(pubDate),
+                            description: description.replace(/<[^>]*>/g, '').substring(0, 150) + "..." // Убираем HTML-теги
+                        });
+                   3
+                });
+                return parsedItems;
+            } catch (error) {
+                console.error(`Ошибка загрузки ${source.name}:`, error);
+                return [];
+            }
+        }
+
+        // === 3. ОСНОВНАЯ ФУНКЦИЯ СБОРА И ОТРИСОВКИ ===
+        async function fetchAndRenderNews() {
+            const newsContainer = document.getElementById('news-container');
+            const calendarContainer = document.getElementById('calendar-container');
+            
+            // Показываем лоадер
+            newsContainer.innerHTML = '<div class="flex justify-center py-10"><div class="loader"></div></div>';
+            calendarContainer.innerHTML = '<div class="flex justify-center py-4"><div class="loader"></div></div>';
+
+            // Собираем новости со всех источников параллельно
+            const promises = RSS_SOURCES.map(source => fetchRSS(source));
+            const results = await Promise.all(promises);
+            
+            // Объединяем и сортируем по дате (свежие сверху)
+            let allNews = results.flat().sort((a, b) => b.date - a.date);
+            
+            // Убираем дубликаты по заголовку
+            allNews = allNews.filter((v,i,a)=>a.findIndex(t=>(t.title === v.title))===i);
+
+            // Обновляем время
+            document.getElementById('last-updated').innerText = `Обновлено: ${new Date().toLocaleTimeString('ru-RU')}`;
+
+            // === РЕНДЕР НОВОСТЕЙ ===
+            if (allNews.length === 0) {
+                newsContainer.innerHTML = '<p class="text-gray-400 text-center">Не удалось загрузить новости. Попробуйте позже.</p>';
+            } else {
+                newsContainer.innerHTML = allNews.slice(0, 15).map(item => { // Показываем топ-15
+                    const dateStr = item.date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
+                    return `
+                    <article class="bg-card rounded-xl p-5 border border-gray-700 hover:border-accent transition shadow-lg">
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="${item.color} text-xs px-2 py-1 rounded font-bold">${item.source}</span>
+                            <span class="text-gray-500 text-xs">${dateStr}</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-2 hover:text-accent cursor-pointer">
+                            <a href="${item.link}" target="_blank" rel="noopener noreferrer">${item.title}</a>
+                        </h3>
+                        <p class="text-gray-400 text-sm mb-4">${item.description}</p>
+                        <a href="${item.link}" target="_blank" class="text-accent text-sm hover:underline font-medium">
+                            Читать оригинал <i class="fas fa-external-link-alt ml-1 text-xs"></i>
+                        </a
+                    </article>`;
+                }).join('');
+            }
+
+            // === РЕНДЕР КАЛЕНДАРЯ (извлекаем из тех же новостей) ===
+            const calendarEvents = allNews.filter(item => 
+                CALENDAR_KEYWORDS.some(regex => regex.test(item.title))
+            ).slice(0, 5); // Берем топ-5 событий
+
+            if (calendarEvents.length === 0) {
+                calendarContainer.innerHTML = '<li class="text-gray-500 text-xs">Событий в ближайших новостях не найдено.</li>';
+            } else {
+                calendarContainer.innerHTML = calendarEvents.map(item => {
+                    const dateStr = item.date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+                    const timeStr = item.date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+                    return `
+                    <li class="flex items-start border-l-2 border-accent pl-3 hover:bg-gray-800 p-2 rounded transition">
+                        <div class="w-full">
+                            <div class="text-accent text-xs font-bold">${dateStr} в ${timeStr} • ${item.source}</div>
+                            <a href="${item.link}" target="_blank" class="text-white text-sm font-medium hover:text-accent line-clamp-2">
+                                ${item.title}
+                            </a>
+                        </div>
+                    </li>`;
+                }).join('');
+            }
+        }
+
+        // === 4. КУРСЫ ВАЛЮТ (Бесплатный API) ===
         async function fetchCurrencyRates() {
             try {
                 const response = await fetch('https://open.er-api.com/v6/latest/USD');
                 const data = await response.json();
-                
-                const usdRub = data.rates.RUB.toFixed(2);
-                const eurRub = (data.rates.RUB / data.rates.EUR).toFixed(2); // Кросс-курс
-                const cnyRub = (data.rates.RUB / data.rates.CNY).toFixed(2);
-
-                document.getElementById('usd-rate').innerText = `${usdRub} ₽`;
-                document.getElementById('eur-rate').innerText = `${eurRub} ₽`;
-                document.getElementById('cny-rate').innerText = `${cnyRub} ₽`;
-            } catch (error) {
-                console.error('Ошибка загрузки курсов:', error);
-                document.getElementById('usd-rate').innerText = '92.50 ₽'; // Фолбэк
+                document.getElementById('usd-rate').innerText = `${data.rates.RUB.toFixed(2)} ₽`;
+                document.getElementById('eur-rate').innerText = `${(data.rates.RUB / data.rates.EUR).toFixed(2)} ₽`;
+                document.getElementById('cny-rate').innerText = `${(data.rates.RUB / data.rates.CNY).toFixed(2)} ₽`;
+            } catch (e) {
+                document.getElementById('usd-rate').innerText = "Н/Д";
             }
         }
 
-        // 2. Генерация бегущей строки
+        // === 5. БЕГУЩАЯ СТРОКА ===
         function initTicker() {
             const tickerData = [
                 { name: 'IMOEX', value: '3,245.12', change: '+1.2%', up: true },
                 { name: 'S&P 500', value: '5,432.10', change: '-0.4%', up: false },
                 { name: 'BTC/USD', value: '68,500', change: '+2.1%', up: true },
-                { name: 'Золото', value: '2,340.50', change: '+0.5%', up: true },
                 { name: 'Нефть Brent', value: '82.15', change: '-1.1%', up: false },
-                { name: 'IMOEX', value: '3,245.12', change: '+1.2%', up: true }, // Дублирование для бесшовности
+                { name: 'Золото', value: '2,340.50', change: '+0.5%', up: true }
             ];
-
-            const tickerContainer = document.getElementById('ticker-content');
-            let html = '';
-            
-            tickerData.forEach(item => {
-                const colorClass = item.up ? 'text-up' : 'text-down';
+            const html = tickerData.map(item => {
+                const color = item.up ? 'text-up' : 'text-down';
                 const icon = item.up ? '▲' : '▼';
-                html += `
-                    <div class="ticker-item">
-                        <span class="font-bold text-gray-300">${item.name}</span>
-                        <span class="ml-2">${item.value}</span>
-                        <span class="ml-2 ${colorClass}">${icon} ${item.change}</span>
-                    </div>
-                `;
-            });
-            // Умножаем контент, чтобы строка была длинной
-            tickerContainer.innerHTML = html + html + html; 
+                return `<div class="ticker-item"><span class="font-bold text-gray-300">${item.name}</span> <span class="ml-2">${item.value}</span> <span class="ml-2 ${color}">${icon} ${item.change}</span></div>`;
+            }).join('');
+            document.getElementById('ticker-content').innerHTML = html + html + html; // Для бесшовной прокрутки
         }
 
-        // Запуск при загрузке
+        // === ЗАПУСК ПРИ ЗАГРУЗКЕ ===
         document.addEventListener('DOMContentLoaded', () => {
-            fetchCurrencyRates();
             initTicker();
+            fetchCurrencyRates();
+            fetchAndRenderNews(); // Загружаем новости сразу
+            
+            // Автообновление новостей каждые 10 минут (600000 мс), чтобы не копить и не спамить запросами
+            setInterval(fetchAndRenderNews, 600000);
         });
     </script>
 </body>
