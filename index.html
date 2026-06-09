@@ -288,58 +288,64 @@ const app = {
         feedPage: 0, essencePage: 0, 
         feedLoading: false, essenceLoading: false, 
         readerTheme: localStorage.getItem('ip_theme') || 'light',
-        likes: JSON.parse(localStorage.getItem('ip_likes_v12') || '{}'),
-        comments: JSON.parse(localStorage.getItem('ip_comments_v12') || '{}'),
+        likes: JSON.parse(localStorage.getItem('ip_likes_v13') || '{}'),
+        comments: JSON.parse(localStorage.getItem('ip_comments_v13') || '{}'),
         users: JSON.parse(localStorage.getItem('fuch_users') || '[]'),
         currentUser: JSON.parse(localStorage.getItem('fuch_current_user') || 'null'),
-        currentItem: null, rssSources: []
+        currentItem: null,
+        generatedIds: new Set() // Глобальный реестр уникальности
     },
 
-    // --- ГЕНЕРАТОР КОНТЕНТА ---
-    companies: ['Сбербанк', 'Газпром', 'Лукойл', 'Яндекс', 'Тинькофф', 'Магнит', 'Норникель', 'Полюс', 'Аэрофлот', 'Сургутнефтегаз', 'Роснефть', 'МТС', 'Северсталь', 'НЛМК', 'Татнефть', 'Мосбиржа', 'VK', 'Ozon', 'Wildberries', 'Детский мир'],
-    tickers: ['SBER', 'GAZP', 'LKOH', 'YNDX', 'TCSG', 'MGNT', 'GMKN', 'PLZL', 'AFLT', 'SNGS', 'ROSN', 'MTSS', 'CHMF', 'NLMK', 'TATN', 'MOEX', 'VKCO', 'OZON', 'DSKY'],
-    macroEvents: ['Ключевая ставка ЦБ', 'Инфляция в РФ', 'ВВП России', 'Безработица США', 'Non-Farm Payrolls', 'Ставка ФРС', 'Индекс PMI', 'Розничные продажи', 'Промышленное производство', 'Сальдо торгового баланса'],
-    cryptoAssets: ['Bitcoin', 'Ethereum', 'Solana', 'TON', 'BNB', 'Ripple', 'Cardano', 'Dogecoin'],
+    // --- ГЕНЕРАТОР КОНТЕНТА С ЗАЩИТОЙ ОТ ПОВТОРОВ ---
+    companies: ['Сбербанк', 'Газпром', 'Лукойл', 'Яндекс', 'Тинькофф', 'Магнит', 'Норникель', 'Полюс', 'Аэрофлот', 'Сургутнефтегаз', 'Роснефть', 'МТС', 'Северсталь', 'НЛМК', 'Татнефть', 'Мосбиржа', 'VK', 'Ozon', 'Wildberries', 'Детский мир', 'X5 Group', 'Русал', 'Фосагро', 'Полиметалл', 'Алроса'],
+    tickers: ['SBER', 'GAZP', 'LKOH', 'YNDX', 'TCSG', 'MGNT', 'GMKN', 'PLZL', 'AFLT', 'SNGS', 'ROSN', 'MTSS', 'CHMF', 'NLMK', 'TATN', 'MOEX', 'VKCO', 'OZON', 'DSKY', 'RUAL', 'PHOR', 'POLY', 'ALRS'],
+    macroEvents: ['Ключевая ставка ЦБ', 'Инфляция в РФ', 'ВВП России', 'Безработица США', 'Non-Farm Payrolls', 'Ставка ФРС', 'Индекс PMI', 'Розничные продажи', 'Промышленное производство', 'Сальдо торгового баланса', 'Индекс потребительских цен', 'Ставка ЕЦБ'],
+    cryptoAssets: ['Bitcoin', 'Ethereum', 'Solana', 'TON', 'BNB', 'Ripple', 'Cardano', 'Dogecoin', 'Polkadot', 'Avalanche', 'Chainlink'],
     
     templates: {
         essence: [
             { tag: "Акции", gen: () => {
                 const c = app.companies[Math.floor(Math.random()*app.companies.length)];
                 const n = Math.floor(Math.random()*40)+1;
-                return { t: `${c}: прибыль +${n}%`, s: `• Чистая прибыль: ${n} млрд руб\n• Дивиденды: рекомендованы\n• Акции реагируют ростом` };
+                return { t: `${c}: прибыль +${n}%`, s: `• Чистая прибыль: ${n} млрд руб\n• Дивиденды: рекомендованы\n• Акции реагируют ростом`, hash: `ess_stock_${c}_${n}` };
             }},
             { tag: "Макро", gen: () => {
                 const e = app.macroEvents[Math.floor(Math.random()*app.macroEvents.length)];
                 const v = (Math.random()*10).toFixed(1);
-                return { t: `${e}: данные вышли`, s: `• Показатель: ${v}%\n• Прогноз был ниже\n• Рынок корректируется` };
+                return { t: `${e}: данные вышли`, s: `• Показатель: ${v}%\n• Прогноз был ниже\n• Рынок корректируется`, hash: `ess_macro_${e}_${v}` };
             }},
             { tag: "Крипто", gen: () => {
                 const a = app.cryptoAssets[Math.floor(Math.random()*app.cryptoAssets.length)];
                 const p = Math.floor(Math.random()*50000)+1000;
-                return { t: `${a} пробивает уровень`, s: `• Цена: $${p}\n• Объем торгов растет\n• Киты накапливают позицию` };
+                return { t: `${a} пробивает уровень`, s: `• Цена: $${p}\n• Объем торгов растет\n• Киты накапливают позицию`, hash: `ess_crypto_${a}_${p}` };
             }},
             { tag: "Сырье", gen: () => {
-                const items = ['Нефть Brent', 'Золото', 'Палладий', 'Природный газ'];
+                const items = ['Нефть Brent', 'Золото', 'Палладий', 'Природный газ', 'Медь', 'Платина'];
                 const i = items[Math.floor(Math.random()*items.length)];
-                return { t: `${i} обновляет максимум`, s: `• Дефицит предложения\n• Геополитическая премия\n• Тренд восходящий` };
+                const v = Math.floor(Math.random()*100)+50;
+                return { t: `${i} обновляет максимум`, s: `• Рост на ${v}% за неделю\n• Дефицит предложения\n• Тренд восходящий`, hash: `ess_comm_${i}_${v}` };
             }}
         ],
         feed: [
             () => {
                 const c = app.companies[Math.floor(Math.random()*app.companies.length)];
-                return { t: `${c} опубликовал отчетность за квартал`, b: `Компания показала результаты выше ожиданий аналитиков. Выручка выросла на фоне расширения бизнеса.` };
+                const q = ['I', 'II', 'III', 'IV'][Math.floor(Math.random()*4)];
+                return { t: `${c} опубликовал отчетность за ${q} квартал`, b: `Компания показала результаты выше ожиданий аналитиков. Выручка выросла на фоне расширения бизнеса.`, hash: `feed_report_${c}_${q}` };
             },
             () => {
                 const t = app.tickers[Math.floor(Math.random()*app.tickers.length)];
-                return { t: `Акции ${t} падают на новостях о санкциях`, b: `Рынок негативно отреагировал на новые ограничения. Инвесторы фиксируют прибыль.` };
+                const reasons = ['санкциях', 'дивидендах', 'отчетности', 'макро-фоне', 'новостях сектора'];
+                const r = reasons[Math.floor(Math.random()*reasons.length)];
+                return { t: `Акции ${t} падают на новостях о ${r}`, b: `Рынок негативно отреагировал на новые ограничения. Инвесторы фиксируют прибыль после роста.`, hash: `feed_drop_${t}_${r}` };
             },
             () => {
                 const e = app.macroEvents[Math.floor(Math.random()*app.macroEvents.length)];
-                return { t: `ЦБ прокомментировал ${e}`, b: `Регулятор отметил стабильность финансовой системы и отсутствие системных рисков.` };
+                return { t: `ЦБ прокомментировал ${e}`, b: `Регулятор отметил стабильность финансовой системы и отсутствие системных рисков в текущих условиях.`, hash: `feed_cb_${e}` };
             },
             () => {
                 const a = app.cryptoAssets[Math.floor(Math.random()*app.cryptoAssets.length)];
-                return { t: `Крупный фонд купил ${a} на $100 млн`, b: `Институциональные инвесторы продолжают наращивать позиции в цифровых активах.` };
+                const amount = Math.floor(Math.random()*500)+50;
+                return { t: `Крупный фонд купил ${a} на $${amount} млн`, b: `Институциональные инвесторы продолжают наращивать позиции в цифровых активах несмотря на волатильность.`, hash: `feed_buy_${a}_${amount}` };
             }
         ]
     },
@@ -348,39 +354,68 @@ const app = {
         return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
     },
 
+    // Умный генератор Essence с проверкой уникальности
     generateEssenceItem() {
-        const tmpl = this.templates.essence[Math.floor(Math.random() * this.templates.essence.length)];
-        const data = tmpl.gen();
+        let attempts = 0;
+        while(attempts < 50) {
+            const tmpl = this.templates.essence[Math.floor(Math.random() * this.templates.essence.length)];
+            const data = tmpl.gen();
+            
+            if (!this.data.generatedIds.has(data.hash)) {
+                this.data.generatedIds.add(data.hash);
+                return {
+                    id: this.generateUniqueID(),
+                    title: data.t,
+                    summary: data.s,
+                    tag: tmpl.tag,
+                    source: ['Bloomberg', 'Reuters', 'Интерфакс', 'РБК', 'ЦБ РФ'][Math.floor(Math.random() * 5)],
+                    date: new Date(Date.now() - Math.floor(Math.random() * 86400000)).toLocaleDateString('ru-RU', {day:'numeric', month:'short'}),
+                    sourceUrl: '#'
+                };
+            }
+            attempts++;
+        }
+        // Fallback если все комбинации исчерпаны (крайне маловероятно)
         return {
             id: this.generateUniqueID(),
-            title: data.t,
-            summary: data.s,
-            tag: tmpl.tag,
-            source: ['Bloomberg', 'Reuters', 'Интерфакс', 'РБК', 'ЦБ РФ'][Math.floor(Math.random() * 5)],
-            date: new Date(Date.now() - Math.floor(Math.random() * 86400000)).toLocaleDateString('ru-RU', {day:'numeric', month:'short'}),
-            sourceUrl: '#'
+            title: "Рынок: свежие обновления",
+            summary: "• Торги проходят активно\n• Волатильность повышена\n• Следите за новостями",
+            tag: "Рынок", source: "FUCH", date: "Сейчас", sourceUrl: "#"
         };
     },
 
+    // Умный генератор Feed с проверкой уникальности
     generateFeedItem() {
-        const gen = this.templates.feed[Math.floor(Math.random() * this.templates.feed.length)];
-        const data = gen();
+        let attempts = 0;
+        while(attempts < 50) {
+            const gen = this.templates.feed[Math.floor(Math.random() * this.templates.feed.length)];
+            const data = gen();
+            
+            if (!this.data.generatedIds.has(data.hash)) {
+                this.data.generatedIds.add(data.hash);
+                return {
+                    id: this.generateUniqueID(),
+                    title: data.t,
+                    body: data.b,
+                    full: `<p>${data.b}</p><p>Подробности развиваются...</p>`,
+                    tag: ["Акции","Макро","Крипто","Сырье"][Math.floor(Math.random()*4)],
+                    source: ['Ведомости', 'Коммерсантъ', 'Forbes', 'Habr'][Math.floor(Math.random() * 4)],
+                    date: new Date(Date.now() - Math.floor(Math.random() * 86400000)).toLocaleDateString('ru-RU', {day:'numeric', month:'short'}),
+                    sourceUrl: '#'
+                };
+            }
+            attempts++;
+        }
         return {
             id: this.generateUniqueID(),
-            title: data.t,
-            body: data.b,
-            full: `<p>${data.b}</p><p>Подробности развиваются...</p>`,
-            tag: ["Акции","Макро","Крипто","Сырье"][Math.floor(Math.random()*4)],
-            source: ['Ведомости', 'Коммерсантъ', 'Forbes', 'Habr'][Math.floor(Math.random() * 4)],
-            date: new Date(Date.now() - Math.floor(Math.random() * 86400000)).toLocaleDateString('ru-RU', {day:'numeric', month:'short'}),
-            sourceUrl: '#'
+            title: "Обзор рынка за сегодня",
+            body: "Основные индексы демонстрируют смешанную динамику на фоне корпоративных новостей.",
+            full: "<p>Обзор рынка...</p>", tag: "Рынок", source: "FUCH", date: "Сейчас", sourceUrl: "#"
         };
     },
 
     init() {
-        this.seedData();
-        
-        const savedPosts = localStorage.getItem('ip_posts_v12');
+        const savedPosts = localStorage.getItem('ip_posts_v13');
         this.data.posts = savedPosts ? JSON.parse(savedPosts) : [
             { id: 'post_1', title: "Почему я покупаю нефтянку", body: "Энергетический кризис только начинается.", full: "<p>Многие боятся рецессии, но я вижу точку входа.</p><h2>Причины</h2><p>Дефицит инвестиций в добычу создает предпосылки для роста цен.</p>", tag: "Мнение", date: "2ч назад", isPost: true }
         ];
@@ -487,8 +522,6 @@ const app = {
         } else this.showToast('Неверный пароль админа'); 
     },
 
-    seedData() { /* Стартовые данные больше не нужны, всё генерируется */ },
-
     initTicker() {
         const d = [{n:'IMOEX',v:'3,245',c:'+1.2%',u:1},{n:'S&P',v:'5,432',c:'-0.4%',u:0},{n:'BTC',v:'68K',c:'+2.1%',u:1},{n:'Brent',v:'82',c:'-1.1%',u:0},{n:'USD',v:'92.5',c:'+0.3%',u:1}];
         document.getElementById('ticker-content').innerHTML = d.map(i=>`<div class="ticker-item"><span class="font-bold text-gray-300">${i.n}</span> <span class="mx-1">${i.v}</span> <span class="${i.u?'text-up':'text-down'}">${i.c}</span></div>`).join('').repeat(6);
@@ -531,7 +564,7 @@ const app = {
         const isLiked = this.data.likes[id];
         if (isLiked) { delete this.data.likes[id]; btn.classList.remove('text-red-500'); btn.querySelector('i').classList.replace('fas', 'far'); } 
         else { this.data.likes[id] = true; btn.classList.add('text-red-500'); btn.querySelector('i').classList.replace('far', 'fas'); btn.querySelector('i').classList.add('like-animate'); setTimeout(() => btn.querySelector('i').classList.remove('like-animate'), 300); }
-        localStorage.setItem('ip_likes_v12', JSON.stringify(this.data.likes));
+        localStorage.setItem('ip_likes_v13', JSON.stringify(this.data.likes));
         this.updateLikeUI(id);
     },
 
@@ -556,7 +589,7 @@ const app = {
         const id = this.data.currentItem.id;
         if(!this.data.comments[id]) this.data.comments[id] = [];
         this.data.comments[id].unshift({text, author: this.data.currentUser.name, date: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})});
-        localStorage.setItem('ip_comments_v12', JSON.stringify(this.data.comments));
+        localStorage.setItem('ip_comments_v13', JSON.stringify(this.data.comments));
         input.value = '';
         this.renderComments(id);
         this.showToast('Комментарий добавлен');
@@ -720,7 +753,7 @@ const app = {
         const t=document.getElementById('new-title').value, b=document.getElementById('new-body').value, type=document.getElementById('new-tag').value;
         if(!t||!b) return alert('Заполните');
         const n={id:this.generateUniqueID(), title:t, body:b.substring(0,150)+'...', full:`<p>${b.replace(/\n/g,'</p><p>')}</p>`, tag:type==='idea'?'Мнение':'Новости', source:'Автор', date:'Сейчас', isPost:type==='idea', sourceUrl:'#'};
-        if(type==='idea') { this.data.posts.unshift(n); localStorage.setItem('ip_posts_v12',JSON.stringify(this.data.posts)); this.renderIdeas(); }
+        if(type==='idea') { this.data.posts.unshift(n); localStorage.setItem('ip_posts_v13',JSON.stringify(this.data.posts)); this.renderIdeas(); }
         else { this.data.news.unshift(n); this.renderStandardFeed([n]); }
         alert('OK'); this.nav(type==='idea'?'ideas':'feed');
     },
