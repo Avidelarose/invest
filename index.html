@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>FUCH | Gewinn fixieren</title>
     
+    <!-- VK SDK -->
+    <script type="text/javascript" src="https://vk.com/js/api/openapi.js?169"></script>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
@@ -85,42 +88,48 @@
 
     <div id="toast"><i class="fas fa-check-circle mr-2 text-fuch-accent"></i><span id="toast-msg">Готово</span></div>
 
-    <!-- AUTH MODAL -->
+    <!-- AUTH / PROFILE MODAL -->
     <div id="auth-modal" class="modal-overlay z-[120]">
-        <div class="auth-modal-content bg-fuch-card w-[90%] max-w-sm p-6 rounded-3xl border border-fuch-border shadow-2xl relative">
-            <button onclick="app.closeAuth()" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition text-lg">
+        <div class="auth-modal-content bg-fuch-card w-[90%] max-w-sm p-6 rounded-3xl border border-fuch-border shadow-2xl relative max-h-[90vh] overflow-y-auto no-scrollbar">
+            <button onclick="app.closeAuth()" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition text-lg z-10">
                 <i class="fas fa-times"></i>
             </button>
 
+            <!-- ЭКРАН ВХОДА -->
             <div id="auth-login-form">
                 <h2 class="text-2xl font-bold text-white mb-1">Вход в FUCH</h2>
                 <p class="text-xs text-gray-500 mb-6">Войдите, чтобы комментировать и ставить лайки</p>
                 
+                <!-- VK LOGIN BUTTON -->
+                <div class="mb-6">
+                    <button onclick="app.vkLogin()" class="w-full bg-vk hover:bg-blue-600 text-white font-bold py-4 rounded-xl transition active:scale-95 flex items-center justify-center gap-3 text-lg shadow-lg shadow-blue-900/20">
+                        <i class="fab fa-vk text-2xl"></i> Войти через VK
+                    </button>
+                    <p class="text-[10px] text-gray-500 text-center mt-2">Мы запросим только имя и аватар</p>
+                </div>
+
+                <div class="relative flex py-2 items-center mb-4">
+                    <div class="flex-grow border-t border-fuch-border"></div>
+                    <span class="flex-shrink-0 mx-4 text-gray-500 text-xs uppercase">или email</span>
+                    <div class="flex-grow border-t border-fuch-border"></div>
+                </div>
+
                 <div class="space-y-3 mb-6">
                     <input type="email" id="login-email" class="w-full bg-fuch-bg border border-fuch-border rounded-xl px-4 py-4 text-white outline-none focus:border-fuch-accent transition text-base" placeholder="Email">
                     <input type="password" id="login-pass" class="w-full bg-fuch-bg border border-fuch-border rounded-xl px-4 py-4 text-white outline-none focus:border-fuch-accent transition text-base" placeholder="Пароль">
                 </div>
 
                 <button onclick="app.loginUser()" class="w-full bg-fuch-accent hover:bg-blue-600 text-white font-bold py-4 rounded-xl transition active:scale-95 mb-4 text-lg">Войти</button>
-                
-                <div class="relative flex py-2 items-center mb-4">
-                    <div class="flex-grow border-t border-fuch-border"></div>
-                    <span class="flex-shrink-0 mx-4 text-gray-500 text-xs uppercase">или</span>
-                    <div class="flex-grow border-t border-fuch-border"></div>
-                </div>
-
-                <button onclick="app.vkLoginMock()" class="w-full bg-vk hover:bg-blue-600 text-white font-bold py-4 rounded-xl transition active:scale-95 flex items-center justify-center gap-2 mb-4 text-lg">
-                    <i class="fab fa-vk text-xl"></i> Войти через VK
-                </button>
 
                 <p class="text-center text-base text-gray-400">
                     Нет аккаунта? <button onclick="app.toggleAuthMode('register')" class="text-fuch-accent font-bold hover:underline">Создать</button>
                 </p>
             </div>
 
+            <!-- ЭКРАН РЕГИСТРАЦИИ -->
             <div id="auth-register-form" class="hidden">
                 <h2 class="text-2xl font-bold text-white mb-1">Регистрация</h2>
-                <p class="text-xs text-gray-500 mb-6">Присоединяйтесь к сообществу инвесторов</p>
+                <p class="text-xs text-gray-500 mb-6">Создайте аккаунт инвестора</p>
                 
                 <div class="space-y-3 mb-6">
                     <input type="text" id="reg-name" class="w-full bg-fuch-bg border border-fuch-border rounded-xl px-4 py-4 text-white outline-none focus:border-fuch-accent transition text-base" placeholder="Имя / Никнейм">
@@ -134,11 +143,89 @@
                     Уже есть аккаунт? <button onclick="app.toggleAuthMode('login')" class="text-fuch-accent font-bold hover:underline">Войти</button>
                 </p>
             </div>
+
+            <!-- ЛИЧНЫЙ КАБИНЕТ (Показывается когда вошел) -->
+            <div id="profile-view" class="hidden">
+                <div class="flex flex-col items-center mb-6">
+                    <img id="profile-avatar" src="" alt="Avatar" class="w-24 h-24 rounded-full border-4 border-fuch-accent mb-4 object-cover bg-gray-700">
+                    <h2 id="profile-name" class="text-2xl font-bold text-white text-center">User Name</h2>
+                    <p id="profile-email" class="text-sm text-gray-500">user@example.com</p>
+                    <div id="profile-vk-badge" class="hidden mt-2 bg-vk/20 text-vk text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
+                        <i class="fab fa-vk"></i> Привязан к VK
+                    </div>
+                </div>
+
+                <div class="bg-fuch-bg rounded-xl p-4 border border-fuch-border mb-6 space-y-4">
+                    <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider">Редактировать профиль</h3>
+                    
+                    <div>
+                        <label class="block text-xs text-gray-500 mb-1">Отображаемое имя</label>
+                        <input type="text" id="edit-name" class="w-full bg-fuch-card border border-fuch-border rounded-lg px-3 py-3 text-white outline-none focus:border-fuch-accent text-sm">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs text-gray-500 mb-1">Возраст</label>
+                        <input type="number" id="edit-age" class="w-full bg-fuch-card border border-fuch-border rounded-lg px-3 py-3 text-white outline-none focus:border-fuch-accent text-sm" placeholder="Не указан">
+                    </div>
+
+                    <button onclick="app.saveProfile()" class="w-full bg-white/10 hover:bg-white/20 text-white font-bold py-3 rounded-lg transition text-sm">Сохранить изменения</button>
+                </div>
+
+                <button onclick="app.logout()" class="w-full border border-red-500/50 text-red-500 hover:bg-red-500/10 font-bold py-4 rounded-xl transition text-lg">
+                    Выйти из аккаунта
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- DONATE MODAL -->
+    <div id="donate-modal" class="modal-overlay z-[110]">
+        <div class="auth-modal-content bg-fuch-card w-[90%] max-w-md p-8 rounded-3xl border border-fuch-border shadow-2xl relative text-center">
+            <button onclick="document.getElementById('donate-modal').classList.remove('active')" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white transition text-lg">
+                <i class="fas fa-times"></i>
+            </button>
+
+            <div class="w-20 h-20 bg-gradient-to-tr from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-orange-500/30">
+                <i class="fas fa-hand-holding-heart text-white text-3xl"></i>
+            </div>
+            
+            <h2 class="text-3xl font-bold text-white mb-2">Поддержать FUCH</h2>
+            <p class="text-gray-400 mb-8">Помогите проекту развиваться и оставаться независимым. Ваш донат идет на оплату серверов и развитие функционала.</p>
+
+            <!-- Прогресс бар -->
+            <div class="mb-8 text-left">
+                <div class="flex justify-between text-sm mb-2 font-bold">
+                    <span class="text-white">Собрано: 12 400 ₽</span>
+                    <span class="text-gray-500">Цель: 50 000 ₽</span>
+                </div>
+                <div class="w-full bg-fuch-bg rounded-full h-4 overflow-hidden border border-fuch-border">
+                    <div class="bg-gradient-to-r from-yellow-400 to-orange-500 h-full rounded-full" style="width: 25%"></div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <button onclick="app.donate(100)" class="bg-fuch-bg hover:bg-fuch-accent hover:text-white border border-fuch-border py-4 rounded-xl font-bold text-xl transition group">
+                    100 ₽
+                </button>
+                <button onclick="app.donate(300)" class="bg-fuch-bg hover:bg-fuch-accent hover:text-white border border-fuch-border py-4 rounded-xl font-bold text-xl transition group">
+                    300 ₽
+                </button>
+                <button onclick="app.donate(500)" class="bg-fuch-bg hover:bg-fuch-accent hover:text-white border border-fuch-border py-4 rounded-xl font-bold text-xl transition group">
+                    500 ₽
+                </button>
+                <button onclick="app.donate(1000)" class="bg-fuch-bg hover:bg-fuch-accent hover:text-white border border-fuch-border py-4 rounded-xl font-bold text-xl transition group">
+                    1000 ₽
+                </button>
+            </div>
+            
+            <button onclick="app.donate('custom')" class="w-full bg-fuch-essence hover:bg-orange-600 text-black font-bold py-4 rounded-xl transition active:scale-95 text-lg mt-2">
+                Задонатить другую сумму
+            </button>
         </div>
     </div>
 
     <!-- ONBOARDING MODAL -->
-    <div id="essence-modal" class="modal-overlay z-[110]">
+    <div id="essence-modal" class="modal-overlay z-[100]">
         <div class="bg-fuch-card w-[90%] max-w-md p-8 rounded-3xl border border-fuch-border shadow-2xl text-center">
             <div class="w-16 h-16 bg-gradient-to-tr from-fuch-essence to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-orange-500/20">
                 <i class="fas fa-bolt text-white text-3xl"></i>
@@ -168,6 +255,11 @@
             <button onclick="app.nav('ideas')" id="btn-ideas" class="nav-btn px-4 py-1.5 rounded-full text-xs font-medium text-gray-400 hover:text-white hover:bg-white/10 transition-all">Мнения</button>
         </nav>
         <div class="flex items-center gap-2 md:gap-3">
+            <!-- Кнопка Донат -->
+            <button onclick="document.getElementById('donate-modal').classList.add('active')" class="h-10 md:h-9 px-3 md:px-2 rounded-full border border-yellow-500/30 bg-yellow-500/10 flex items-center justify-center gap-2 text-yellow-500 hover:bg-yellow-500 hover:text-black transition text-xs font-bold" title="Поддержать проект">
+                <i class="fas fa-heart text-xs"></i> <span class="hidden md:inline">Донат</span>
+            </button>
+
             <button onclick="app.showEssenceInfo()" class="w-10 h-10 md:w-9 md:h-9 rounded-full border border-fuch-essence/50 bg-fuch-essence/10 flex items-center justify-center text-fuch-essence hover:text-white hover:bg-fuch-essence transition" title="Что такое Суть?">
                 <i class="fas fa-question text-sm md:text-xs"></i>
             </button>
@@ -267,7 +359,8 @@
                 </div>
 
                 <div id="comment-section-logged-in" class="hidden flex gap-3 mb-6 items-center">
-                    <div class="w-12 h-12 rounded-full bg-fuch-accent flex items-center justify-center text-white font-bold text-lg shrink-0" id="comment-avatar">U</div>
+                    <img id="comment-avatar-img" src="" class="w-12 h-12 rounded-full bg-fuch-accent object-cover shrink-0 hidden">
+                    <div id="comment-avatar-letter" class="w-12 h-12 rounded-full bg-fuch-accent flex items-center justify-center text-white font-bold text-lg shrink-0">U</div>
                     <div class="flex-1 flex gap-2">
                         <input type="text" id="comment-input" class="comment-input flex-1 px-4 py-4 md:py-3 rounded-xl border outline-none text-base md:text-sm" placeholder="Написать комментарий...">
                         <button onclick="app.postComment()" class="bg-fuch-accent text-white w-14 h-14 md:w-12 md:h-12 rounded-xl flex items-center justify-center hover:bg-blue-600 transition shrink-0">
@@ -288,15 +381,16 @@ const app = {
         feedPage: 0, essencePage: 0, 
         feedLoading: false, essenceLoading: false, 
         readerTheme: localStorage.getItem('ip_theme') || 'light',
-        likes: JSON.parse(localStorage.getItem('ip_likes_v13') || '{}'),
-        comments: JSON.parse(localStorage.getItem('ip_comments_v13') || '{}'),
+        likes: JSON.parse(localStorage.getItem('ip_likes_v14') || '{}'),
+        comments: JSON.parse(localStorage.getItem('ip_comments_v14') || '{}'),
         users: JSON.parse(localStorage.getItem('fuch_users') || '[]'),
         currentUser: JSON.parse(localStorage.getItem('fuch_current_user') || 'null'),
         currentItem: null,
-        generatedIds: new Set() // Глобальный реестр уникальности
+        generatedIds: new Set(),
+        vkAppId: 0 // <-- ВСТАВИТЬ СЮДА ВАШ APP_ID ОТ VK
     },
 
-    // --- ГЕНЕРАТОР КОНТЕНТА С ЗАЩИТОЙ ОТ ПОВТОРОВ ---
+    // --- ГЕНЕРАТОР КОНТЕНТА ---
     companies: ['Сбербанк', 'Газпром', 'Лукойл', 'Яндекс', 'Тинькофф', 'Магнит', 'Норникель', 'Полюс', 'Аэрофлот', 'Сургутнефтегаз', 'Роснефть', 'МТС', 'Северсталь', 'НЛМК', 'Татнефть', 'Мосбиржа', 'VK', 'Ozon', 'Wildberries', 'Детский мир', 'X5 Group', 'Русал', 'Фосагро', 'Полиметалл', 'Алроса'],
     tickers: ['SBER', 'GAZP', 'LKOH', 'YNDX', 'TCSG', 'MGNT', 'GMKN', 'PLZL', 'AFLT', 'SNGS', 'ROSN', 'MTSS', 'CHMF', 'NLMK', 'TATN', 'MOEX', 'VKCO', 'OZON', 'DSKY', 'RUAL', 'PHOR', 'POLY', 'ALRS'],
     macroEvents: ['Ключевая ставка ЦБ', 'Инфляция в РФ', 'ВВП России', 'Безработица США', 'Non-Farm Payrolls', 'Ставка ФРС', 'Индекс PMI', 'Розничные продажи', 'Промышленное производство', 'Сальдо торгового баланса', 'Индекс потребительских цен', 'Ставка ЕЦБ'],
@@ -350,72 +444,43 @@ const app = {
         ]
     },
 
-    generateUniqueID() {
-        return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
-    },
+    generateUniqueID() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 9); },
 
-    // Умный генератор Essence с проверкой уникальности
     generateEssenceItem() {
         let attempts = 0;
         while(attempts < 50) {
             const tmpl = this.templates.essence[Math.floor(Math.random() * this.templates.essence.length)];
             const data = tmpl.gen();
-            
             if (!this.data.generatedIds.has(data.hash)) {
                 this.data.generatedIds.add(data.hash);
-                return {
-                    id: this.generateUniqueID(),
-                    title: data.t,
-                    summary: data.s,
-                    tag: tmpl.tag,
-                    source: ['Bloomberg', 'Reuters', 'Интерфакс', 'РБК', 'ЦБ РФ'][Math.floor(Math.random() * 5)],
-                    date: new Date(Date.now() - Math.floor(Math.random() * 86400000)).toLocaleDateString('ru-RU', {day:'numeric', month:'short'}),
-                    sourceUrl: '#'
-                };
+                return { id: this.generateUniqueID(), title: data.t, summary: data.s, tag: tmpl.tag, source: ['Bloomberg', 'Reuters', 'Интерфакс', 'РБК', 'ЦБ РФ'][Math.floor(Math.random() * 5)], date: new Date(Date.now() - Math.floor(Math.random() * 86400000)).toLocaleDateString('ru-RU', {day:'numeric', month:'short'}), sourceUrl: '#' };
             }
             attempts++;
         }
-        // Fallback если все комбинации исчерпаны (крайне маловероятно)
-        return {
-            id: this.generateUniqueID(),
-            title: "Рынок: свежие обновления",
-            summary: "• Торги проходят активно\n• Волатильность повышена\n• Следите за новостями",
-            tag: "Рынок", source: "FUCH", date: "Сейчас", sourceUrl: "#"
-        };
+        return { id: this.generateUniqueID(), title: "Рынок: свежие обновления", summary: "• Торги проходят активно\n• Волатильность повышена", tag: "Рынок", source: "FUCH", date: "Сейчас", sourceUrl: "#" };
     },
 
-    // Умный генератор Feed с проверкой уникальности
     generateFeedItem() {
         let attempts = 0;
         while(attempts < 50) {
             const gen = this.templates.feed[Math.floor(Math.random() * this.templates.feed.length)];
             const data = gen();
-            
             if (!this.data.generatedIds.has(data.hash)) {
                 this.data.generatedIds.add(data.hash);
-                return {
-                    id: this.generateUniqueID(),
-                    title: data.t,
-                    body: data.b,
-                    full: `<p>${data.b}</p><p>Подробности развиваются...</p>`,
-                    tag: ["Акции","Макро","Крипто","Сырье"][Math.floor(Math.random()*4)],
-                    source: ['Ведомости', 'Коммерсантъ', 'Forbes', 'Habr'][Math.floor(Math.random() * 4)],
-                    date: new Date(Date.now() - Math.floor(Math.random() * 86400000)).toLocaleDateString('ru-RU', {day:'numeric', month:'short'}),
-                    sourceUrl: '#'
-                };
+                return { id: this.generateUniqueID(), title: data.t, body: data.b, full: `<p>${data.b}</p><p>Подробности развиваются...</p>`, tag: ["Акции","Макро","Крипто","Сырье"][Math.floor(Math.random()*4)], source: ['Ведомости', 'Коммерсантъ', 'Forbes', 'Habr'][Math.floor(Math.random() * 4)], date: new Date(Date.now() - Math.floor(Math.random() * 86400000)).toLocaleDateString('ru-RU', {day:'numeric', month:'short'}), sourceUrl: '#' };
             }
             attempts++;
         }
-        return {
-            id: this.generateUniqueID(),
-            title: "Обзор рынка за сегодня",
-            body: "Основные индексы демонстрируют смешанную динамику на фоне корпоративных новостей.",
-            full: "<p>Обзор рынка...</p>", tag: "Рынок", source: "FUCH", date: "Сейчас", sourceUrl: "#"
-        };
+        return { id: this.generateUniqueID(), title: "Обзор рынка за сегодня", body: "Основные индексы демонстрируют смешанную динамику.", full: "<p>Обзор рынка...</p>", tag: "Рынок", source: "FUCH", date: "Сейчас", sourceUrl: "#" };
     },
 
     init() {
-        const savedPosts = localStorage.getItem('ip_posts_v13');
+        // Инициализация VK SDK
+        if (this.data.vkAppId) {
+            VK.init({ apiId: this.data.vkAppId });
+        }
+
+        const savedPosts = localStorage.getItem('ip_posts_v14');
         this.data.posts = savedPosts ? JSON.parse(savedPosts) : [
             { id: 'post_1', title: "Почему я покупаю нефтянку", body: "Энергетический кризис только начинается.", full: "<p>Многие боятся рецессии, но я вижу точку входа.</p><h2>Причины</h2><p>Дефицит инвестиций в добычу создает предпосылки для роста цен.</p>", tag: "Мнение", date: "2ч назад", isPost: true }
         ];
@@ -424,7 +489,6 @@ const app = {
         this.initTicker();
         this.renderIdeas();
         
-        // Генерируем стартовые порции
         for(let i=0; i<10; i++) this.data.news.push(this.generateFeedItem());
         for(let i=0; i<5; i++) this.data.essenceFeed.push(this.generateEssenceItem());
         
@@ -439,32 +503,75 @@ const app = {
         this.nav('feed');
     },
 
-    // --- AUTH SYSTEM ---
+    // --- AUTH & PROFILE SYSTEM ---
     openAuth() {
+        document.getElementById('auth-modal').classList.add('active');
         if (this.data.currentUser) {
-            if(confirm(`Вы вошли как ${this.data.currentUser.name}. Выйти из аккаунта?`)) this.logout();
+            this.showProfile();
         } else {
-            document.getElementById('auth-modal').classList.add('active');
             this.toggleAuthMode('login');
         }
     },
     closeAuth() { document.getElementById('auth-modal').classList.remove('active'); },
+    
     toggleAuthMode(mode) {
         document.getElementById('auth-login-form').classList.toggle('hidden', mode !== 'login');
         document.getElementById('auth-register-form').classList.toggle('hidden', mode !== 'register');
+        document.getElementById('profile-view').classList.add('hidden');
     },
+
+    showProfile() {
+        document.getElementById('auth-login-form').classList.add('hidden');
+        document.getElementById('auth-register-form').classList.add('hidden');
+        document.getElementById('profile-view').classList.remove('hidden');
+        
+        const u = this.data.currentUser;
+        document.getElementById('profile-name').innerText = u.name;
+        document.getElementById('profile-email').innerText = u.email || 'Email не указан';
+        document.getElementById('profile-avatar').src = u.photo || 'https://via.placeholder.com/150';
+        document.getElementById('edit-name').value = u.name;
+        document.getElementById('edit-age').value = u.age || '';
+        
+        const vkBadge = document.getElementById('profile-vk-badge');
+        if(u.isVk) vkBadge.classList.remove('hidden'); else vkBadge.classList.add('hidden');
+    },
+
+    saveProfile() {
+        const newName = document.getElementById('edit-name').value.trim();
+        const newAge = document.getElementById('edit-age').value;
+        
+        if(!newName) return this.showToast('Имя не может быть пустым');
+        
+        // Обновляем в памяти
+        this.data.currentUser.name = newName;
+        this.data.currentUser.age = newAge;
+        
+        // Обновляем в базе пользователей
+        const idx = this.data.users.findIndex(u => u.id === this.data.currentUser.id);
+        if(idx > -1) {
+            this.data.users[idx] = this.data.currentUser;
+            localStorage.setItem('fuch_users', JSON.stringify(this.data.users));
+        }
+        localStorage.setItem('fuch_current_user', JSON.stringify(this.data.currentUser));
+        
+        this.updateAuthUI();
+        this.showProfile(); // Обновить поля
+        this.showToast('Профиль обновлен');
+    },
+
     registerUser() {
         const name = document.getElementById('reg-name').value.trim();
         const email = document.getElementById('reg-email').value.trim();
         const pass = document.getElementById('reg-pass').value;
         if (!name || !email || !pass) return this.showToast('Заполните все поля');
         if (this.data.users.find(u => u.email === email)) return this.showToast('Email уже занят');
-        const newUser = { name, email, pass, id: this.generateUniqueID() };
+        const newUser = { name, email, pass, id: this.generateUniqueID(), photo: null, age: null };
         this.data.users.push(newUser);
         localStorage.setItem('fuch_users', JSON.stringify(this.data.users));
         this.loginAs(newUser);
         this.showToast('Регистрация успешна!');
     },
+
     loginUser() {
         const email = document.getElementById('login-email').value.trim();
         const pass = document.getElementById('login-pass').value;
@@ -473,16 +580,71 @@ const app = {
         this.loginAs(user);
         this.showToast(`Добро пожаловать, ${user.name}!`);
     },
-    vkLoginMock() {
-        let user = this.data.users.find(u => u.isVk);
-        if (!user) {
-            user = { name: 'VK User', email: 'vk@user.com', pass: '', id: 'vk_' + Date.now(), isVk: true };
-            this.data.users.push(user);
-            localStorage.setItem('fuch_users', JSON.stringify(this.data.users));
+
+    vkLogin() {
+        // Если AppID не задан, используем демо-режим
+        if (!this.data.vkAppId) {
+            if(confirm('Для настоящего входа нужен App ID от VK.\nЗапустить демо-вход с фейковыми данными?')) {
+                const mockVkUser = {
+                    id: 'vk_demo_' + Date.now(),
+                    name: 'Павел Дуров',
+                    email: 'durov@vk.com',
+                    photo: 'https://sun9-68.userapi.com/impg/WDXWj5-Xj5_jQ-_l5_wXJw.jpg',
+                    age: 39,
+                    isVk: true
+                };
+                // Проверяем, есть ли уже такой
+                let existing = this.data.users.find(u => u.isVk && u.name === mockVkUser.name);
+                if(!existing) {
+                    this.data.users.push(mockVkUser);
+                    localStorage.setItem('fuch_users', JSON.stringify(this.data.users));
+                    existing = mockVkUser;
+                }
+                this.loginAs(existing);
+                this.showToast('Демо-вход через VK выполнен');
+            }
+            return;
         }
-        this.loginAs(user);
-        this.showToast('Вход через VK выполнен');
+
+        // Настоящий вход через VK SDK
+        VK.Auth.login(function(response) {
+            if (response.session) {
+                const uid = response.session.mid;
+                // Запрашиваем данные профиля
+                VK.api('users.get', { user_ids: uid, fields: 'photo_200,bdate' }, function(r) {
+                    if (r.response && r.response[0]) {
+                        const vkData = r.response[0];
+                        const fullName = `${vkData.first_name} ${vkData.last_name}`;
+                        
+                        // Ищем или создаем пользователя
+                        let user = app.data.users.find(u => u.vkId == uid);
+                        if (!user) {
+                            user = {
+                                id: 'vk_' + uid,
+                                vkId: uid,
+                                name: fullName,
+                                photo: vkData.photo_200,
+                                email: null, // VK не отдает email без отдельного разрешения
+                                age: null, // Можно распарсить из bdate
+                                isVk: true
+                            };
+                            app.data.users.push(user);
+                            localStorage.setItem('fuch_users', JSON.stringify(app.data.users));
+                        } else {
+                            // Обновляем фото и имя при каждом входе
+                            user.name = fullName;
+                            user.photo = vkData.photo_200;
+                            localStorage.setItem('fuch_users', JSON.stringify(app.data.users));
+                        }
+                        
+                        app.loginAs(user);
+                        app.showToast(`Привет, ${vkData.first_name}!`);
+                    }
+                });
+            }
+        }, 4); // 4 = права доступа к email (если нужно)
     },
+
     loginAs(user) {
         this.data.currentUser = user;
         localStorage.setItem('fuch_current_user', JSON.stringify(user));
@@ -490,19 +652,23 @@ const app = {
         this.updateAuthUI();
         if (this.data.currentItem) this.renderComments(this.data.currentItem.id);
     },
+
     logout() {
         this.data.currentUser = null;
         localStorage.removeItem('fuch_current_user');
         this.updateAuthUI();
+        this.toggleAuthMode('login');
         this.showToast('Вы вышли из аккаунта');
         if (this.data.currentItem) this.renderComments(this.data.currentItem.id);
     },
+
     updateAuthUI() {
         const btn = document.getElementById('user-profile-btn');
         const nameSpan = document.getElementById('user-name-display');
         const icon = btn.querySelector('i');
         if (this.data.currentUser) {
             nameSpan.innerText = this.data.currentUser.name.split(' ')[0];
+            // Если есть фото, можно заменить иконку на мини-аватар, но пока оставим иконку
             icon.className = 'fas fa-user-check text-fuch-accent text-base md:text-sm';
             btn.classList.add('border-fuch-accent', 'text-white', 'bg-fuch-accent/10');
             btn.classList.remove('text-gray-300');
@@ -512,6 +678,15 @@ const app = {
             btn.classList.remove('border-fuch-accent', 'text-white', 'bg-fuch-accent/10');
             btn.classList.add('text-gray-300');
         }
+    },
+
+    donate(amount) {
+        if(amount === 'custom') {
+            const val = prompt('Введите сумму доната (₽):');
+            if(val && !isNaN(val)) amount = val; else return;
+        }
+        this.showToast(`Переход к оплате ${amount}₽... (Здесь будет платежный шлюз)`);
+        // Здесь должна быть интеграция с CloudPayments / YooKassa / DonationAlerts
     },
 
     toggleAdmin() { this.nav('admin'); },
@@ -564,7 +739,7 @@ const app = {
         const isLiked = this.data.likes[id];
         if (isLiked) { delete this.data.likes[id]; btn.classList.remove('text-red-500'); btn.querySelector('i').classList.replace('fas', 'far'); } 
         else { this.data.likes[id] = true; btn.classList.add('text-red-500'); btn.querySelector('i').classList.replace('far', 'fas'); btn.querySelector('i').classList.add('like-animate'); setTimeout(() => btn.querySelector('i').classList.remove('like-animate'), 300); }
-        localStorage.setItem('ip_likes_v13', JSON.stringify(this.data.likes));
+        localStorage.setItem('ip_likes_v14', JSON.stringify(this.data.likes));
         this.updateLikeUI(id);
     },
 
@@ -588,8 +763,13 @@ const app = {
         if(!text) return;
         const id = this.data.currentItem.id;
         if(!this.data.comments[id]) this.data.comments[id] = [];
-        this.data.comments[id].unshift({text, author: this.data.currentUser.name, date: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})});
-        localStorage.setItem('ip_comments_v13', JSON.stringify(this.data.comments));
+        
+        // Берем актуальное имя из профиля (вдруг изменил)
+        const authorName = this.data.currentUser.name;
+        const authorPhoto = this.data.currentUser.photo;
+
+        this.data.comments[id].unshift({text, author: authorName, photo: authorPhoto, date: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})});
+        localStorage.setItem('ip_comments_v14', JSON.stringify(this.data.comments));
         input.value = '';
         this.renderComments(id);
         this.showToast('Комментарий добавлен');
@@ -600,21 +780,41 @@ const app = {
         const count = document.getElementById('comments-count');
         const loggedInSection = document.getElementById('comment-section-logged-in');
         const loggedOutSection = document.getElementById('comment-section-logged-out');
-        const avatar = document.getElementById('comment-avatar');
+        const avatarImg = document.getElementById('comment-avatar-img');
+        const avatarLetter = document.getElementById('comment-avatar-letter');
+        
         const coms = this.data.comments[id] || [];
         count.innerText = coms.length;
+        
         if (this.data.currentUser) {
             loggedInSection.classList.remove('hidden');
             loggedOutSection.classList.add('hidden');
-            avatar.innerText = this.data.currentUser.name.charAt(0).toUpperCase();
+            if(this.data.currentUser.photo) {
+                avatarImg.src = this.data.currentUser.photo;
+                avatarImg.classList.remove('hidden');
+                avatarLetter.classList.add('hidden');
+            } else {
+                avatarImg.classList.add('hidden');
+                avatarLetter.classList.remove('hidden');
+                avatarLetter.innerText = this.data.currentUser.name.charAt(0).toUpperCase();
+            }
         } else {
             loggedInSection.classList.add('hidden');
             loggedOutSection.classList.remove('hidden');
         }
+        
         list.innerHTML = coms.map(c => `
-            <div class="bg-black/5 dark:bg-white/5 p-4 rounded-xl">
-                <div class="flex justify-between text-xs font-bold mb-1 opacity-70"><span>${c.author}</span><span>${c.date}</span></div>
-                <p class="text-sm md:text-base">${c.text}</p>
+            <div class="bg-black/5 dark:bg-white/5 p-4 rounded-xl flex gap-3">
+                <div class="shrink-0">
+                    ${c.photo 
+                        ? `<img src="${c.photo}" class="w-8 h-8 rounded-full object-cover">` 
+                        : `<div class="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center text-xs font-bold">${c.author.charAt(0)}</div>`
+                    }
+                </div>
+                <div class="flex-1">
+                    <div class="flex justify-between text-xs font-bold mb-1 opacity-70"><span>${c.author}</span><span>${c.date}</span></div>
+                    <p class="text-sm md:text-base">${c.text}</p>
+                </div>
             </div>
         `).join('');
     },
@@ -753,7 +953,7 @@ const app = {
         const t=document.getElementById('new-title').value, b=document.getElementById('new-body').value, type=document.getElementById('new-tag').value;
         if(!t||!b) return alert('Заполните');
         const n={id:this.generateUniqueID(), title:t, body:b.substring(0,150)+'...', full:`<p>${b.replace(/\n/g,'</p><p>')}</p>`, tag:type==='idea'?'Мнение':'Новости', source:'Автор', date:'Сейчас', isPost:type==='idea', sourceUrl:'#'};
-        if(type==='idea') { this.data.posts.unshift(n); localStorage.setItem('ip_posts_v13',JSON.stringify(this.data.posts)); this.renderIdeas(); }
+        if(type==='idea') { this.data.posts.unshift(n); localStorage.setItem('ip_posts_v14',JSON.stringify(this.data.posts)); this.renderIdeas(); }
         else { this.data.news.unshift(n); this.renderStandardFeed([n]); }
         alert('OK'); this.nav(type==='idea'?'ideas':'feed');
     },
