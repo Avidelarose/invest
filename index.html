@@ -168,12 +168,10 @@
             <button onclick="app.nav('ideas')" id="btn-ideas" class="nav-btn px-4 py-1.5 rounded-full text-xs font-medium text-gray-400 hover:text-white hover:bg-white/10 transition-all">Мнения</button>
         </nav>
         <div class="flex items-center gap-2 md:gap-3">
-            <!-- Кнопка ? (УВЕЛИЧЕНА) -->
             <button onclick="app.showEssenceInfo()" class="w-10 h-10 md:w-9 md:h-9 rounded-full border border-fuch-essence/50 bg-fuch-essence/10 flex items-center justify-center text-fuch-essence hover:text-white hover:bg-fuch-essence transition" title="Что такое Суть?">
                 <i class="fas fa-question text-sm md:text-xs"></i>
             </button>
             
-            <!-- Кнопка профиля / Вход (УВЕЛИЧЕНА) -->
             <button id="user-profile-btn" onclick="app.openAuth()" class="h-10 md:h-9 px-4 md:px-3 rounded-full border border-fuch-border bg-white/5 flex items-center justify-center gap-2 text-gray-300 hover:text-white hover:border-fuch-accent hover:bg-fuch-accent/10 transition text-sm font-bold">
                 <i class="far fa-user text-base md:text-sm"></i> <span id="user-name-display" class="hidden md:inline">Войти</span>
             </button>
@@ -194,7 +192,7 @@
             <div id="essence-mobile" class="essence-scroll-mobile no-scrollbar md:hidden pl-4"></div>
             <div id="essence-desktop" class="essence-grid-desktop no-scrollbar hidden md:block"></div>
             <div id="essence-loader" class="absolute bottom-8 left-1/2 -translate-x-1/2 text-gray-500 text-sm hidden bg-fuch-card px-4 py-2 rounded-full border border-fuch-border z-30">
-                <i class="fas fa-circle-notch fa-spin mr-2"></i>Анализ...
+                <i class="fas fa-circle-notch fa-spin mr-2"></i>Генерация сути...
             </div>
         </section>
 
@@ -239,13 +237,11 @@
     <div id="reader-modal" class="modal-overlay">
         <div id="reader-paper" class="reader-box reader-paper light">
             <div class="reader-header sticky top-0 z-10 px-4 md:px-6 py-3 flex justify-between items-center font-sans backdrop-blur">
-                <!-- Кнопка Назад (УВЕЛИЧЕНА) -->
                 <button onclick="app.closeReader()" class="flex items-center gap-2 text-current opacity-80 hover:opacity-100 font-bold text-base md:text-sm px-3 py-2 -ml-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition">
                     <i class="fas fa-arrow-left text-lg md:text-base"></i> <span>Назад</span>
                 </button>
                 <div class="flex items-center gap-3">
                     <span class="text-[10px] font-bold uppercase tracking-widest opacity-50 hidden sm:block">FUCH READER</span>
-                    <!-- Кнопка темы (УВЕЛИЧЕНА) -->
                     <button onclick="app.toggleReaderTheme()" class="w-10 h-10 md:w-9 md:h-9 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center hover:bg-black/10 dark:hover:bg-white/20 transition border border-black/5 dark:border-white/5">
                         <i id="theme-icon" class="fas fa-moon text-sm md:text-xs"></i>
                     </button>
@@ -253,7 +249,6 @@
             </div>
             <article id="reader-content" class="prose-reader"></article>
             <div class="max-w-[68ch] mx-auto px-4 md:px-6 pb-20 font-sans border-t border-current/10 mt-8 pt-8">
-                <!-- Кнопки действий в ридере (УВЕЛИЧЕНЫ) -->
                 <div class="flex gap-3 mb-8">
                     <button id="reader-like-btn" onclick="app.handleReaderLike()" class="reader-btn flex-1 py-4 md:py-3 rounded-xl font-bold border flex items-center justify-center gap-2 transition active:scale-95 text-base md:text-sm">
                         <i class="far fa-heart text-lg md:text-base"></i> <span id="reader-like-count">0</span>
@@ -293,18 +288,50 @@ const app = {
         feedPage: 0, essencePage: 0, 
         feedLoading: false, essenceLoading: false, 
         readerTheme: localStorage.getItem('ip_theme') || 'light',
-        likes: JSON.parse(localStorage.getItem('ip_likes_v10') || '{}'),
-        comments: JSON.parse(localStorage.getItem('ip_comments_v10') || '{}'),
+        likes: JSON.parse(localStorage.getItem('ip_likes_v11') || '{}'),
+        comments: JSON.parse(localStorage.getItem('ip_comments_v11') || '{}'),
         users: JSON.parse(localStorage.getItem('fuch_users') || '[]'),
         currentUser: JSON.parse(localStorage.getItem('fuch_current_user') || 'null'),
         currentItem: null, rssSources: []
+    },
+
+    // ГЕНЕРАТОР РАЗНООБРАЗНЫХ ВЫЖИМОК ДЛЯ "СУТИ"
+    essenceTemplates: [
+        { tag: "Акции", titles: ["{T} отчитался за квартал", "{T}: дивидендный сюрприз", "{T} обновляет максимумы"], summaries: ["• Прибыль +{N}% г/г\n• Рекомендация: Покупать\n• Цель: {P} руб."] },
+        { tag: "Макро", titles: ["ЦБ: решение по ставке", "Инфляция замедляется", "ВВП вырос на {N}%"], summaries: ["• Ставка сохранена\n• Прогноз позитивный\n• Рубль укрепляется"] },
+        { tag: "Крипто", titles: ["BTC пробил ${P}", "Эфир обновляет хаи", "Киты скупают {T}"], summaries: ["• Объем торгов +{N}%\n• Страх и жадность: {N}\n• Технически: пробой"] },
+        { tag: "Сырье", titles: ["Нефть Brent > ${P}", "Золото бьет рекорды", "Газпром: новый контракт"], summaries: ["• Цена: ${P} за баррель\n• Спрос растет\n• Дефицит предложения"] },
+        { tag: "IPO", titles: ["IPO {T}: итоги размещения", "{T} выходит на биржу", "Размещение {T} переподписано"], summaries: ["• Цена: {P} руб.\n• Оценка: {N} млрд\n• Доходность: {N}%"] }
+    ],
+    tickers: ['SBER', 'GAZP', 'LKOH', 'YNDX', 'VTBR', 'ROSN', 'GMKN', 'PLZL', 'MGNT', 'TCSG', 'NVTK', 'MTSS', 'POLY', 'ALRS', 'CHMF', 'NLMK', 'TATN', 'MOEX', 'IRAO', 'FLOT'],
+
+    generateEssenceItem() {
+        const tmpl = this.essenceTemplates[Math.floor(Math.random() * this.essenceTemplates.length)];
+        const ticker = this.tickers[Math.floor(Math.random() * this.tickers.length)];
+        const num = Math.floor(Math.random() * 30) + 1;
+        const price = Math.floor(Math.random() * 5000) + 100;
+        
+        const title = tmpl.titles[Math.floor(Math.random() * tmpl.titles.length)]
+            .replace('{T}', ticker).replace('{N}', num).replace('{P}', price);
+        const summary = tmpl.summaries[0]
+            .replace('{T}', ticker).replace('{N}', num).replace('{P}', price);
+
+        return {
+            id: 'ess_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+            title,
+            summary,
+            tag: tmpl.tag,
+            source: ['Bloomberg', 'Reuters', 'Интерфакс', 'РБК', 'ЦБ РФ'][Math.floor(Math.random() * 5)],
+            date: new Date(Date.now() - Math.floor(Math.random() * 86400000)).toLocaleDateString('ru-RU', {day:'numeric', month:'short'}),
+            sourceUrl: '#'
+        };
     },
 
     init() {
         this.generateRSSSources();
         this.seedData();
         
-        const savedPosts = localStorage.getItem('ip_posts_v10');
+        const savedPosts = localStorage.getItem('ip_posts_v11');
         this.data.posts = savedPosts ? JSON.parse(savedPosts) : [
             { id: 101, title: "Почему я покупаю нефтянку", body: "Энергетический кризис только начинается.", full: "<p>Многие боятся рецессии, но я вижу точку входа.</p><h2>Причины</h2><p>Дефицит инвестиций в добычу создает предпосылки для роста цен.</p>", tag: "Мнение", date: "2ч назад", isPost: true }
         ];
@@ -313,7 +340,12 @@ const app = {
         this.initTicker();
         this.renderIdeas();
         this.renderStandardFeed(this.data.news.slice(0, 10));
-        this.renderEssenceChunk(this.data.essenceFeed.slice(0, 5));
+        
+        // Генерируем стартовую порцию для Сути
+        for(let i = 0; i < 5; i++) {
+            this.data.essenceFeed.push(this.generateEssenceItem());
+        }
+        this.renderEssenceChunk(this.data.essenceFeed);
         
         document.getElementById('view-feed').addEventListener('scroll', () => this.checkStandardScroll());
         ['mobile', 'desktop'].forEach(dev => {
@@ -437,11 +469,6 @@ const app = {
             { id: 's4', title: "Газпром: новый НПЗ", body: "Инвестиции 300 млрд.", full: "<p>Увеличение переработки.</p>", tag: "Сырье", source: "Ведомости", date: "6ч", sourceUrl: "https://vedomosti.ru" },
             { id: 's5', title: "Яндекс GPT 5", body: "Лучше чем GPT-4?", full: "<p>Ставка на мультимодальность.</p>", tag: "IT", source: "Habr", date: "7ч", sourceUrl: "https://habr.com" }
         ];
-        this.data.essenceFeed = [
-            { id: 'e1', title: "ЦБ сохранил ставку 16%", summary: "• Ставка без изменений\n• Инфляция замедляется медленно\n• Жесткая политика продлится до конца года", tag: "Макро", source: "ЦБ РФ", date: "10:30", sourceUrl: "https://cbr.ru" },
-            { id: 'e2', title: "Лукойл: дивиденды", summary: "• Рекомендация: 520 руб. на акцию\n• Отсечка: 15 мая\n• Доходность: ~14% годовых", tag: "Дивиденды", source: "Интерфакс", date: "09:15", sourceUrl: "https://interfax.ru" },
-            { id: 'e3', title: "Илон Маск про AI", summary: "• Новый чип быстрее H100 в 2 раза\n• Акции NVDA +5% на новостях\n• Релиз FSD v13 перенесен", tag: "Tech", source: "Twitter", date: "Вчера", sourceUrl: "https://twitter.com" }
-        ];
     },
 
     generateRSSSources() {
@@ -491,7 +518,7 @@ const app = {
         const isLiked = this.data.likes[id];
         if (isLiked) { delete this.data.likes[id]; btn.classList.remove('text-red-500'); btn.querySelector('i').classList.replace('fas', 'far'); } 
         else { this.data.likes[id] = true; btn.classList.add('text-red-500'); btn.querySelector('i').classList.replace('far', 'fas'); btn.querySelector('i').classList.add('like-animate'); setTimeout(() => btn.querySelector('i').classList.remove('like-animate'), 300); }
-        localStorage.setItem('ip_likes_v10', JSON.stringify(this.data.likes));
+        localStorage.setItem('ip_likes_v11', JSON.stringify(this.data.likes));
         this.updateLikeUI(id);
     },
 
@@ -516,7 +543,7 @@ const app = {
         const id = this.data.currentItem.id;
         if(!this.data.comments[id]) this.data.comments[id] = [];
         this.data.comments[id].unshift({text, author: this.data.currentUser.name, date: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})});
-        localStorage.setItem('ip_comments_v10', JSON.stringify(this.data.comments));
+        localStorage.setItem('ip_comments_v11', JSON.stringify(this.data.comments));
         input.value = '';
         this.renderComments(id);
         this.showToast('Комментарий добавлен');
@@ -636,16 +663,18 @@ const app = {
         if(this.data.essenceLoading) return;
         this.data.essenceLoading = true;
         document.getElementById('essence-loader').classList.remove('hidden');
+        
+        // Имитация задержки генерации
         setTimeout(() => {
-            const newItems = [
-                { id: 'eg_'+Date.now(), title: "Золото обновляет максимум", summary: "• Цена > $2400\n• Центробанки скупают\n• Хеджирование рисков", tag: "Сырье", source: "Bloomberg", date: "Сегодня", sourceUrl: "#" },
-                { id: 'eg_'+(Date.now()+1), title: "IPO Самолет", summary: "• Диапазон: 3200-3600 руб\n• Оценка: 120 млрд руб\n• Дивиденды от 10%", tag: "IPO", source: "МОСКВА", date: "Вчера", sourceUrl: "#" }
-            ];
+            const newItems = [];
+            for(let i = 0; i < 5; i++) {
+                newItems.push(this.generateEssenceItem());
+            }
             this.data.essenceFeed = [...this.data.essenceFeed, ...newItems];
             this.renderEssenceChunk(newItems);
             this.data.essenceLoading = false;
             document.getElementById('essence-loader').classList.add('hidden');
-        }, 1200);
+        }, 800);
     },
 
     renderEssenceChunk(items) {
@@ -684,7 +713,7 @@ const app = {
         const t=document.getElementById('new-title').value, b=document.getElementById('new-body').value, type=document.getElementById('new-tag').value;
         if(!t||!b) return alert('Заполните');
         const n={id:Date.now(), title:t, body:b.substring(0,150)+'...', full:`<p>${b.replace(/\n/g,'</p><p>')}</p>`, tag:type==='idea'?'Мнение':'Новости', source:'Автор', date:'Сейчас', isPost:type==='idea', sourceUrl:'#'};
-        if(type==='idea') { this.data.posts.unshift(n); localStorage.setItem('ip_posts_v10',JSON.stringify(this.data.posts)); this.renderIdeas(); }
+        if(type==='idea') { this.data.posts.unshift(n); localStorage.setItem('ip_posts_v11',JSON.stringify(this.data.posts)); this.renderIdeas(); }
         else { this.data.news.unshift(n); this.renderStandardFeed([n]); }
         alert('OK'); this.nav(type==='idea'?'ideas':'feed');
     },
