@@ -1,366 +1,396 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>InvestPro - Аналитика и Новости Рынков</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>InvestPro | Профессиональная аналитика</title>
+    
+    <!-- PRODUCTION CSS (Собирать через Tailwind CLI) -->
+    <link rel="stylesheet" href="./dist/output.css" onerror="this.onerror=null;this.href='https://cdn.tailwindcss.com';console.warn('⚠️ InvestPro: Локальный CSS не найден. Используется CDN. Запустите `npx @tailwindcss/cli` для продакшена.');">
+    
+    <!-- Fallback конфигурация для CDN режима (игнорируется при наличии локального CSS) -->
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        dark: '#0f172a', darker: '#020617', card: '#1e293b',
-                        accent: '#3b82f6', up: '#22c55e', down: '#ef4444', donate: '#f59e0b'
+        if (!document.querySelector('link[href="./dist/output.css"]')?.sheet) {
+            const s = document.createElement('script');
+            s.src = 'https://cdn.tailwindcss.com';
+            s.onload = () => {
+                tailwind.config = {
+                    theme: {
+                        extend: {
+                            colors: {
+                                dark: '#0b1120', darker: '#020617', card: '#1e293b',
+                                accent: '#3b82f6', up: '#10b981', down: '#ef4444', donate: '#f59e0b'
+                            },
+                            fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] }
+                        }
                     }
                 }
-            }
+            };
+            document.head.appendChild(s);
         }
     </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
-        .ticker-wrap { width: 100%; overflow: hidden; background-color: #1e293b; padding-left: 100%; box-sizing: border-box; }
-        .ticker { display: inline-block; white-space: nowrap; padding-right: 100%; box-sizing: border-box; animation: ticker 35s linear infinite; }
-        .ticker-item { display: inline-block; padding: 0 2rem; font-size: 0.9rem; color: #e2e8f0; }
+        /* Базовые стили и анимации (не зависят от Tailwind) */
+        body { font-family: 'Inter', sans-serif; background-color: #0b1120; }
+        
+        /* Эффект матового стекла */
+        .glass { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); background: rgba(30, 41, 59, 0.7); }
+        .glass-header { backdrop-filter: blur(16px); background: rgba(11, 17, 32, 0.85); }
+
+        /* Бегущая строка */
+        .ticker-wrap { width: 100%; overflow: hidden; background: linear-gradient(90deg, #1e293b 0%, #0f172a 50%, #1e293b 100%); }
+        .ticker { display: inline-block; white-space: nowrap; padding-left: 100%; animation: ticker 40s linear infinite; }
+        .ticker-item { display: inline-block; padding: 0 2rem; font-size: 0.85rem; letter-spacing: 0.02em; }
         @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
-        .loader { border: 3px solid #1e293b; border-top: 3px solid #3b82f6; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .nav-active { color: #3b82f6 !important; font-weight: bold; border-bottom: 2px solid #3b82f6; }
-        .nav-donate-active { color: #f59e0b !important; font-weight: bold; border-bottom: 2px solid #f59e0b; }
-        /* Стили для виджетов TradingView, чтобы они вписались в дизайн */
-        .tradingview-widget-container { border-radius: 12px; overflow: hidden; border: 1px solid #334155; }
+
+        /* Микро-анимации */
+        .fade-in { animation: fadeIn 0.5s ease-out forwards; opacity: 0; transform: translateY(10px); }
+        @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
+        
+        .nav-indicator { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        
+        /* Кастомный скроллбар */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { bg: #0b1120; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
     </style>
 </head>
-<body class="bg-dark text-gray-200 font-sans antialiased flex flex-col min-h-screen">
+<body class="text-gray-300 antialiased flex flex-col min-h-screen selection:bg-accent selection:text-white">
 
-    <!-- ПРЕДУПРЕЖДЕНИЯ -->
-    <div class="bg-darker border-b border-gray-800">
-        <div class="text-red-500 text-center py-2 text-sm font-bold uppercase tracking-wider animate-pulse">
-            <i class="fas fa-exclamation-triangle mr-2"></i>Не является индивидуальной инвестиционной рекомендацией
-        </div>
-        <div class="text-gray-500 text-center pb-3 text-xs font-medium">
-            Всегда проводите собственный анализ акций перед какими-либо действиями.
+    <!-- ЮРИДИЧЕСКИЙ ДИСКЛЕЙМЕР -->
+    <div class="bg-gradient-to-r from-red-950/80 via-red-900/60 to-red-950/80 border-b border-red-800/50">
+        <div class="container mx-auto px-4 py-2 text-center">
+            <p class="text-red-200 text-xs font-semibold tracking-wide uppercase flex items-center justify-center gap-2">
+                <i class="fas fa-shield-alt"></i>
+                Не является индивидуальной инвестиционной рекомендацией
+            </p>
+            <p class="text-red-300/60 text-[10px] mt-0.5">Всегда проводите собственный анализ перед принятием решений</p>
         </div>
     </div>
 
-    <!-- ШАПКА -->
-    <header class="bg-card border-b border-gray-700 sticky top-0 z-50 shadow-lg">
-        <div class="container mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-4">
-            <div class="flex items-center space-x-2 cursor-pointer" onclick="switchView('main')">
-                <i class="fas fa-chart-line text-accent text-2xl"></i>
-                <span class="text-2xl font-bold text-white">Invest<span class="text-accent">Pro</span></span>
+    <!-- ШАПКА С МАТОВЫМ СТЕКЛОМ -->
+    <header class="glass-header sticky top-0 z-50 border-b border-white/5 shadow-2xl shadow-black/20">
+        <div class="container mx-auto px-4 h-16 flex justify-between items-center">
+            <div class="flex items-center gap-3 cursor-pointer group" onclick="switchView('main')">
+                <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-accent to-blue-600 flex items-center justify-center shadow-lg shadow-accent/20 group-hover:shadow-accent/40 transition-all duration-300">
+                    <i class="fas fa-chart-line text-white text-sm"></i>
+                </div>
+                <span class="text-xl font-bold text-white tracking-tight">Invest<span class="text-accent">Pro</span></span>
             </div>
-            <nav class="flex flex-wrap justify-center gap-4 md:gap-6 text-sm font-medium">
-                <a href="#" id="nav-main" onclick="switchView('main'); return false;" class="nav-active py-1 transition hover:text-accent">Главная</a>
-                <a href="#" id="nav-news" onclick="switchView('news'); return false;" class="text-gray-400 py-1 transition hover:text-accent">Все новости</a>
-                <a href="#" id="nav-donate" onclick="switchView('donate'); return false;" class="text-gray-400 py-1 transition hover:text-donate"><i class="fas fa-heart mr-1"></i>Поддержать</a>
+            
+            <nav class="hidden md:flex items-center gap-1 bg-white/5 p-1 rounded-full border border-white/5">
+                <button id="nav-main" onclick="switchView('main')" class="nav-btn px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-300 bg-accent text-white shadow-lg shadow-accent/25">Главная</button>
+                <button id="nav-news" onclick="switchView('news')" class="nav-btn px-4 py-1.5 rounded-full text-sm font-medium text-gray-400 hover:text-white hover:bg-white/10 transition-all duration-300">Все новости</button>
+                <button id="nav-donate" onclick="switchView('donate')" class="nav-btn px-4 py-1.5 rounded-full text-sm font-medium text-gray-400 hover:text-donate hover:bg-donate/10 transition-all duration-300">
+                    <i class="fas fa-heart mr-1.5 text-xs"></i>Поддержать
+                </button>
             </nav>
-            <div class="text-xs text-gray-400 flex items-center bg-darker px-3 py-1 rounded-full">
-                <i class="fas fa-signal mr-2 text-accent"></i>
-                <span>Реальное время</span>
+
+            <div class="flex items-center gap-3">
+                <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                    <span class="relative flex h-2 w-2">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
+                    <span class="text-xs font-medium text-emerald-400">Live</span>
+                </div>
             </div>
         </div>
     </header>
 
     <!-- БЕГУЩАЯ СТРОКА -->
-    <div class="ticker-wrap border-b border-gray-700">
+    <div class="ticker-wrap border-b border-white/5 py-2.5">
         <div class="ticker" id="ticker-content"></div>
     </div>
 
     <!-- ОСНОВНОЙ КОНТЕНТ -->
-    <main class="container mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8 flex-grow">
-        <div class="lg:col-span-2 space-y-6">
+    <main class="flex-grow container mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- ЛЕВАЯ КОЛОНКА (8/12) -->
+        <div class="lg:col-span-8 space-y-8">
             
-            <!-- ВКЛАДКА 1: ГЛАВНАЯ -->
-            <div id="view-main">
-                <h2 class="text-xl font-bold text-white border-l-4 border-yellow-500 pl-3 mb-4 flex items-center">
-                    <i class="fas fa-fire text-yellow-500 mr-2"></i> ГЛАВНЫЕ НОВОСТИ ДНЯ
-                </h2>
-                <div id="main-news-container" class="space-y-4">
-                    <div class="flex justify-center py-10"><div class="loader"></div></div>
+            <!-- ВКЛАДКА: ГЛАВНАЯ -->
+            <section id="view-main" class="fade-in space-y-6">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-2xl font-bold text-white flex items-center gap-3">
+                        <span class="w-1 h-8 bg-gradient-to-b from-yellow-400 to-orange-500 rounded-full"></span>
+                        Главные новости дня
+                    </h2>
+                    <span class="text-xs text-gray-500 bg-white/5 px-3 py-1 rounded-full border border-white/5" id="last-updated">Загрузка...</span>
                 </div>
-            </div>
-
-            <!-- ВКЛАДКА 2: ВСЕ НОВОСТИ -->
-            <div id="view-news" class="hidden">
-                <h2 class="text-xl font-bold text-white border-l-4 border-accent pl-3 mb-4">Лента рыночных новостей</h2>
-                <p class="text-xs text-gray-500 mb-4 italic">
-                    <i class="fas fa-info-circle mr-1 text-accent"></i> Данные предоставлены официальным новостным терминалом TradingView.
-                </p>
                 
-                <!-- ОФИЦИАЛЬНЫЙ ВИДЖЕТ НОВОСТЕЙ TRADINGVIEW -->
-                <div class="tradingview-widget-container" style="height:1000px;">
-                    <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
-                    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-timeline.js" async>
-                    {
-                        "feedMode": "all_symbols",
-                        "isTransparent": true,
-                        "displayMode": "regular",
-                        "width": "100%",
-                        "height": "1000",
-                        "colorTheme": "dark",
-                        "locale": "ru"
-                    }
-                    </script>
-                </div>
-            </div>
-
-            <!-- ВКЛАДКА 3: ДОНАТЫ -->
-            <div id="view-donate" class="hidden">
-                <h2 class="text-xl font-bold text-white border-l-4 border-donate pl-3 mb-4 flex items-center">
-                    <i class="fas fa-heart text-donate mr-2"></i> Поддержка проекта
-                </h2>
-                <div class="bg-card rounded-xl p-6 border border-gray-700 shadow-lg">
-                    <div class="flex items-start space-x-4 mb-6">
-                        <div class="bg-donate/20 p-4 rounded-full">
-                            <i class="fas fa-server text-donate text-3xl"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-bold text-white mb-2">Помогите сохранить сайт бесплатным</h3>
-                            <p class="text-gray-400 text-sm leading-relaxed">
-                                Чтобы сайт работал стабильно, быстро загружался и не содержал навязчивой рекламы, 
-                                нам необходимо оплачивать хостинг и доменное имя.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="mb-6">
-                        <div class="flex justify-between text-sm mb-2">
-                            <span class="text-gray-300">Собрано: <span class="text-donate font-bold" id="donate-current">1 250 ₽</span></span>
-                            <span class="text-gray-400">Цель: <span class="font-bold" id="donate-goal">5 000 ₽</span> / месяц</span>
-                        </div>
-                        <div class="w-full bg-gray-700 rounded-full h-4 overflow-hidden">
-                            <div id="donate-progress-bar" class="bg-gradient-to-r from-donate to-yellow-300 h-4 rounded-full transition-all duration-1000 ease-out" style="width: 0%"></div>
-                        </div>
-                        <p class="text-xs text-gray-500 mt-2 text-right">Осталось собрать: <span id="donate-remaining" class="text-white font-medium">3 750 ₽</span></p>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <a href="https://boosty.to/your_project" target="_blank" class="flex items-center justify-center space-x-2 bg-donate hover:bg-yellow-500 text-darker font-bold py-3 px-4 rounded-lg transition transform hover:scale-[1.02]">
-                            <i class="fas fa-coffee text-lg"></i><span>Поддержать через Boosty</span>
-                        </a>
-                        <a href="https://www.tinkoff.ru/rm/r_csnoVZkZFd.HBvCrLkgTP/ehch462345" target="_blank" class="flex items-center justify-center space-x-2 bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg transition transform hover:scale-[1.02]">
-                            <i class="fas fa-credit-card text-lg"></i><span>Разовый перевод (СБП)</span>
-                        </a>
+                <div id="main-news-container" class="grid gap-4">
+                    <!-- Лоадер -->
+                    <div class="col-span-full flex flex-col items-center justify-center py-20 gap-4">
+                        <div class="w-10 h-10 border-3 border-accent/30 border-t-accent rounded-full animate-spin"></div>
+                        <p class="text-sm text-gray-500 animate-pulse">Загрузка рыночных данных...</p>
                     </div>
                 </div>
-            </div>
+            </section>
+
+            <!-- ВКЛАДКА: ВСЕ НОВОСТИ (TradingView Widget) -->
+            <section id="view-news" class="hidden fade-in">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-white mb-2">Лента рыночных новостей</h2>
+                    <p class="text-sm text-gray-400">Официальный терминал TradingView в реальном времени</p>
+                </div>
+                <div class="rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-card" style="height: 800px;">
+                    <div class="tradingview-widget-container" style="height:100%;width:100%">
+                        <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
+                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-timeline.js" async>
+                        { "feedMode": "all_symbols", "isTransparent": true, "displayMode": "regular", "width": "100%", "height": "100%", "colorTheme": "dark", "locale": "ru" }
+                        </script>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ВКЛАДКА: ДОНАТЫ -->
+            <section id="view-donate" class="hidden fade-in max-w-2xl mx-auto">
+                <div class="bg-gradient-to-br from-card to-slate-900 rounded-3xl p-8 border border-white/10 shadow-2xl relative overflow-hidden">
+                    <!-- Декоративный фон -->
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-donate/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+                    
+                    <div class="relative z-10 text-center mb-8">
+                        <div class="w-16 h-16 bg-gradient-to-br from-donate to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-donate/30 rotate-3">
+                            <i class="fas fa-hand-holding-heart text-white text-2xl"></i>
+                        </div>
+                        <h2 class="text-3xl font-bold text-white mb-2">Поддержите проект</h2>
+                        <p class="text-gray-400">Помогите сохранить сервис бесплатным и независимым</p>
+                    </div>
+
+                    <div class="bg-black/20 rounded-2xl p-6 mb-8 border border-white/5">
+                        <div class="flex justify-between text-sm mb-3 font-medium">
+                            <span class="text-gray-400">Собрано</span>
+                            <span class="text-white"><span id="donate-current" class="text-donate text-lg font-bold">1 250</span> / <span id="donate-goal">5 000</span> ₽</span>
+                        </div>
+                        <div class="w-full bg-gray-800 rounded-full h-3 overflow-hidden">
+                            <div id="donate-progress-bar" class="bg-gradient-to-r from-donate to-yellow-300 h-full rounded-full transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(245,158,11,0.5)]" style="width: 0%"></div>
+                        </div>
+                        <p class="text-right text-xs text-gray-500 mt-2">Осталось: <span id="donate-remaining" class="text-gray-300">3 750 ₽</span></p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <a href="#" class="group flex items-center justify-center gap-3 bg-[#ff5c00] hover:bg-[#ff7a33] text-white font-bold py-4 px-6 rounded-xl transition-all transform hover:-translate-y-1 shadow-lg shadow-orange-900/30">
+                            <i class="fab fa-bootstrap text-xl"></i> Boosty
+                        </a>
+                        <a href="#" class="group flex items-center justify-center gap-3 bg-[#ffdd2d] hover:bg-[#ffe44d] text-black font-bold py-4 px-6 rounded-xl transition-all transform hover:-translate-y-1 shadow-lg shadow-yellow-900/30">
+                            <i class="fas fa-bolt text-xl"></i> СБП / Карта
+                        </a>
+                    </div>
+                </div>
+            </section>
         </div>
 
-        <!-- САЙДБАР -->
-        <aside class="space-y-6">
-            <!-- ВИДЖЕТ КУРСОВ ВАЛЮТ TRADINGVIEW -->
-            <div class="bg-card rounded-xl border border-gray-700 shadow-lg overflow-hidden">
-                <h3 class="text-lg font-bold text-white mb-0 p-4 border-b border-gray-700 flex items-center">
-                    <i class="fas fa-coins text-yellow-500 mr-2"></i>Курсы валют (Биржа)
-                </h3>
+        <!-- ПРАВАЯ КОЛОНКА (4/12) -->
+        <aside class="lg:col-span-4 space-y-6">
+            
+            <!-- Курсы валют -->
+            <div class="bg-card rounded-2xl border border-white/5 shadow-xl overflow-hidden">
+                <div class="p-4 border-b border-white/5 flex items-center justify-between">
+                    <h3 class="font-bold text-white flex items-center gap-2"><i class="fas fa-exchange-alt text-accent"></i> Рынок валют</h3>
+                    <span class="text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">REAL-TIME</span>
+                </div>
                 <div class="tradingview-widget-container">
                     <div class="tradingview-widget-container__widget"></div>
                     <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-forex-cross-rates.js" async>
-                    {
-                        "width": "100%",
-                        "height": "400",
-                        "currencies": [ "RUB", "USD", "EUR", "CNY" ],
-                        "isTransparent": true,
-                        "colorTheme": "dark",
-                        "locale": "ru"
-                    }
+                    { "width": "100%", "height": "350", "currencies": ["RUB", "USD", "EUR", "CNY"], "isTransparent": true, "colorTheme": "dark", "locale": "ru" }
                     </script>
                 </div>
             </div>
 
-            <!-- ВИДЖЕТ ЭКОНОМИЧЕСКОГО КАЛЕНДАРЯ TRADINGVIEW -->
-            <div class="bg-card rounded-xl border border-gray-700 shadow-lg overflow-hidden">
-                <h3 class="text-lg font-bold text-white mb-0 p-4 border-b border-gray-700 flex items-center">
-                    <i class="fas fa-calendar-alt text-accent mr-2"></i>Календарь событий
-                </h3>
-                <div class="tradingview-widget-container" style="height: 400px;">
+            <!-- Экономический календарь -->
+            <div class="bg-card rounded-2xl border border-white/5 shadow-xl overflow-hidden">
+                <div class="p-4 border-b border-white/5">
+                    <h3 class="font-bold text-white flex items-center gap-2"><i class="fas fa-calendar-day text-purple-400"></i> Макроэкономика</h3>
+                </div>
+                <div class="tradingview-widget-container" style="height: 450px;">
                     <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
                     <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-events.js" async>
-                    {
-                        "colorTheme": "dark",
-                        "isTransparent": true,
-                        "width": "100%",
-                        "height": "100%",
-                        "locale": "ru",
-                        "importanceFilter": "0,1",
-                        "countryFilter": "ru,us"
-                    }
+                    { "colorTheme": "dark", "isTransparent": true, "width": "100%", "height": "100%", "locale": "ru", "importanceFilter": "0,1", "countryFilter": "ru,us,cn" }
                     </script>
                 </div>
             </div>
+
         </aside>
     </main>
 
-    <footer class="bg-darker border-t border-gray-800 mt-auto py-8">
-        <div class="container mx-auto px-4 text-center">
-            <p class="text-red-500 text-xs font-bold mb-2">НЕ ЯВЛЯЕТСЯ ИНДИВИДУАЛЬНОЙ ИНВЕСТИЦИОННОЙ РЕКОМЕНДАЦИЕЙ</p>
-            <p class="text-gray-600 text-xs mb-4">Материалы сайта носят ознакомительный характер.</p>
-            <div class="text-gray-500 text-sm">&copy; 2026 InvestPro.</div>
+    <!-- ФУТЕР -->
+    <footer class="border-t border-white/5 bg-darker mt-auto py-10">
+        <div class="container mx-auto px-4 text-center space-y-4">
+            <div class="inline-flex items-center gap-2 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
+                <i class="fas fa-chart-line text-accent text-xl"></i>
+                <span class="text-lg font-bold text-white">InvestPro</span>
+            </div>
+            <p class="text-xs text-gray-600 max-w-2xl mx-auto leading-relaxed">
+                Материалы сайта носят исключительно ознакомительный характер. Администрация не несет ответственности за возможные убытки. 
+                Торговля на финансовых рынках сопряжена с высоким уровнем риска.
+            </p>
+            <p class="text-xs text-gray-700">&copy; 2026 InvestPro. All rights reserved.</p>
         </div>
     </footer>
 
     <!-- СКРИПТЫ -->
     <script>
-        const DONATE_GOAL = 5000;      
-        const DONATE_CURRENT = 1250;   
+        // === КОНФИГУРАЦИЯ ===
+        const DONATE_GOAL = 5000;
+        const DONATE_CURRENT = 1250;
         
+        // === ИНИЦИАЛИЗАЦИЯ ДОНАТОВ ===
         function initDonate() {
-            const percentage = Math.min((DONATE_CURRENT / DONATE_GOAL) * 100, 100);
-            const remaining = Math.max(DONATE_GOAL - DONATE_CURRENT, 0);
-            const formatNum = (num) => num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+            const pct = Math.min((DONATE_CURRENT / DONATE_GOAL) * 100, 100);
+            const fmt = n => n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
             
-            document.getElementById('donate-current').innerText = formatNum(DONATE_CURRENT) + ' ₽';
-            document.getElementById('donate-goal').innerText = formatNum(DONATE_GOAL) + ' ₽';
-            document.getElementById('donate-remaining').innerText = formatNum(remaining) + ' ₽';
+            document.getElementById('donate-current').innerText = fmt(DONATE_CURRENT);
+            document.getElementById('donate-goal').innerText = fmt(DONATE_GOAL);
+            document.getElementById('donate-remaining').innerText = fmt(Math.max(DONATE_GOAL - DONATE_CURRENT, 0));
             
-            setTimeout(() => { document.getElementById('donate-progress-bar').style.width = percentage + '%'; }, 500);
+            requestAnimationFrame(() => {
+                document.getElementById('donate-progress-bar').style.width = `${pct}%`;
+            });
         }
 
+        // === НАВИГАЦИЯ ===
         function switchView(viewName) {
-            document.getElementById('view-main').classList.add('hidden');
-            document.getElementById('view-news').classList.add('hidden');
-            document.getElementById('view-donate').classList.add('hidden');
+            // Скрытие всех секций
+            ['main', 'news', 'donate'].forEach(v => {
+                const el = document.getElementById(`view-${v}`);
+                if (el) {
+                    el.classList.add('hidden');
+                    el.classList.remove('fade-in');
+                }
+            });
             
-            ['nav-main', 'nav-news', 'nav-donate'].forEach(id => {
-                const el = document.getElementById(id);
-                el.classList.remove('nav-active', 'nav-donate-active', 'text-accent', 'text-donate');
-                el.classList.add('text-gray-400');
+            // Сброс кнопок
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.className = 'nav-btn px-4 py-1.5 rounded-full text-sm font-medium text-gray-400 hover:text-white hover:bg-white/10 transition-all duration-300';
             });
 
-            document.getElementById(`view-${viewName}`).classList.remove('hidden');
+            // Активация
+            const activeSection = document.getElementById(`view-${viewName}`);
+            if (activeSection) {
+                activeSection.classList.remove('hidden');
+                // Триггер рефлоу для перезапуска анимации
+                void activeSection.offsetWidth; 
+                activeSection.classList.add('fade-in');
+            }
+
             const activeBtn = document.getElementById(`nav-${viewName}`);
-            activeBtn.classList.add(viewName === 'donate' ? 'nav-donate-active' : 'nav-active');
-            activeBtn.classList.remove('text-gray-400');
+            if (activeBtn) {
+                if (viewName === 'donate') {
+                    activeBtn.className = 'nav-btn px-4 py-1.5 rounded-full text-sm font-medium bg-donate text-black shadow-lg shadow-donate/25 transition-all duration-300';
+                } else {
+                    activeBtn.className = 'nav-btn px-4 py-1.5 rounded-full text-sm font-medium bg-accent text-white shadow-lg shadow-accent/25 transition-all duration-300';
+                }
+            }
             
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        let globalNewsData = [];
-        
-        // Запасные новости на случай, если прокси упадет
+        // === НОВОСТИ (С ЗАЩИТОЙ ОТ ОШИБОК) ===
         const FALLBACK_NEWS = [
-            { source: "РБК", color: "bg-blue-900 text-blue-300", title: "Мосбиржа зафиксировала рекордный объем торгов акциями", link: "https://www.rbc.ru/finances/", date: new Date(), description: "Участники рынка проявляют высокую активность на фоне корпоративных событий и выхода макроэкономической статистики..." },
-            { source: "ЦБ РФ", color: "bg-red-900 text-red-300", title: "Банк России опубликовал обзор ключевых показателей банковского сектора", link: "http://www.cbr.ru/", date: new Date(Date.now() - 3600000), description: "Регулятор отметил стабильность системы и достаточность капитала у крупнейших игроков рынка..." },
-            { source: "Smart-Lab", color: "bg-purple-900 text-purple-300", title: "Дивидендный сезон: какие компании могут повысить выплаты?", link: "https://smart-lab.ru/", date: new Date(Date.now() - 7200000), description: "Инвесторы активно обсуждают перспективы предстоящих отсечек и размер рекомендуемых дивидендов от экспортеров..." }
+            { source: "РБК Инвестиции", color: "bg-blue-600", title: "Мосбиржа обновила исторические максимумы по объему торгов", link: "#", date: new Date(), desc: "Участники рынка демонстрируют рекордную активность на фоне корпоративных отчетностей и макроэкономических данных..." },
+            { source: "ЦБ РФ", color: "bg-red-600", title: "Банк России сохранил ключевую ставку на прежнем уровне", link: "#", date: new Date(Date.now() - 3600000), desc: "Регулятор отметил замедление инфляционных ожиданий и стабильность банковской системы в текущих условиях..." },
+            { source: "Smart-Lab", color: "bg-purple-600", title: "Дивидендный сезон 2026: топ-10 идей с доходностью выше 15%", link: "#", date: new Date(Date.now() - 7200000), desc: "Аналитики выделяют фаворитов среди экспортеров и финансового сектора, способных обеспечить повышенные выплаты..." }
         ];
 
-        // Используем Google News RSS - он намного стабильнее, чем парсинг конкретных сайтов
         const PROXY = "https://api.codetabs.com/v1/proxy?quest=";
         const RSS_SOURCES = [
-            { name: "Google News (Рынок)", url: "https://news.google.com/rss/search?q=инвестиции+акции+дивиденды+мосбиржа&hl=ru&gl=RU&ceid=RU:ru", color: "bg-green-900 text-green-300" },
-            { name: "РБК", url: "https://www.rbc.ru/finances/rss/", color: "bg-blue-900 text-blue-300" }
+            { name: "Google News", url: "https://news.google.com/rss/search?q=инвестиции+акции+дивиденды+мосбиржа&hl=ru&gl=RU&ceid=RU:ru", color: "bg-emerald-600" },
+            { name: "РБК", url: "https://www.rbc.ru/finances/rss/", color: "bg-blue-600" }
         ];
-
-        const KEYWORDS = [/акци/i, /облигац/i, /инвестиц/i, /дивиденд/i, /ставк/i, /цб/i, /мосбирж/i, /moex/i, /отчет/i, /прибыл/i, /сбер/i, /газпром/i, /лукойл/i, /яндекс/i, /выручк/i];
+        const KEYWORDS = [/акци/i, /облигац/i, /инвест/i, /дивиденд/i, /ставк/i, /цб/i, /мосбирж/i, /moex/i, /отчет/i, /прибыл/i, /сбер/i, /газпром/i, /лукойл/i, /яндекс/i];
 
         async function fetchRSS(source) {
             try {
-                // codetabs - очень надежный прокси
-                const response = await fetch(PROXY + encodeURIComponent(source.url));
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                const text = await response.text();
+                const res = await fetch(PROXY + encodeURIComponent(source.url));
+                if (!res.ok) throw new Error(res.status);
+                const xml = await res.text();
+                const doc = new DOMParser().parseFromString(xml, "text/xml");
+                if (doc.querySelector("parsererror")) throw new Error("Parse Error");
                 
-                const parser = new DOMParser();
-                const xmlDoc = parser.parseFromString(text, "text/xml");
-                if (xmlDoc.querySelector("parsererror")) throw new Error("XML Parse Error");
-                
-                const items = xmlDoc.querySelectorAll("item, entry");
-                const parsedItems = [];
-                
-                items.forEach(item => {
-                    const title = item.querySelector("title")?.textContent || "";
-                    const link = item.querySelector("link")?.textContent || item.querySelector("guid")?.textContent || "";
-                    const pubDateStr = item.querySelector("pubDate")?.textContent || item.querySelector("published")?.textContent || "";
-                    
-                    let dateObj = new Date(pubDateStr);
-                    if (isNaN(dateObj.getTime())) dateObj = new Date(); 
-                    
-                    const description = (item.querySelector("description")?.textContent || item.querySelector("summary")?.textContent || "").replace(/<[^>]*>/g, '').substring(0, 180);
-
-                    if (KEYWORDS.some(regex => regex.test(title) || regex.test(description)) && title && link) {
-                        parsedItems.push({
-                            source: source.name, color: source.color, title: title, link: link,
-                            date: dateObj, description: description + "..."
-                        });
-                    }
-                });
-                return parsedItems;
-            } catch (error) {
-                console.warn(`[InvestPro] Источник ${source.name} временно недоступен:`, error);
+                return Array.from(doc.querySelectorAll("item")).map(item => ({
+                    source: source.name,
+                    color: source.color,
+                    title: item.querySelector("title")?.textContent || "",
+                    link: item.querySelector("link")?.textContent || "#",
+                    date: new Date(item.querySelector("pubDate")?.textContent || Date.now()),
+                    desc: (item.querySelector("description")?.textContent || "").replace(/<[^>]*>/g, '').substring(0, 160) + "..."
+                })).filter(n => KEYWORDS.some(k => k.test(n.title) || k.test(n.desc)));
+            } catch (e) {
+                console.warn(`[InvestPro] Source failed: ${source.name}`, e);
                 return [];
             }
         }
 
-        function createNewsCard(item, isFeatured = false) {
+        function renderCard(item, featured = false) {
             const dateStr = item.date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
-            const borderClass = isFeatured ? 'border-yellow-600/50 bg-gradient-to-br from-card to-gray-800' : 'border-gray-700 hover:border-accent';
-            
             return `
-            <article class="bg-card rounded-xl p-5 border ${borderClass} transition shadow-lg">
-                <div class="flex justify-between items-start mb-3 flex-wrap gap-2">
-                    <span class="${item.color} text-xs px-2 py-1 rounded font-bold flex items-center">
-                        <i class="fas fa-newspaper mr-1.5"></i>Источник: ${item.source}
-                    </span>
-                    <span class="text-gray-500 text-xs flex items-center">
-                        <i class="far fa-clock mr-1"></i>${dateStr}
-                    </span>
+            <article class="group bg-card/50 hover:bg-card border border-white/5 hover:border-accent/30 rounded-2xl p-5 transition-all duration-300 hover:shadow-xl hover:shadow-accent/5 ${featured ? 'md:col-span-2 lg:col-span-1' : ''}">
+                <div class="flex justify-between items-start mb-3 gap-2">
+                    <span class="${item.color} text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded text-white/90">${item.source}</span>
+                    <time class="text-xs text-gray-500 whitespace-nowrap">${dateStr}</time>
                 </div>
-                <h3 class="text-lg font-bold text-white mb-2 hover:text-accent cursor-pointer leading-tight">
+                <h3 class="text-lg font-bold text-white mb-2 leading-snug group-hover:text-accent transition-colors">
                     <a href="${item.link}" target="_blank" rel="noopener noreferrer">${item.title}</a>
                 </h3>
-                <p class="text-gray-400 text-sm mb-4 leading-relaxed">${item.description}</p>
-                <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center text-accent text-sm hover:text-blue-400 font-medium transition">
-                    Читать оригинал <i class="fas fa-external-link-alt ml-1.5 text-xs"></i>
+                <p class="text-sm text-gray-400 leading-relaxed mb-4 line-clamp-3">${item.desc}</p>
+                <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center text-xs font-semibold text-accent hover:text-white transition-colors">
+                    Читать источник <i class="fas fa-arrow-right ml-1.5 text-[10px] group-hover:translate-x-1 transition-transform"></i>
                 </a>
             </article>`;
         }
 
-        async function fetchAndRenderNews() {
-            const mainContainer = document.getElementById('main-news-container');
+        async function loadNews() {
+            const container = document.getElementById('main-news-container');
+            const results = await Promise.all(RSS_SOURCES.map(fetchRSS));
+            let news = results.flat();
             
-            mainContainer.innerHTML = '<div class="flex justify-center py-10"><div class="loader"></div></div>';
-
-            const promises = RSS_SOURCES.map(source => fetchRSS(source));
-            const results = await Promise.all(promises);
+            if (news.length === 0) news = FALLBACK_NEWS;
             
-            let newNews = results.flat();
+            // Уникализация и сортировка
+            news = news.filter((v,i,a) => a.findIndex(t => t.title === v.title) === i)
+                       .sort((a,b) => b.date - a.date)
+                       .slice(0, 6);
+
+            document.getElementById('last-updated').innerText = `Обновлено: ${new Date().toLocaleTimeString('ru-RU')}`;
             
-            // Если ничего не загрузилось, берем запасные новости
-            if (newNews.length === 0) {
-                newNews = FALLBACK_NEWS;
-            }
-
-            globalNewsData = newNews.sort((a, b) => b.date - a.date);
-            globalNewsData = globalNewsData.filter((v, i, a) => a.findIndex(t => (t.title === v.title)) === i);
-
-            if (globalNewsData.length === 0) {
-                mainContainer.innerHTML = `<div class="bg-red-900/30 border border-red-800 text-red-200 p-4 rounded-xl text-center">Не удалось загрузить новости.</div>`;
-                return;
-            }
-
-            mainContainer.innerHTML = globalNewsData.slice(0, 5).map(item => createNewsCard(item, true)).join('');
+            container.innerHTML = news.length > 0 
+                ? `<div class="grid grid-cols-1 md:grid-cols-2 gap-4">${news.map(n => renderCard(n)).join('')}</div>`
+                : `<div class="text-center py-10 text-gray-500">Новости временно недоступны</div>`;
         }
 
+        // === БЕГУЩАЯ СТРОКА ===
         function initTicker() {
-            const tickerData = [
-                { name: 'IMOEX', value: '3,245.12', change: '+1.2%', up: true },
-                { name: 'S&P 500', value: '5,432.10', change: '-0.4%', up: false },
-                { name: 'BTC/USD', value: '68,500', change: '+2.1%', up: true },
-                { name: 'Нефть Brent', value: '82.15', change: '-1.1%', up: false }
+            const data = [
+                { n: 'IMOEX', v: '3,245.12', c: '+1.2%', u: true },
+                { n: 'S&P 500', v: '5,432.10', c: '-0.4%', u: false },
+                { n: 'BTC/USD', v: '68,500', c: '+2.1%', u: true },
+                { n: 'Brent', v: '82.15', c: '-1.1%', u: false },
+                { n: 'Gold', v: '2,340.50', c: '+0.5%', u: true },
+                { n: 'EUR/RUB', v: '98.45', c: '+0.3%', u: true }
             ];
-            const html = tickerData.map(item => {
-                const color = item.up ? 'text-up' : 'text-down';
-                const icon = item.up ? '▲' : '▼';
-                return `<div class="ticker-item"><span class="font-bold text-gray-300">${item.name}</span> <span class="ml-2">${item.value}</span> <span class="ml-2 ${color}">${icon} ${item.change}</span></div>`;
-            }).join('');
-            document.getElementById('ticker-content').innerHTML = html + html + html;
+            const html = data.map(i => `
+                <div class="ticker-item flex items-center gap-2">
+                    <span class="font-bold text-gray-300">${i.n}</span>
+                    <span class="text-gray-400">${i.v}</span>
+                    <span class="${i.u ? 'text-emerald-400' : 'text-red-400'} font-medium">${i.u ? '▲' : '▼'} ${i.c}</span>
+                </div>
+            `).join('');
+            document.getElementById('ticker-content').innerHTML = html.repeat(4);
         }
 
+        // === ЗАПУСК ===
         document.addEventListener('DOMContentLoaded', () => {
             initDonate();
             initTicker();
-            fetchAndRenderNews();
+            loadNews();
+            setInterval(loadNews, 600000); // Автообновление каждые 10 мин
         });
     </script>
 </body>
