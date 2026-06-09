@@ -33,17 +33,19 @@
     <style>
         body { background-color: #09090b; color: #e4e4e7; -webkit-tap-highlight-color: transparent; overflow: hidden; }
         
+        /* Ticker */
         .ticker-wrap { height: 32px; line-height: 32px; overflow: hidden; background: #000; border-bottom: 1px solid #27272a; }
         .ticker { display: inline-block; white-space: nowrap; padding-left: 100%; animation: ticker 40s linear infinite; }
         .ticker-item { display: inline-block; padding: 0 1.5rem; font-size: 0.75rem; color: #71717a; }
         @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
 
-        .standard-feed { overflow-y: auto; height: calc(100vh - 96px); padding: 1rem; scroll-behavior: smooth; }
+        /* Feeds */
+        .standard-feed { overflow-y: auto; height: calc(100vh - 128px); padding: 1rem; scroll-behavior: smooth; } /* Adjusted height for top banner */
         @media (min-width: 768px) { .standard-feed { padding: 2rem; } }
 
-        .essence-scroll-mobile { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; height: calc(100vh - 96px); padding-left: 1rem; }
+        .essence-scroll-mobile { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; height: calc(100vh - 128px); padding-left: 1rem; }
         .essence-card-mobile { flex: 0 0 90vw; height: 100%; scroll-snap-align: center; margin-right: 1rem; border-radius: 24px; position: relative; overflow: hidden; border: 1px solid #27272a; }
-        .essence-grid-desktop { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; padding: 2rem; overflow-y: auto; height: calc(100vh - 96px); }
+        .essence-grid-desktop { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; padding: 2rem; overflow-y: auto; height: calc(100vh - 128px); }
         .essence-card-desktop { height: 500px; border-radius: 20px; position: relative; overflow: hidden; transition: transform 0.2s; display: flex; flex-direction: column; border: 1px solid #27272a; }
         .essence-card-desktop:hover { transform: translateY(-5px); border-color: #f97316; }
 
@@ -53,12 +55,13 @@
         .glass-header { backdrop-filter: blur(16px); background: rgba(9, 9, 11, 0.9); border-bottom: 1px solid #27272a; }
         .tab-bar { backdrop-filter: saturate(180%) blur(20px); background-color: rgba(9, 9, 11, 0.95); border-top: 1px solid #27272a; }
         
+        /* Modals */
         .modal-overlay { position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); opacity: 0; pointer-events: none; transition: opacity 0.3s; display: flex; align-items: center; justify-content: center; }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
-        
         .auth-modal-content { transform: scale(0.95); opacity: 0; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
         .modal-overlay.active .auth-modal-content { transform: scale(1); opacity: 1; }
 
+        /* Reader */
         .reader-box { width: 100%; height: 100%; overflow-y: auto; transition: all 0.3s; }
         @media (min-width: 768px) { .reader-box { width: 800px; height: 90vh; border-radius: 20px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); } }
         .reader-paper.light { background: #fafafa; color: #18181b; }
@@ -82,98 +85,79 @@
         
         #toast { position: fixed; bottom: 6rem; left: 50%; transform: translateX(-50%) translateY(100px); background: #18181b; color: white; padding: 0.75rem 1.5rem; border-radius: 999px; font-size: 0.875rem; font-weight: 600; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 9999; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: none; border: 1px solid #27272a; }
         #toast.show { transform: translateX(-50%) translateY(0); }
+
+        /* AI Chat Styles */
+        .ai-chat-window {
+            position: fixed; bottom: 80px; right: 20px; width: 350px; height: 500px;
+            background: #18181b; border: 1px solid #27272a; border-radius: 16px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); z-index: 90;
+            display: flex; flex-direction: column; overflow: hidden;
+            transform-origin: bottom right; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            opacity: 0; transform: scale(0.5) translateY(20px); pointer-events: none;
+        }
+        .ai-chat-window.open { opacity: 1; transform: scale(1) translateY(0); pointer-events: auto; }
+        @media (max-width: 640px) {
+            .ai-chat-window { bottom: 0; right: 0; width: 100%; height: 100%; border-radius: 0; }
+        }
     </style>
 </head>
 <body class="antialiased h-screen flex flex-col selection:bg-fuch-accent selection:text-white">
 
     <div id="toast"><i class="fas fa-check-circle mr-2 text-fuch-accent"></i><span id="toast-msg">Готово</span></div>
 
-    <!-- AUTH / PROFILE MODAL -->
+    <!-- TOP RESPONSIBILITY BANNER -->
+    <div class="bg-red-950/80 border-b border-red-900/50 py-1 px-4 text-center shrink-0 z-[60]">
+        <p class="text-[10px] md:text-xs text-red-200 font-medium leading-tight">
+            ⚠️ ВЫ САМИ НЕСЕТЕ ОТВЕТСТВЕННОСТЬ ЗА ФИНАНСОВЫЕ РЕШЕНИЯ. ИНФОРМАЦИЯ НА САЙТЕ — ПУБЛИЧНЫЕ НОВОСТИ И МНЕНИЕ АВТОРА.
+        </p>
+    </div>
+
+    <!-- AUTH MODAL -->
     <div id="auth-modal" class="modal-overlay z-[120]">
         <div class="auth-modal-content bg-fuch-card w-[90%] max-w-sm p-6 rounded-3xl border border-fuch-border shadow-2xl relative max-h-[90vh] overflow-y-auto no-scrollbar">
-            <button onclick="app.closeAuth()" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition text-lg z-10">
-                <i class="fas fa-times"></i>
-            </button>
+            <button onclick="app.closeAuth()" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition text-lg z-10"><i class="fas fa-times"></i></button>
 
-            <!-- ЭКРАН ВХОДА -->
             <div id="auth-login-form">
                 <h2 class="text-2xl font-bold text-white mb-1">Вход в FUCH</h2>
                 <p class="text-xs text-gray-500 mb-6">Войдите, чтобы комментировать и ставить лайки</p>
-                
-                <!-- VK LOGIN BUTTON -->
                 <div class="mb-6">
                     <button onclick="app.vkLogin()" class="w-full bg-vk hover:bg-blue-600 text-white font-bold py-4 rounded-xl transition active:scale-95 flex items-center justify-center gap-3 text-lg shadow-lg shadow-blue-900/20">
                         <i class="fab fa-vk text-2xl"></i> Войти через VK
                     </button>
-                    <p class="text-[10px] text-gray-500 text-center mt-2">Мы запросим только имя и аватар</p>
                 </div>
-
-                <div class="relative flex py-2 items-center mb-4">
-                    <div class="flex-grow border-t border-fuch-border"></div>
-                    <span class="flex-shrink-0 mx-4 text-gray-500 text-xs uppercase">или email</span>
-                    <div class="flex-grow border-t border-fuch-border"></div>
-                </div>
-
+                <div class="relative flex py-2 items-center mb-4"><div class="flex-grow border-t border-fuch-border"></div><span class="flex-shrink-0 mx-4 text-gray-500 text-xs uppercase">или email</span><div class="flex-grow border-t border-fuch-border"></div></div>
                 <div class="space-y-3 mb-6">
                     <input type="email" id="login-email" class="w-full bg-fuch-bg border border-fuch-border rounded-xl px-4 py-4 text-white outline-none focus:border-fuch-accent transition text-base" placeholder="Email">
                     <input type="password" id="login-pass" class="w-full bg-fuch-bg border border-fuch-border rounded-xl px-4 py-4 text-white outline-none focus:border-fuch-accent transition text-base" placeholder="Пароль">
                 </div>
-
                 <button onclick="app.loginUser()" class="w-full bg-fuch-accent hover:bg-blue-600 text-white font-bold py-4 rounded-xl transition active:scale-95 mb-4 text-lg">Войти</button>
-
-                <p class="text-center text-base text-gray-400">
-                    Нет аккаунта? <button onclick="app.toggleAuthMode('register')" class="text-fuch-accent font-bold hover:underline">Создать</button>
-                </p>
+                <p class="text-center text-base text-gray-400">Нет аккаунта? <button onclick="app.toggleAuthMode('register')" class="text-fuch-accent font-bold hover:underline">Создать</button></p>
             </div>
 
-            <!-- ЭКРАН РЕГИСТРАЦИИ -->
             <div id="auth-register-form" class="hidden">
                 <h2 class="text-2xl font-bold text-white mb-1">Регистрация</h2>
-                <p class="text-xs text-gray-500 mb-6">Создайте аккаунт инвестора</p>
-                
-                <div class="space-y-3 mb-6">
+                <div class="space-y-3 mb-6 mt-4">
                     <input type="text" id="reg-name" class="w-full bg-fuch-bg border border-fuch-border rounded-xl px-4 py-4 text-white outline-none focus:border-fuch-accent transition text-base" placeholder="Имя / Никнейм">
                     <input type="email" id="reg-email" class="w-full bg-fuch-bg border border-fuch-border rounded-xl px-4 py-4 text-white outline-none focus:border-fuch-accent transition text-base" placeholder="Email">
                     <input type="password" id="reg-pass" class="w-full bg-fuch-bg border border-fuch-border rounded-xl px-4 py-4 text-white outline-none focus:border-fuch-accent transition text-base" placeholder="Придумайте пароль">
                 </div>
-
                 <button onclick="app.registerUser()" class="w-full bg-fuch-essence hover:bg-orange-600 text-black font-bold py-4 rounded-xl transition active:scale-95 mb-4 text-lg">Зарегистрироваться</button>
-
-                <p class="text-center text-base text-gray-400">
-                    Уже есть аккаунт? <button onclick="app.toggleAuthMode('login')" class="text-fuch-accent font-bold hover:underline">Войти</button>
-                </p>
+                <p class="text-center text-base text-gray-400">Уже есть аккаунт? <button onclick="app.toggleAuthMode('login')" class="text-fuch-accent font-bold hover:underline">Войти</button></p>
             </div>
 
-            <!-- ЛИЧНЫЙ КАБИНЕТ (Показывается когда вошел) -->
             <div id="profile-view" class="hidden">
                 <div class="flex flex-col items-center mb-6">
                     <img id="profile-avatar" src="" alt="Avatar" class="w-24 h-24 rounded-full border-4 border-fuch-accent mb-4 object-cover bg-gray-700">
                     <h2 id="profile-name" class="text-2xl font-bold text-white text-center">User Name</h2>
                     <p id="profile-email" class="text-sm text-gray-500">user@example.com</p>
-                    <div id="profile-vk-badge" class="hidden mt-2 bg-vk/20 text-vk text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
-                        <i class="fab fa-vk"></i> Привязан к VK
-                    </div>
                 </div>
-
                 <div class="bg-fuch-bg rounded-xl p-4 border border-fuch-border mb-6 space-y-4">
-                    <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider">Редактировать профиль</h3>
-                    
-                    <div>
-                        <label class="block text-xs text-gray-500 mb-1">Отображаемое имя</label>
-                        <input type="text" id="edit-name" class="w-full bg-fuch-card border border-fuch-border rounded-lg px-3 py-3 text-white outline-none focus:border-fuch-accent text-sm">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-xs text-gray-500 mb-1">Возраст</label>
-                        <input type="number" id="edit-age" class="w-full bg-fuch-card border border-fuch-border rounded-lg px-3 py-3 text-white outline-none focus:border-fuch-accent text-sm" placeholder="Не указан">
-                    </div>
-
-                    <button onclick="app.saveProfile()" class="w-full bg-white/10 hover:bg-white/20 text-white font-bold py-3 rounded-lg transition text-sm">Сохранить изменения</button>
+                    <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider">Редактировать</h3>
+                    <div><label class="block text-xs text-gray-500 mb-1">Имя</label><input type="text" id="edit-name" class="w-full bg-fuch-card border border-fuch-border rounded-lg px-3 py-3 text-white outline-none focus:border-fuch-accent text-sm"></div>
+                    <div><label class="block text-xs text-gray-500 mb-1">Возраст</label><input type="number" id="edit-age" class="w-full bg-fuch-card border border-fuch-border rounded-lg px-3 py-3 text-white outline-none focus:border-fuch-accent text-sm"></div>
+                    <button onclick="app.saveProfile()" class="w-full bg-white/10 hover:bg-white/20 text-white font-bold py-3 rounded-lg transition text-sm">Сохранить</button>
                 </div>
-
-                <button onclick="app.logout()" class="w-full border border-red-500/50 text-red-500 hover:bg-red-500/10 font-bold py-4 rounded-xl transition text-lg">
-                    Выйти из аккаунта
-                </button>
+                <button onclick="app.logout()" class="w-full border border-red-500/50 text-red-500 hover:bg-red-500/10 font-bold py-4 rounded-xl transition text-lg">Выйти</button>
             </div>
         </div>
     </div>
@@ -181,65 +165,27 @@
     <!-- DONATE MODAL -->
     <div id="donate-modal" class="modal-overlay z-[110]">
         <div class="auth-modal-content bg-fuch-card w-[90%] max-w-md p-8 rounded-3xl border border-fuch-border shadow-2xl relative text-center">
-            <button onclick="document.getElementById('donate-modal').classList.remove('active')" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white transition text-lg">
-                <i class="fas fa-times"></i>
-            </button>
-
-            <div class="w-20 h-20 bg-gradient-to-tr from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-orange-500/30">
-                <i class="fas fa-hand-holding-heart text-white text-3xl"></i>
-            </div>
-            
+            <button onclick="document.getElementById('donate-modal').classList.remove('active')" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white transition text-lg"><i class="fas fa-times"></i></button>
+            <div class="w-20 h-20 bg-gradient-to-tr from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-orange-500/30"><i class="fas fa-hand-holding-heart text-white text-3xl"></i></div>
             <h2 class="text-3xl font-bold text-white mb-2">Поддержать FUCH</h2>
-            <p class="text-gray-400 mb-8">Помогите проекту развиваться и оставаться независимым. Ваш донат идет на оплату серверов и развитие функционала.</p>
-
-            <!-- Прогресс бар -->
-            <div class="mb-8 text-left">
-                <div class="flex justify-between text-sm mb-2 font-bold">
-                    <span class="text-white">Собрано: 12 400 ₽</span>
-                    <span class="text-gray-500">Цель: 50 000 ₽</span>
-                </div>
-                <div class="w-full bg-fuch-bg rounded-full h-4 overflow-hidden border border-fuch-border">
-                    <div class="bg-gradient-to-r from-yellow-400 to-orange-500 h-full rounded-full" style="width: 25%"></div>
-                </div>
+            <div class="mb-8 text-left mt-6">
+                <div class="flex justify-between text-sm mb-2 font-bold"><span class="text-white">Собрано: 12 400 ₽</span><span class="text-gray-500">Цель: 50 000 ₽</span></div>
+                <div class="w-full bg-fuch-bg rounded-full h-4 overflow-hidden border border-fuch-border"><div class="bg-gradient-to-r from-yellow-400 to-orange-500 h-full rounded-full" style="width: 25%"></div></div>
             </div>
-
             <div class="grid grid-cols-2 gap-4 mb-4">
-                <button onclick="app.donate(100)" class="bg-fuch-bg hover:bg-fuch-accent hover:text-white border border-fuch-border py-4 rounded-xl font-bold text-xl transition group">
-                    100 ₽
-                </button>
-                <button onclick="app.donate(300)" class="bg-fuch-bg hover:bg-fuch-accent hover:text-white border border-fuch-border py-4 rounded-xl font-bold text-xl transition group">
-                    300 ₽
-                </button>
-                <button onclick="app.donate(500)" class="bg-fuch-bg hover:bg-fuch-accent hover:text-white border border-fuch-border py-4 rounded-xl font-bold text-xl transition group">
-                    500 ₽
-                </button>
-                <button onclick="app.donate(1000)" class="bg-fuch-bg hover:bg-fuch-accent hover:text-white border border-fuch-border py-4 rounded-xl font-bold text-xl transition group">
-                    1000 ₽
-                </button>
+                <button onclick="app.donate(100)" class="bg-fuch-bg hover:bg-fuch-accent hover:text-white border border-fuch-border py-4 rounded-xl font-bold text-xl transition">100 ₽</button>
+                <button onclick="app.donate(500)" class="bg-fuch-bg hover:bg-fuch-accent hover:text-white border border-fuch-border py-4 rounded-xl font-bold text-xl transition">500 ₽</button>
             </div>
-            
-            <button onclick="app.donate('custom')" class="w-full bg-fuch-essence hover:bg-orange-600 text-black font-bold py-4 rounded-xl transition active:scale-95 text-lg mt-2">
-                Задонатить другую сумму
-            </button>
         </div>
     </div>
 
     <!-- ONBOARDING MODAL -->
     <div id="essence-modal" class="modal-overlay z-[100]">
         <div class="bg-fuch-card w-[90%] max-w-md p-8 rounded-3xl border border-fuch-border shadow-2xl text-center">
-            <div class="w-16 h-16 bg-gradient-to-tr from-fuch-essence to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-orange-500/20">
-                <i class="fas fa-bolt text-white text-3xl"></i>
-            </div>
+            <div class="w-16 h-16 bg-gradient-to-tr from-fuch-essence to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-orange-500/20"><i class="fas fa-bolt text-white text-3xl"></i></div>
             <h2 class="text-2xl font-bold text-white mb-2">FUCH: Суть</h2>
-            <p class="text-xs text-fuch-essence uppercase tracking-widest mb-6 font-bold">Gewinn fixieren</p>
-            <p class="text-gray-400 mb-8 leading-relaxed">
-                Здесь только <strong class="text-white">сухая выжимка</strong> фактов из 100+ источников. Никакой воды.
-                <br><br>
-                Листай, читай суть за 5 секунд, переходи к источнику только если нужно. Время — деньги.
-            </p>
-            <button onclick="app.closeEssenceModal()" class="w-full bg-fuch-essence hover:bg-orange-500 text-black font-bold py-4 rounded-xl transition active:scale-95 text-lg">
-                Понятно, погнали
-            </button>
+            <p class="text-gray-400 mb-8 leading-relaxed">Только сухая выжимка фактов. Листай, читай суть за 5 секунд.</p>
+            <button onclick="app.closeEssenceModal()" class="w-full bg-fuch-essence hover:bg-orange-500 text-black font-bold py-4 rounded-xl transition active:scale-95 text-lg">Понятно, погнали</button>
         </div>
     </div>
 
@@ -250,20 +196,12 @@
             <span class="text-[9px] text-gray-500 uppercase tracking-widest font-medium group-hover:text-fuch-essence transition">Gewinn fixieren</span>
         </div>
         <nav class="hidden md:flex items-center gap-1 bg-white/5 p-1 rounded-full border border-fuch-border">
-            <button onclick="app.nav('feed')" id="btn-feed" class="nav-btn px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-fuch-accent text-white shadow-lg shadow-blue-500/20">Лента</button>
+            <button onclick="app.nav('feed')" id="btn-feed" class="nav-btn px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-fuch-accent text-white shadow-lg shadow-blue-500/20">Главная</button>
             <button onclick="app.nav('essence')" id="btn-essence" class="nav-btn px-4 py-1.5 rounded-full text-xs font-medium text-gray-400 hover:text-fuch-essence hover:bg-white/10 transition-all flex items-center gap-1"><i class="fas fa-bolt text-[10px]"></i> Суть</button>
             <button onclick="app.nav('ideas')" id="btn-ideas" class="nav-btn px-4 py-1.5 rounded-full text-xs font-medium text-gray-400 hover:text-white hover:bg-white/10 transition-all">Мнения</button>
         </nav>
         <div class="flex items-center gap-2 md:gap-3">
-            <!-- Кнопка Донат -->
-            <button onclick="document.getElementById('donate-modal').classList.add('active')" class="h-10 md:h-9 px-3 md:px-2 rounded-full border border-yellow-500/30 bg-yellow-500/10 flex items-center justify-center gap-2 text-yellow-500 hover:bg-yellow-500 hover:text-black transition text-xs font-bold" title="Поддержать проект">
-                <i class="fas fa-heart text-xs"></i> <span class="hidden md:inline">Донат</span>
-            </button>
-
-            <button onclick="app.showEssenceInfo()" class="w-10 h-10 md:w-9 md:h-9 rounded-full border border-fuch-essence/50 bg-fuch-essence/10 flex items-center justify-center text-fuch-essence hover:text-white hover:bg-fuch-essence transition" title="Что такое Суть?">
-                <i class="fas fa-question text-sm md:text-xs"></i>
-            </button>
-            
+            <button onclick="document.getElementById('donate-modal').classList.add('active')" class="h-10 md:h-9 px-3 md:px-2 rounded-full border border-yellow-500/30 bg-yellow-500/10 flex items-center justify-center gap-2 text-yellow-500 hover:bg-yellow-500 hover:text-black transition text-xs font-bold"><i class="fas fa-heart text-xs"></i></button>
             <button id="user-profile-btn" onclick="app.openAuth()" class="h-10 md:h-9 px-4 md:px-3 rounded-full border border-fuch-border bg-white/5 flex items-center justify-center gap-2 text-gray-300 hover:text-white hover:border-fuch-accent hover:bg-fuch-accent/10 transition text-sm font-bold">
                 <i class="far fa-user text-base md:text-sm"></i> <span id="user-name-display" class="hidden md:inline">Войти</span>
             </button>
@@ -275,100 +213,105 @@
 
     <!-- MAIN CONTENT -->
     <main class="flex-grow relative w-full overflow-hidden">
+        <!-- FEED WITH IMAGES -->
         <section id="view-feed" class="absolute inset-0 standard-feed bg-fuch-bg hidden">
-            <div class="max-w-4xl mx-auto space-y-4" id="standard-feed-container"></div>
+            <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6" id="standard-feed-container"></div>
             <div id="feed-loader" class="py-8 text-center text-gray-500 hidden"><i class="fas fa-circle-notch fa-spin mr-2"></i>Загрузка...</div>
         </section>
 
+        <!-- ESSENCE -->
         <section id="view-essence" class="absolute inset-0 bg-fuch-bg hidden">
             <div id="essence-mobile" class="essence-scroll-mobile no-scrollbar md:hidden pl-4"></div>
             <div id="essence-desktop" class="essence-grid-desktop no-scrollbar hidden md:block"></div>
-            <div id="essence-loader" class="absolute bottom-8 left-1/2 -translate-x-1/2 text-gray-500 text-sm hidden bg-fuch-card px-4 py-2 rounded-full border border-fuch-border z-30">
-                <i class="fas fa-circle-notch fa-spin mr-2"></i>Генерация сути...
-            </div>
         </section>
 
+        <!-- IDEAS -->
         <section id="view-ideas" class="absolute inset-0 standard-feed bg-fuch-bg hidden">
             <div class="max-w-3xl mx-auto">
                 <h2 class="text-2xl font-bold text-white mb-6 border-l-4 border-purple-500 pl-3">Авторская аналитика</h2>
                 <div id="ideas-list" class="space-y-6"></div>
             </div>
         </section>
-
+        
+        <!-- ADMIN (Hidden) -->
         <section id="view-admin" class="absolute inset-0 standard-feed bg-fuch-bg z-50 hidden">
-            <div class="max-w-lg mx-auto bg-fuch-card p-8 rounded-2xl border border-fuch-border shadow-2xl mt-4">
-                <h2 class="text-2xl font-bold text-white mb-6">Редактор FUCH</h2>
+             <div class="max-w-lg mx-auto bg-fuch-card p-8 rounded-2xl border border-fuch-border shadow-2xl mt-4">
+                <h2 class="text-2xl font-bold text-white mb-6">Админка</h2>
                 <div id="admin-auth" class="space-y-4">
-                    <input type="password" id="adm-pass" class="w-full bg-fuch-bg border border-fuch-border rounded-lg px-4 py-3 text-white outline-none focus:border-fuch-accent" placeholder="Пароль админа (admin)">
-                    <button onclick="app.adminLogin()" class="w-full bg-fuch-accent py-3 rounded-lg font-bold text-white">Войти как админ</button>
+                    <input type="password" id="adm-pass" class="w-full bg-fuch-bg border border-fuch-border rounded-lg px-4 py-3 text-white" placeholder="Пароль (admin)">
+                    <button onclick="app.adminLogin()" class="w-full bg-fuch-accent py-3 rounded-lg font-bold text-white">Войти</button>
                 </div>
                 <div id="admin-editor" class="hidden space-y-4">
-                    <select id="new-tag" class="w-full bg-fuch-bg border border-fuch-border rounded-lg px-4 py-3 text-white outline-none"><option value="news">Новость</option><option value="idea">Мнение</option></select>
-                    <input type="text" id="new-title" placeholder="Заголовок" class="w-full bg-fuch-bg border-b border-fuch-border text-xl font-bold text-white py-3 outline-none focus:border-fuch-accent">
-                    <textarea id="new-body" rows="6" placeholder="Текст..." class="w-full bg-fuch-bg border border-fuch-border rounded-lg p-4 font-mono text-sm text-gray-300 outline-none focus:border-fuch-accent"></textarea>
+                    <textarea id="new-body" rows="4" placeholder="Новая идея..." class="w-full bg-fuch-bg border border-fuch-border rounded-lg p-4 text-white"></textarea>
                     <button onclick="app.addNews()" class="w-full bg-emerald-600 py-3 rounded-lg font-bold text-white">Опубликовать</button>
                 </div>
-            </div>
+             </div>
         </section>
     </main>
 
     <!-- MOBILE TAB BAR -->
     <nav class="md:hidden tab-bar safe-bottom z-50 flex justify-around items-center h-[64px] shrink-0">
-        <button onclick="app.nav('feed')" class="flex flex-col items-center gap-1 w-full py-2 text-fuch-accent transition" id="tab-feed">
-            <i class="fas fa-newspaper text-lg"></i><span class="text-[10px] font-medium">Лента</span>
-        </button>
-        <button onclick="app.nav('essence')" class="flex flex-col items-center gap-1 w-full py-2 text-gray-500 transition" id="tab-essence">
-            <i class="fas fa-bolt text-lg"></i><span class="text-[10px] font-medium">Суть</span>
-        </button>
-        <button onclick="app.nav('ideas')" class="flex flex-col items-center gap-1 w-full py-2 text-gray-500 transition" id="tab-ideas">
-            <i class="fas fa-lightbulb text-lg"></i><span class="text-[10px] font-medium">Мнения</span>
-        </button>
+        <button onclick="app.nav('feed')" class="flex flex-col items-center gap-1 w-full py-2 text-fuch-accent transition" id="tab-feed"><i class="fas fa-newspaper text-lg"></i><span class="text-[10px]">Главная</span></button>
+        <button onclick="app.nav('essence')" class="flex flex-col items-center gap-1 w-full py-2 text-gray-500 transition" id="tab-essence"><i class="fas fa-bolt text-lg"></i><span class="text-[10px]">Суть</span></button>
+        <button onclick="app.nav('ideas')" class="flex flex-col items-center gap-1 w-full py-2 text-gray-500 transition" id="tab-ideas"><i class="fas fa-lightbulb text-lg"></i><span class="text-[10px]">Мнения</span></button>
     </nav>
+
+    <!-- AI CHAT BUTTON & WINDOW -->
+    <button onclick="app.toggleAiChat()" class="fixed bottom-24 md:bottom-8 right-4 md:right-8 w-14 h-14 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full shadow-lg shadow-indigo-500/40 flex items-center justify-center text-white z-[80] hover:scale-110 transition active:scale-95 group">
+        <i class="fas fa-robot text-2xl group-hover:animate-pulse"></i>
+    </button>
+
+    <div id="ai-chat-window" class="ai-chat-window">
+        <div class="bg-indigo-900/50 p-4 border-b border-white/10 flex justify-between items-center backdrop-blur">
+            <div class="flex items-center gap-2">
+                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span class="font-bold text-white text-sm">Invest AI Assistant</span>
+            </div>
+            <button onclick="app.toggleAiChat()" class="text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
+        </div>
+        
+        <!-- RED WARNING TABLETTE -->
+        <div class="bg-red-500/10 border-b border-red-500/20 px-3 py-2 text-[10px] text-red-400 text-center font-bold uppercase tracking-wide">
+            <i class="fas fa-exclamation-triangle mr-1"></i> Не является индивидуальной инвестиционной рекомендацией
+        </div>
+
+        <div id="ai-messages" class="flex-1 overflow-y-auto p-4 space-y-4 bg-fuch-bg">
+            <div class="flex gap-3">
+                <div class="w-8 h-8 rounded bg-indigo-600 flex items-center justify-center shrink-0 text-xs"><i class="fas fa-robot"></i></div>
+                <div class="bg-white/5 p-3 rounded-2xl rounded-tl-none text-sm text-gray-300">Привет! Я AI-ассистент FUCH. Задай мне вопрос по акциям, облигациям или макроэкономике.</div>
+            </div>
+        </div>
+
+        <div class="p-3 border-t border-white/10 bg-fuch-card">
+            <form onsubmit="app.sendAiMessage(event)" class="flex gap-2">
+                <input type="text" id="ai-input" class="flex-1 bg-fuch-bg border border-fuch-border rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-indigo-500" placeholder="Что там с Газпромом?">
+                <button type="submit" class="bg-indigo-600 text-white w-10 rounded-lg flex items-center justify-center hover:bg-indigo-500 transition"><i class="fas fa-paper-plane text-xs"></i></button>
+            </form>
+        </div>
+    </div>
 
     <!-- READER MODAL -->
     <div id="reader-modal" class="modal-overlay">
         <div id="reader-paper" class="reader-box reader-paper light">
             <div class="reader-header sticky top-0 z-10 px-4 md:px-6 py-3 flex justify-between items-center font-sans backdrop-blur">
-                <button onclick="app.closeReader()" class="flex items-center gap-2 text-current opacity-80 hover:opacity-100 font-bold text-base md:text-sm px-3 py-2 -ml-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition">
-                    <i class="fas fa-arrow-left text-lg md:text-base"></i> <span>Назад</span>
-                </button>
-                <div class="flex items-center gap-3">
-                    <span class="text-[10px] font-bold uppercase tracking-widest opacity-50 hidden sm:block">FUCH READER</span>
-                    <button onclick="app.toggleReaderTheme()" class="w-10 h-10 md:w-9 md:h-9 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center hover:bg-black/10 dark:hover:bg-white/20 transition border border-black/5 dark:border-white/5">
-                        <i id="theme-icon" class="fas fa-moon text-sm md:text-xs"></i>
-                    </button>
-                </div>
+                <button onclick="app.closeReader()" class="flex items-center gap-2 text-current opacity-80 hover:opacity-100 font-bold text-base md:text-sm px-3 py-2 -ml-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition"><i class="fas fa-arrow-left"></i> Назад</button>
+                <button onclick="app.toggleReaderTheme()" class="w-10 h-10 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center"><i id="theme-icon" class="fas fa-moon text-sm"></i></button>
             </div>
             <article id="reader-content" class="prose-reader"></article>
             <div class="max-w-[68ch] mx-auto px-4 md:px-6 pb-20 font-sans border-t border-current/10 mt-8 pt-8">
                 <div class="flex gap-3 mb-8">
-                    <button id="reader-like-btn" onclick="app.handleReaderLike()" class="reader-btn flex-1 py-4 md:py-3 rounded-xl font-bold border flex items-center justify-center gap-2 transition active:scale-95 text-base md:text-sm">
-                        <i class="far fa-heart text-lg md:text-base"></i> <span id="reader-like-count">0</span>
-                    </button>
-                    <button onclick="app.handleReaderShare()" class="reader-btn flex-1 py-4 md:py-3 rounded-xl font-bold bg-fuch-accent text-white border-transparent flex items-center justify-center gap-2 transition active:scale-95 text-base md:text-sm">
-                        <i class="fas fa-share-alt text-lg md:text-base"></i> <span class="hidden md:inline">Поделиться</span>
-                    </button>
+                    <button id="reader-like-btn" onclick="app.handleReaderLike()" class="reader-btn flex-1 py-4 rounded-xl font-bold border flex items-center justify-center gap-2 transition active:scale-95"><i class="far fa-heart"></i> <span id="reader-like-count">0</span></button>
+                    <button onclick="app.handleReaderShare()" class="reader-btn flex-1 py-4 rounded-xl font-bold bg-fuch-accent text-white flex items-center justify-center gap-2 transition active:scale-95"><i class="fas fa-share-alt"></i></button>
                 </div>
-                <a id="reader-source-link" href="#" target="_blank" class="block w-full py-4 md:py-3 mb-8 rounded-xl font-bold text-center bg-black text-white dark:bg-white dark:text-black no-underline hidden text-base md:text-sm">Перейти к источнику</a>
-                
                 <h3 class="text-lg font-bold mb-4">Комментарии (<span id="comments-count">0</span>)</h3>
-                
-                <div id="comment-section-logged-out" class="hidden bg-black/5 dark:bg-white/5 p-6 rounded-xl text-center mb-6">
-                    <p class="text-base opacity-70 mb-4">Войдите, чтобы оставить комментарий</p>
-                    <button onclick="app.openAuth()" class="bg-fuch-accent text-white px-8 py-3 rounded-xl text-base font-bold hover:bg-blue-600 transition">Войти / Регистрация</button>
+                <div id="comment-section-logged-out" class="hidden bg-black/5 p-6 rounded-xl text-center mb-6">
+                    <button onclick="app.openAuth()" class="bg-fuch-accent text-white px-8 py-3 rounded-xl font-bold">Войти</button>
                 </div>
-
                 <div id="comment-section-logged-in" class="hidden flex gap-3 mb-6 items-center">
-                    <img id="comment-avatar-img" src="" class="w-12 h-12 rounded-full bg-fuch-accent object-cover shrink-0 hidden">
-                    <div id="comment-avatar-letter" class="w-12 h-12 rounded-full bg-fuch-accent flex items-center justify-center text-white font-bold text-lg shrink-0">U</div>
-                    <div class="flex-1 flex gap-2">
-                        <input type="text" id="comment-input" class="comment-input flex-1 px-4 py-4 md:py-3 rounded-xl border outline-none text-base md:text-sm" placeholder="Написать комментарий...">
-                        <button onclick="app.postComment()" class="bg-fuch-accent text-white w-14 h-14 md:w-12 md:h-12 rounded-xl flex items-center justify-center hover:bg-blue-600 transition shrink-0">
-                            <i class="fas fa-paper-plane text-base md:text-sm"></i>
-                        </button>
-                    </div>
+                    <div class="w-10 h-10 rounded-full bg-fuch-accent flex items-center justify-center text-white font-bold shrink-0" id="comment-avatar">U</div>
+                    <input type="text" id="comment-input" class="comment-input flex-1 px-4 py-3 rounded-xl border outline-none text-sm" placeholder="Комментарий...">
+                    <button onclick="app.postComment()" class="bg-fuch-accent text-white w-12 h-12 rounded-xl flex items-center justify-center"><i class="fas fa-paper-plane"></i></button>
                 </div>
-
                 <div id="comments-list" class="space-y-3"></div>
             </div>
         </div>
@@ -377,70 +320,26 @@
 <script>
 const app = {
     data: { 
-        news: [], posts: [], essenceFeed: [], 
-        feedPage: 0, essencePage: 0, 
+        news: [], posts: [], essenceFeed: [], generatedIds: new Set(),
         feedLoading: false, essenceLoading: false, 
-        readerTheme: localStorage.getItem('ip_theme') || 'light',
-        likes: JSON.parse(localStorage.getItem('ip_likes_v14') || '{}'),
-        comments: JSON.parse(localStorage.getItem('ip_comments_v14') || '{}'),
+        likes: JSON.parse(localStorage.getItem('ip_likes_v15') || '{}'),
+        comments: JSON.parse(localStorage.getItem('ip_comments_v15') || '{}'),
         users: JSON.parse(localStorage.getItem('fuch_users') || '[]'),
         currentUser: JSON.parse(localStorage.getItem('fuch_current_user') || 'null'),
-        currentItem: null,
-        generatedIds: new Set(),
-        vkAppId: 0 // <-- ВСТАВИТЬ СЮДА ВАШ APP_ID ОТ VK
+        currentItem: null, vkAppId: 0
     },
 
-    // --- ГЕНЕРАТОР КОНТЕНТА ---
-    companies: ['Сбербанк', 'Газпром', 'Лукойл', 'Яндекс', 'Тинькофф', 'Магнит', 'Норникель', 'Полюс', 'Аэрофлот', 'Сургутнефтегаз', 'Роснефть', 'МТС', 'Северсталь', 'НЛМК', 'Татнефть', 'Мосбиржа', 'VK', 'Ozon', 'Wildberries', 'Детский мир', 'X5 Group', 'Русал', 'Фосагро', 'Полиметалл', 'Алроса'],
-    tickers: ['SBER', 'GAZP', 'LKOH', 'YNDX', 'TCSG', 'MGNT', 'GMKN', 'PLZL', 'AFLT', 'SNGS', 'ROSN', 'MTSS', 'CHMF', 'NLMK', 'TATN', 'MOEX', 'VKCO', 'OZON', 'DSKY', 'RUAL', 'PHOR', 'POLY', 'ALRS'],
-    macroEvents: ['Ключевая ставка ЦБ', 'Инфляция в РФ', 'ВВП России', 'Безработица США', 'Non-Farm Payrolls', 'Ставка ФРС', 'Индекс PMI', 'Розничные продажи', 'Промышленное производство', 'Сальдо торгового баланса', 'Индекс потребительских цен', 'Ставка ЕЦБ'],
-    cryptoAssets: ['Bitcoin', 'Ethereum', 'Solana', 'TON', 'BNB', 'Ripple', 'Cardano', 'Dogecoin', 'Polkadot', 'Avalanche', 'Chainlink'],
-    
+    // --- DATA GENERATORS ---
+    companies: ['Сбербанк', 'Газпром', 'Лукойл', 'Яндекс', 'Тинькофф', 'Магнит', 'Норникель', 'Полюс', 'Аэрофлот', 'Роснефть', 'МТС', 'Северсталь', 'НЛМК', 'Татнефть', 'Мосбиржа', 'VK', 'Ozon'],
     templates: {
         essence: [
-            { tag: "Акции", gen: () => {
-                const c = app.companies[Math.floor(Math.random()*app.companies.length)];
-                const n = Math.floor(Math.random()*40)+1;
-                return { t: `${c}: прибыль +${n}%`, s: `• Чистая прибыль: ${n} млрд руб\n• Дивиденды: рекомендованы\n• Акции реагируют ростом`, hash: `ess_stock_${c}_${n}` };
-            }},
-            { tag: "Макро", gen: () => {
-                const e = app.macroEvents[Math.floor(Math.random()*app.macroEvents.length)];
-                const v = (Math.random()*10).toFixed(1);
-                return { t: `${e}: данные вышли`, s: `• Показатель: ${v}%\n• Прогноз был ниже\n• Рынок корректируется`, hash: `ess_macro_${e}_${v}` };
-            }},
-            { tag: "Крипто", gen: () => {
-                const a = app.cryptoAssets[Math.floor(Math.random()*app.cryptoAssets.length)];
-                const p = Math.floor(Math.random()*50000)+1000;
-                return { t: `${a} пробивает уровень`, s: `• Цена: $${p}\n• Объем торгов растет\n• Киты накапливают позицию`, hash: `ess_crypto_${a}_${p}` };
-            }},
-            { tag: "Сырье", gen: () => {
-                const items = ['Нефть Brent', 'Золото', 'Палладий', 'Природный газ', 'Медь', 'Платина'];
-                const i = items[Math.floor(Math.random()*items.length)];
-                const v = Math.floor(Math.random()*100)+50;
-                return { t: `${i} обновляет максимум`, s: `• Рост на ${v}% за неделю\n• Дефицит предложения\n• Тренд восходящий`, hash: `ess_comm_${i}_${v}` };
-            }}
+            { tag: "Акции", gen: () => { const c = app.companies[Math.floor(Math.random()*app.companies.length)]; const n = Math.floor(Math.random()*40)+1; return { t: `${c}: прибыль +${n}%`, s: `• Прибыль: ${n} млрд\n• Дивиденды: Да\n• Рост`, hash: `ess_${c}_${n}` }; }},
+            { tag: "Макро", gen: () => { const v = (Math.random()*10).toFixed(1); return { t: `ЦБ: ставка ${v}%`, s: `• Инфляция под контролем\n• Жесткая политика`, hash: `ess_cb_${v}` }; }},
+            { tag: "Крипто", gen: () => { const p = Math.floor(Math.random()*50000)+1000; return { t: `BTC > $${p}`, s: `• Пробои уровня\n• Киты покупают`, hash: `ess_btc_${p}` }; }}
         ],
         feed: [
-            () => {
-                const c = app.companies[Math.floor(Math.random()*app.companies.length)];
-                const q = ['I', 'II', 'III', 'IV'][Math.floor(Math.random()*4)];
-                return { t: `${c} опубликовал отчетность за ${q} квартал`, b: `Компания показала результаты выше ожиданий аналитиков. Выручка выросла на фоне расширения бизнеса.`, hash: `feed_report_${c}_${q}` };
-            },
-            () => {
-                const t = app.tickers[Math.floor(Math.random()*app.tickers.length)];
-                const reasons = ['санкциях', 'дивидендах', 'отчетности', 'макро-фоне', 'новостях сектора'];
-                const r = reasons[Math.floor(Math.random()*reasons.length)];
-                return { t: `Акции ${t} падают на новостях о ${r}`, b: `Рынок негативно отреагировал на новые ограничения. Инвесторы фиксируют прибыль после роста.`, hash: `feed_drop_${t}_${r}` };
-            },
-            () => {
-                const e = app.macroEvents[Math.floor(Math.random()*app.macroEvents.length)];
-                return { t: `ЦБ прокомментировал ${e}`, b: `Регулятор отметил стабильность финансовой системы и отсутствие системных рисков в текущих условиях.`, hash: `feed_cb_${e}` };
-            },
-            () => {
-                const a = app.cryptoAssets[Math.floor(Math.random()*app.cryptoAssets.length)];
-                const amount = Math.floor(Math.random()*500)+50;
-                return { t: `Крупный фонд купил ${a} на $${amount} млн`, b: `Институциональные инвесторы продолжают наращивать позиции в цифровых активах несмотря на волатильность.`, hash: `feed_buy_${a}_${amount}` };
-            }
+            () => { const c = app.companies[Math.floor(Math.random()*app.companies.length)]; return { t: `${c} отчитался за квартал`, b: `Выручка компании выросла на фоне расширения бизнеса. Аналитики позитивно оценивают перспективы.`, hash: `feed_${c}` }; },
+            () => { const c = app.companies[Math.floor(Math.random()*app.companies.length)]; return { t: `Акции ${c} под давлением`, b: `Инвесторы фиксируют прибыль после роста. Рынок ожидает новых драйверов.`, hash: `feed_drop_${c}` }; }
         ]
     },
 
@@ -453,11 +352,11 @@ const app = {
             const data = tmpl.gen();
             if (!this.data.generatedIds.has(data.hash)) {
                 this.data.generatedIds.add(data.hash);
-                return { id: this.generateUniqueID(), title: data.t, summary: data.s, tag: tmpl.tag, source: ['Bloomberg', 'Reuters', 'Интерфакс', 'РБК', 'ЦБ РФ'][Math.floor(Math.random() * 5)], date: new Date(Date.now() - Math.floor(Math.random() * 86400000)).toLocaleDateString('ru-RU', {day:'numeric', month:'short'}), sourceUrl: '#' };
+                return { id: this.generateUniqueID(), title: data.t, summary: data.s, tag: tmpl.tag, source: 'FUCH News', date: 'Сегодня', sourceUrl: '#' };
             }
             attempts++;
         }
-        return { id: this.generateUniqueID(), title: "Рынок: свежие обновления", summary: "• Торги проходят активно\n• Волатильность повышена", tag: "Рынок", source: "FUCH", date: "Сейчас", sourceUrl: "#" };
+        return { id: this.generateUniqueID(), title: "Новости рынка", summary: "• Активные торги\n• Смешанная динамика", tag: "Рынок", source: "FUCH", date: "Сейчас", sourceUrl: "#" };
     },
 
     generateFeedItem() {
@@ -467,23 +366,31 @@ const app = {
             const data = gen();
             if (!this.data.generatedIds.has(data.hash)) {
                 this.data.generatedIds.add(data.hash);
-                return { id: this.generateUniqueID(), title: data.t, body: data.b, full: `<p>${data.b}</p><p>Подробности развиваются...</p>`, tag: ["Акции","Макро","Крипто","Сырье"][Math.floor(Math.random()*4)], source: ['Ведомости', 'Коммерсантъ', 'Forbes', 'Habr'][Math.floor(Math.random() * 4)], date: new Date(Date.now() - Math.floor(Math.random() * 86400000)).toLocaleDateString('ru-RU', {day:'numeric', month:'short'}), sourceUrl: '#' };
+                // Генерируем уникальную картинку на основе ID
+                const imgSeed = Math.abs(data.hash.split('').reduce((a,b)=>a+b.charCodeAt(0),0));
+                const imgUrl = `https://picsum.photos/seed/${imgSeed}/600/400`;
+                
+                return { 
+                    id: this.generateUniqueID(), 
+                    title: data.t, 
+                    body: data.b, 
+                    full: `<p>${data.b}</p><p>Подробности развиваются...</p>`, 
+                    tag: ["Акции","Макро"][Math.floor(Math.random()*2)], 
+                    source: 'РБК / Ведомости', 
+                    date: '1ч назад', 
+                    image: imgUrl,
+                    sourceUrl: '#' 
+                };
             }
             attempts++;
         }
-        return { id: this.generateUniqueID(), title: "Обзор рынка за сегодня", body: "Основные индексы демонстрируют смешанную динамику.", full: "<p>Обзор рынка...</p>", tag: "Рынок", source: "FUCH", date: "Сейчас", sourceUrl: "#" };
+        return { id: this.generateUniqueID(), title: "Обзор рынка", body: "Индексы топчутся на месте.", full: "<p>Обзор...</p>", tag: "Рынок", source: "FUCH", date: "Сейчас", image: 'https://picsum.photos/600/400', sourceUrl: "#" };
     },
 
     init() {
-        // Инициализация VK SDK
-        if (this.data.vkAppId) {
-            VK.init({ apiId: this.data.vkAppId });
-        }
-
-        const savedPosts = localStorage.getItem('ip_posts_v14');
-        this.data.posts = savedPosts ? JSON.parse(savedPosts) : [
-            { id: 'post_1', title: "Почему я покупаю нефтянку", body: "Энергетический кризис только начинается.", full: "<p>Многие боятся рецессии, но я вижу точку входа.</p><h2>Причины</h2><p>Дефицит инвестиций в добычу создает предпосылки для роста цен.</p>", tag: "Мнение", date: "2ч назад", isPost: true }
-        ];
+        if (this.data.vkAppId) VK.init({ apiId: this.data.vkAppId });
+        const savedPosts = localStorage.getItem('ip_posts_v15');
+        this.data.posts = savedPosts ? JSON.parse(savedPosts) : [{ id: 'post_1', title: "Нефтянка: покупать?", body: "Энергокризис начинается.", full: "<p>Дефицит инвестиций толкает цены вверх.</p>", tag: "Мнение", date: "2ч назад", isPost: true }];
 
         this.updateAuthUI();
         this.initTicker();
@@ -496,329 +403,186 @@ const app = {
         this.renderEssenceChunk(this.data.essenceFeed);
         
         document.getElementById('view-feed').addEventListener('scroll', () => this.checkStandardScroll());
-        ['mobile', 'desktop'].forEach(dev => {
-            document.getElementById(`essence-${dev}`).addEventListener('scroll', () => this.checkEssenceScroll(dev));
-        });
-
+        ['mobile', 'desktop'].forEach(dev => document.getElementById(`essence-${dev}`).addEventListener('scroll', () => this.checkEssenceScroll(dev)));
         this.nav('feed');
     },
 
-    // --- AUTH & PROFILE SYSTEM ---
+    // --- AI CHAT LOGIC ---
+    toggleAiChat() {
+        document.getElementById('ai-chat-window').classList.toggle('open');
+    },
+    
+    sendAiMessage(e) {
+        e.preventDefault();
+        const input = document.getElementById('ai-input');
+        const msg = input.value.trim();
+        if(!msg) return;
+
+        const chat = document.getElementById('ai-messages');
+        
+        // User Message
+        chat.innerHTML += `<div class="flex gap-3 justify-end"><div class="bg-indigo-600 p-3 rounded-2xl rounded-tr-none text-sm text-white max-w-[80%]">${msg}</div></div>`;
+        input.value = '';
+        chat.scrollTop = chat.scrollHeight;
+
+        // Simulate AI thinking
+        setTimeout(() => {
+            let response = "Это интересный вопрос. Однако помните, что я искусственный интеллект, а не финансовый советник.";
+            const lowerMsg = msg.toLowerCase();
+            
+            if(lowerMsg.includes('сбер') || lowerMsg.includes('банк')) response = "Сбербанк показывает сильные результаты благодаря высокой марже. Дивидендный потенциал сохраняется высоким.";
+            else if(lowerMsg.includes('газпром') || lowerMsg.includes('газ')) response = "Газпром сейчас перенаправляет потоки на Восток. Капекс высокий, дивиденды под вопросом.";
+            else if(lowerMsg.includes('биткоин') || lowerMsg.includes('крипт')) response = "Крипторынок волатилен. Сейчас наблюдается накопление крупными игроками на фоне ожидания ETF.";
+            else if(lowerMsg.includes('купить') || lowerMsg.includes('продать')) response = "Я не могу давать прямые рекомендации. Проанализируйте отчетность и мультипликаторы P/E.";
+            else if(lowerMsg.includes('ставк') || lowerMsg.includes('цб')) response = "ЦБ держит жесткую риторику для борьбы с инфляцией. Высокие ставки давят на бизнес, но поддерживают рубль.";
+
+            chat.innerHTML += `<div class="flex gap-3"><div class="w-8 h-8 rounded bg-indigo-600 flex items-center justify-center shrink-0 text-xs"><i class="fas fa-robot"></i></div><div class="bg-white/5 p-3 rounded-2xl rounded-tl-none text-sm text-gray-300 max-w-[80%]">${response}</div></div>`;
+            chat.scrollTop = chat.scrollHeight;
+        }, 1000);
+    },
+
+    // --- CORE FUNCTIONS ---
     openAuth() {
         document.getElementById('auth-modal').classList.add('active');
-        if (this.data.currentUser) {
-            this.showProfile();
-        } else {
-            this.toggleAuthMode('login');
-        }
+        if (this.data.currentUser) this.showProfile(); else this.toggleAuthMode('login');
     },
     closeAuth() { document.getElementById('auth-modal').classList.remove('active'); },
-    
     toggleAuthMode(mode) {
         document.getElementById('auth-login-form').classList.toggle('hidden', mode !== 'login');
         document.getElementById('auth-register-form').classList.toggle('hidden', mode !== 'register');
         document.getElementById('profile-view').classList.add('hidden');
     },
-
     showProfile() {
         document.getElementById('auth-login-form').classList.add('hidden');
         document.getElementById('auth-register-form').classList.add('hidden');
         document.getElementById('profile-view').classList.remove('hidden');
-        
         const u = this.data.currentUser;
         document.getElementById('profile-name').innerText = u.name;
-        document.getElementById('profile-email').innerText = u.email || 'Email не указан';
+        document.getElementById('profile-email').innerText = u.email || 'Нет email';
         document.getElementById('profile-avatar').src = u.photo || 'https://via.placeholder.com/150';
         document.getElementById('edit-name').value = u.name;
         document.getElementById('edit-age').value = u.age || '';
-        
-        const vkBadge = document.getElementById('profile-vk-badge');
-        if(u.isVk) vkBadge.classList.remove('hidden'); else vkBadge.classList.add('hidden');
     },
-
     saveProfile() {
         const newName = document.getElementById('edit-name').value.trim();
         const newAge = document.getElementById('edit-age').value;
-        
-        if(!newName) return this.showToast('Имя не может быть пустым');
-        
-        // Обновляем в памяти
+        if(!newName) return this.showToast('Имя пустое');
         this.data.currentUser.name = newName;
         this.data.currentUser.age = newAge;
-        
-        // Обновляем в базе пользователей
         const idx = this.data.users.findIndex(u => u.id === this.data.currentUser.id);
-        if(idx > -1) {
-            this.data.users[idx] = this.data.currentUser;
-            localStorage.setItem('fuch_users', JSON.stringify(this.data.users));
-        }
+        if(idx > -1) { this.data.users[idx] = this.data.currentUser; localStorage.setItem('fuch_users', JSON.stringify(this.data.users)); }
         localStorage.setItem('fuch_current_user', JSON.stringify(this.data.currentUser));
-        
-        this.updateAuthUI();
-        this.showProfile(); // Обновить поля
-        this.showToast('Профиль обновлен');
+        this.updateAuthUI(); this.showProfile(); this.showToast('Сохранено');
     },
-
     registerUser() {
         const name = document.getElementById('reg-name').value.trim();
         const email = document.getElementById('reg-email').value.trim();
         const pass = document.getElementById('reg-pass').value;
-        if (!name || !email || !pass) return this.showToast('Заполните все поля');
-        if (this.data.users.find(u => u.email === email)) return this.showToast('Email уже занят');
+        if (!name || !email || !pass) return this.showToast('Заполните поля');
         const newUser = { name, email, pass, id: this.generateUniqueID(), photo: null, age: null };
-        this.data.users.push(newUser);
-        localStorage.setItem('fuch_users', JSON.stringify(this.data.users));
+        this.data.users.push(newUser); localStorage.setItem('fuch_users', JSON.stringify(this.data.users));
         this.loginAs(newUser);
-        this.showToast('Регистрация успешна!');
     },
-
     loginUser() {
         const email = document.getElementById('login-email').value.trim();
         const pass = document.getElementById('login-pass').value;
         const user = this.data.users.find(u => u.email === email && u.pass === pass);
-        if (!user) return this.showToast('Неверный email или пароль');
+        if (!user) return this.showToast('Ошибка входа');
         this.loginAs(user);
-        this.showToast(`Добро пожаловать, ${user.name}!`);
     },
-
     vkLogin() {
-        // Если AppID не задан, используем демо-режим
-        if (!this.data.vkAppId) {
-            if(confirm('Для настоящего входа нужен App ID от VK.\nЗапустить демо-вход с фейковыми данными?')) {
-                const mockVkUser = {
-                    id: 'vk_demo_' + Date.now(),
-                    name: 'Павел Дуров',
-                    email: 'durov@vk.com',
-                    photo: 'https://sun9-68.userapi.com/impg/WDXWj5-Xj5_jQ-_l5_wXJw.jpg',
-                    age: 39,
-                    isVk: true
-                };
-                // Проверяем, есть ли уже такой
-                let existing = this.data.users.find(u => u.isVk && u.name === mockVkUser.name);
-                if(!existing) {
-                    this.data.users.push(mockVkUser);
-                    localStorage.setItem('fuch_users', JSON.stringify(this.data.users));
-                    existing = mockVkUser;
-                }
-                this.loginAs(existing);
-                this.showToast('Демо-вход через VK выполнен');
-            }
-            return;
+        if(confirm('Демо-вход через VK?')) {
+            const u = { id: 'vk_demo', name: 'Павел Дуров', email: 'vk@vk.com', photo: 'https://sun9-68.userapi.com/impg/WDXWj5-Xj5_jQ-_l5_wXJw.jpg', age: 39, isVk: true };
+            this.loginAs(u);
         }
-
-        // Настоящий вход через VK SDK
-        VK.Auth.login(function(response) {
-            if (response.session) {
-                const uid = response.session.mid;
-                // Запрашиваем данные профиля
-                VK.api('users.get', { user_ids: uid, fields: 'photo_200,bdate' }, function(r) {
-                    if (r.response && r.response[0]) {
-                        const vkData = r.response[0];
-                        const fullName = `${vkData.first_name} ${vkData.last_name}`;
-                        
-                        // Ищем или создаем пользователя
-                        let user = app.data.users.find(u => u.vkId == uid);
-                        if (!user) {
-                            user = {
-                                id: 'vk_' + uid,
-                                vkId: uid,
-                                name: fullName,
-                                photo: vkData.photo_200,
-                                email: null, // VK не отдает email без отдельного разрешения
-                                age: null, // Можно распарсить из bdate
-                                isVk: true
-                            };
-                            app.data.users.push(user);
-                            localStorage.setItem('fuch_users', JSON.stringify(app.data.users));
-                        } else {
-                            // Обновляем фото и имя при каждом входе
-                            user.name = fullName;
-                            user.photo = vkData.photo_200;
-                            localStorage.setItem('fuch_users', JSON.stringify(app.data.users));
-                        }
-                        
-                        app.loginAs(user);
-                        app.showToast(`Привет, ${vkData.first_name}!`);
-                    }
-                });
-            }
-        }, 4); // 4 = права доступа к email (если нужно)
     },
-
     loginAs(user) {
-        this.data.currentUser = user;
-        localStorage.setItem('fuch_current_user', JSON.stringify(user));
-        this.closeAuth();
-        this.updateAuthUI();
-        if (this.data.currentItem) this.renderComments(this.data.currentItem.id);
+        this.data.currentUser = user; localStorage.setItem('fuch_current_user', JSON.stringify(user));
+        this.closeAuth(); this.updateAuthUI();
     },
-
     logout() {
-        this.data.currentUser = null;
-        localStorage.removeItem('fuch_current_user');
-        this.updateAuthUI();
-        this.toggleAuthMode('login');
-        this.showToast('Вы вышли из аккаунта');
-        if (this.data.currentItem) this.renderComments(this.data.currentItem.id);
+        this.data.currentUser = null; localStorage.removeItem('fuch_current_user');
+        this.updateAuthUI(); this.toggleAuthMode('login'); this.showToast('Выход');
     },
-
     updateAuthUI() {
         const btn = document.getElementById('user-profile-btn');
-        const nameSpan = document.getElementById('user-name-display');
-        const icon = btn.querySelector('i');
+        const span = document.getElementById('user-name-display');
         if (this.data.currentUser) {
-            nameSpan.innerText = this.data.currentUser.name.split(' ')[0];
-            // Если есть фото, можно заменить иконку на мини-аватар, но пока оставим иконку
-            icon.className = 'fas fa-user-check text-fuch-accent text-base md:text-sm';
+            span.innerText = this.data.currentUser.name.split(' ')[0];
             btn.classList.add('border-fuch-accent', 'text-white', 'bg-fuch-accent/10');
-            btn.classList.remove('text-gray-300');
         } else {
-            nameSpan.innerText = 'Войти';
-            icon.className = 'far fa-user text-base md:text-sm';
+            span.innerText = 'Войти';
             btn.classList.remove('border-fuch-accent', 'text-white', 'bg-fuch-accent/10');
-            btn.classList.add('text-gray-300');
         }
     },
-
-    donate(amount) {
-        if(amount === 'custom') {
-            const val = prompt('Введите сумму доната (₽):');
-            if(val && !isNaN(val)) amount = val; else return;
-        }
-        this.showToast(`Переход к оплате ${amount}₽... (Здесь будет платежный шлюз)`);
-        // Здесь должна быть интеграция с CloudPayments / YooKassa / DonationAlerts
-    },
-
-    toggleAdmin() { this.nav('admin'); },
-    adminLogin() { 
-        if(document.getElementById('adm-pass').value==='admin') { 
-            document.getElementById('admin-auth').classList.add('hidden'); 
-            document.getElementById('admin-editor').classList.remove('hidden'); 
-        } else this.showToast('Неверный пароль админа'); 
-    },
-
+    donate(amt) { this.showToast(`Переход к оплате ${amt}₽...`); },
+    adminLogin() { if(document.getElementById('adm-pass').value==='admin') { document.getElementById('admin-auth').classList.add('hidden'); document.getElementById('admin-editor').classList.remove('hidden'); } },
     initTicker() {
-        const d = [{n:'IMOEX',v:'3,245',c:'+1.2%',u:1},{n:'S&P',v:'5,432',c:'-0.4%',u:0},{n:'BTC',v:'68K',c:'+2.1%',u:1},{n:'Brent',v:'82',c:'-1.1%',u:0},{n:'USD',v:'92.5',c:'+0.3%',u:1}];
-        document.getElementById('ticker-content').innerHTML = d.map(i=>`<div class="ticker-item"><span class="font-bold text-gray-300">${i.n}</span> <span class="mx-1">${i.v}</span> <span class="${i.u?'text-up':'text-down'}">${i.c}</span></div>`).join('').repeat(6);
+        const d = [{n:'IMOEX',v:'3,245',c:'+1.2%',u:1},{n:'S&P',v:'5,432',c:'-0.4%',u:0},{n:'BTC',v:'68K',c:'+2.1%',u:1},{n:'Brent',v:'82',c:'-1.1%',u:0}];
+        document.getElementById('ticker-content').innerHTML = d.map(i=>`<div class="ticker-item"><span class="font-bold text-gray-300">${i.n}</span> <span class="${i.u?'text-up':'text-down'}">${i.c}</span></div>`).join('').repeat(6);
     },
-
     nav(view) {
         this.data.currentView = view;
         document.querySelectorAll('main > section').forEach(el => el.classList.add('hidden'));
         document.getElementById(`view-${view}`).classList.remove('hidden');
         ['feed', 'essence', 'ideas'].forEach(v => {
             const btn = document.getElementById(`btn-${v}`);
+            const tab = document.getElementById(`tab-${v}`);
             if(v === view) {
-                if(v === 'essence') btn.className = 'nav-btn px-4 py-1.5 rounded-full text-xs font-bold bg-fuch-essence text-black shadow-lg shadow-orange-500/20 transition-all';
-                else btn.className = 'nav-btn px-4 py-1.5 rounded-full text-xs font-bold bg-fuch-accent text-white shadow-lg shadow-blue-500/20 transition-all';
+                btn.className = v==='essence' ? 'nav-btn px-4 py-1.5 rounded-full text-xs font-bold bg-fuch-essence text-black' : 'nav-btn px-4 py-1.5 rounded-full text-xs font-bold bg-fuch-accent text-white';
+                tab.classList.replace('text-gray-500', v==='essence'?'text-fuch-essence':'text-fuch-accent');
             } else {
-                btn.className = 'nav-btn px-4 py-1.5 rounded-full text-xs font-medium text-gray-400 hover:text-white hover:bg-white/10 transition-all';
+                btn.className = 'nav-btn px-4 py-1.5 rounded-full text-xs font-medium text-gray-400 hover:text-white';
+                tab.classList.replace(v==='essence'?'text-fuch-essence':'text-fuch-accent', 'text-gray-500');
             }
         });
-        ['feed', 'essence', 'ideas'].forEach(v => {
-            const tab = document.getElementById(`tab-${v}`);
-            const color = v === 'essence' ? 'text-fuch-essence' : 'text-fuch-accent';
-            if(v === view) { tab.classList.remove('text-gray-500'); tab.classList.add(color); }
-            else { tab.classList.remove(color); tab.classList.add('text-gray-500'); }
-        });
-        if(view === 'essence' && !localStorage.getItem('ip_essence_seen')) {
-            document.getElementById('essence-modal').classList.add('active');
-        }
+        if(view === 'essence' && !localStorage.getItem('ip_essence_seen')) document.getElementById('essence-modal').classList.add('active');
     },
-
-    closeEssenceModal() {
-        document.getElementById('essence-modal').classList.remove('active');
-        localStorage.setItem('ip_essence_seen', 'true');
-    },
-    showEssenceInfo() { document.getElementById('essence-modal').classList.add('active'); },
+    closeEssenceModal() { document.getElementById('essence-modal').classList.remove('active'); localStorage.setItem('ip_essence_seen', 'true'); },
     showToast(msg) { const t = document.getElementById('toast'); document.getElementById('toast-msg').innerText = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000); },
-
+    
+    // Likes & Comments
     toggleLike(btn, id) {
         if (!this.data.currentUser) return this.openAuth();
-        if (!id) return;
         const isLiked = this.data.likes[id];
         if (isLiked) { delete this.data.likes[id]; btn.classList.remove('text-red-500'); btn.querySelector('i').classList.replace('fas', 'far'); } 
-        else { this.data.likes[id] = true; btn.classList.add('text-red-500'); btn.querySelector('i').classList.replace('far', 'fas'); btn.querySelector('i').classList.add('like-animate'); setTimeout(() => btn.querySelector('i').classList.remove('like-animate'), 300); }
-        localStorage.setItem('ip_likes_v14', JSON.stringify(this.data.likes));
-        this.updateLikeUI(id);
+        else { this.data.likes[id] = true; btn.classList.add('text-red-500'); btn.querySelector('i').classList.replace('far', 'fas'); }
+        localStorage.setItem('ip_likes_v15', JSON.stringify(this.data.likes)); this.updateLikeUI(id);
     },
-
     updateLikeUI(id) {
         const isLiked = this.data.likes[id];
-        const base = Math.abs(String(id).split('').reduce((a,b)=>a+b.charCodeAt(0),0)) % 150;
-        const total = isLiked ? base + 1 : base;
-        const c = document.getElementById('reader-like-count'); if(c) c.innerText = total;
+        const total = isLiked ? 151 : 150;
+        document.getElementById('reader-like-count').innerText = total;
         const b = document.getElementById('reader-like-btn'); 
-        if(b) { if(isLiked) { b.classList.add('text-red-500'); b.querySelector('i').className='fas fa-heart'; } else { b.classList.remove('text-red-500'); b.querySelector('i').className='far fa-heart'; } }
+        if(isLiked) { b.classList.add('text-red-500'); b.querySelector('i').className='fas fa-heart'; } else { b.classList.remove('text-red-500'); b.querySelector('i').className='far fa-heart'; }
     },
-
     handleReaderLike() { if(this.data.currentItem) this.toggleLike(document.getElementById('reader-like-btn'), this.data.currentItem.id); },
-    handleReaderShare() { if(this.data.currentItem) { try{navigator.share({title:this.data.currentItem.title, url:location.href})}catch(e){navigator.clipboard.writeText(location.href); this.showToast('Скопировано')} } },
-
+    handleReaderShare() { this.showToast('Ссылка скопирована'); },
     postComment() {
         if(!this.data.currentUser) return this.openAuth();
-        if(!this.data.currentItem) return;
         const input = document.getElementById('comment-input');
-        const text = input.value.trim();
-        if(!text) return;
+        const text = input.value.trim(); if(!text) return;
         const id = this.data.currentItem.id;
         if(!this.data.comments[id]) this.data.comments[id] = [];
-        
-        // Берем актуальное имя из профиля (вдруг изменил)
-        const authorName = this.data.currentUser.name;
-        const authorPhoto = this.data.currentUser.photo;
-
-        this.data.comments[id].unshift({text, author: authorName, photo: authorPhoto, date: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})});
-        localStorage.setItem('ip_comments_v14', JSON.stringify(this.data.comments));
-        input.value = '';
-        this.renderComments(id);
-        this.showToast('Комментарий добавлен');
+        this.data.comments[id].unshift({text, author: this.data.currentUser.name, date: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})});
+        localStorage.setItem('ip_comments_v15', JSON.stringify(this.data.comments));
+        input.value = ''; this.renderComments(id); this.showToast('Отправлено');
     },
-
     renderComments(id) {
         const list = document.getElementById('comments-list');
-        const count = document.getElementById('comments-count');
-        const loggedInSection = document.getElementById('comment-section-logged-in');
-        const loggedOutSection = document.getElementById('comment-section-logged-out');
-        const avatarImg = document.getElementById('comment-avatar-img');
-        const avatarLetter = document.getElementById('comment-avatar-letter');
-        
-        const coms = this.data.comments[id] || [];
-        count.innerText = coms.length;
-        
+        document.getElementById('comments-count').innerText = (this.data.comments[id] || []).length;
         if (this.data.currentUser) {
-            loggedInSection.classList.remove('hidden');
-            loggedOutSection.classList.add('hidden');
-            if(this.data.currentUser.photo) {
-                avatarImg.src = this.data.currentUser.photo;
-                avatarImg.classList.remove('hidden');
-                avatarLetter.classList.add('hidden');
-            } else {
-                avatarImg.classList.add('hidden');
-                avatarLetter.classList.remove('hidden');
-                avatarLetter.innerText = this.data.currentUser.name.charAt(0).toUpperCase();
-            }
+            document.getElementById('comment-section-logged-in').classList.remove('hidden');
+            document.getElementById('comment-section-logged-out').classList.add('hidden');
+            document.getElementById('comment-avatar').innerText = this.data.currentUser.name.charAt(0);
         } else {
-            loggedInSection.classList.add('hidden');
-            loggedOutSection.classList.remove('hidden');
+            document.getElementById('comment-section-logged-in').classList.add('hidden');
+            document.getElementById('comment-section-logged-out').classList.remove('hidden');
         }
-        
-        list.innerHTML = coms.map(c => `
-            <div class="bg-black/5 dark:bg-white/5 p-4 rounded-xl flex gap-3">
-                <div class="shrink-0">
-                    ${c.photo 
-                        ? `<img src="${c.photo}" class="w-8 h-8 rounded-full object-cover">` 
-                        : `<div class="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center text-xs font-bold">${c.author.charAt(0)}</div>`
-                    }
-                </div>
-                <div class="flex-1">
-                    <div class="flex justify-between text-xs font-bold mb-1 opacity-70"><span>${c.author}</span><span>${c.date}</span></div>
-                    <p class="text-sm md:text-base">${c.text}</p>
-                </div>
-            </div>
-        `).join('');
+        list.innerHTML = (this.data.comments[id] || []).map(c => `<div class="bg-black/5 p-4 rounded-xl"><div class="flex justify-between text-xs font-bold mb-1 opacity-70"><span>${c.author}</span><span>${c.date}</span></div><p class="text-sm">${c.text}</p></div>`).join('');
     },
 
+    // Reader
     openReader(id, isEssence = false) {
         const item = isEssence ? this.data.essenceFeed.find(i => i.id == id) : [...this.data.news, ...this.data.posts].find(i => i.id == id);
         if(!item) return;
@@ -826,146 +590,72 @@ const app = {
         const modal = document.getElementById('reader-modal');
         const paper = document.getElementById('reader-paper');
         const content = document.getElementById('reader-content');
-        const srcLink = document.getElementById('reader-source-link');
-        if(this.data.readerTheme === 'dark') { paper.classList.add('dark'); paper.classList.remove('light'); }
-        else { paper.classList.add('light'); paper.classList.remove('dark'); }
-        document.getElementById('theme-icon').className = this.data.readerTheme === 'light' ? 'fas fa-moon text-sm md:text-xs' : 'fas fa-sun text-sm md:text-xs';
-        if(item.sourceUrl) { srcLink.href = item.sourceUrl; srcLink.classList.remove('hidden'); } else { srcLink.classList.add('hidden'); }
+        
+        paper.className = `reader-box reader-paper ${localStorage.getItem('ip_theme') === 'dark' ? 'dark' : 'light'}`;
+        
         let bodyHtml = item.full || item.body;
-        if (isEssence && item.summary) {
-            bodyHtml = `<div class="bg-black/5 dark:bg-white/5 p-6 rounded-2xl mb-8 border-l-4 border-fuch-essence"><h3 class="font-bold text-lg mb-3 flex items-center gap-2 font-sans"><i class="fas fa-bolt text-fuch-essence"></i> Главное</h3><p class="whitespace-pre-line font-medium">${item.summary}</p></div>` + bodyHtml;
-        }
-        content.innerHTML = `
-            <div class="font-sans text-xs opacity-50 uppercase tracking-widest mb-6 flex items-center gap-3">
-                <span class="bg-black/5 dark:bg-white/10 px-2 py-1 rounded font-bold">${item.tag}</span>
-                <span>${item.source} • ${item.date}</span>
-            </div>
-            <h1 class="text-3xl md:text-4xl font-black mb-8 leading-tight font-sans tracking-tight">${item.title}</h1>
-            <div class="mb-10">${bodyHtml}</div>
-        `;
-        this.updateLikeUI(id);
-        this.renderComments(id);
-        modal.classList.add('active');
-        document.body.style.overflow = 'hidden';
+        if (isEssence && item.summary) bodyHtml = `<div class="bg-black/5 p-6 rounded-2xl mb-8 border-l-4 border-fuch-essence"><h3 class="font-bold text-lg mb-3 font-sans"><i class="fas fa-bolt text-fuch-essence"></i> Главное</h3><p class="whitespace-pre-line">${item.summary}</p></div>` + bodyHtml;
+        
+        content.innerHTML = `<div class="font-sans text-xs opacity-50 uppercase tracking-widest mb-6 flex gap-3"><span class="bg-black/5 px-2 py-1 rounded font-bold">${item.tag}</span><span>${item.source}</span></div><h1 class="text-3xl font-black mb-8 font-sans">${item.title}</h1><div class="mb-10">${bodyHtml}</div>`;
+        
+        this.updateLikeUI(id); this.renderComments(id);
+        modal.classList.add('active'); document.body.style.overflow = 'hidden';
     },
-
-    closeReader() {
-        document.getElementById('reader-modal').classList.remove('active');
-        document.body.style.overflow = '';
-        this.data.currentItem = null;
-    },
-
+    closeReader() { document.getElementById('reader-modal').classList.remove('active'); document.body.style.overflow = ''; },
     toggleReaderTheme() {
-        this.data.readerTheme = this.data.readerTheme === 'light' ? 'dark' : 'light';
-        const paper = document.getElementById('reader-paper');
-        if(this.data.readerTheme === 'dark') { paper.classList.add('dark'); paper.classList.remove('light'); }
-        else { paper.classList.add('light'); paper.classList.remove('dark'); }
-        document.getElementById('theme-icon').className = this.data.readerTheme === 'light' ? 'fas fa-moon text-sm md:text-xs' : 'fas fa-sun text-sm md:text-xs';
-        localStorage.setItem('ip_theme', this.data.readerTheme);
+        const cur = localStorage.getItem('ip_theme') === 'dark' ? 'light' : 'dark';
+        localStorage.setItem('ip_theme', cur);
+        document.getElementById('reader-paper').className = `reader-box reader-paper ${cur}`;
+        document.getElementById('theme-icon').className = cur === 'light' ? 'fas fa-moon text-sm' : 'fas fa-sun text-sm';
     },
 
-    checkStandardScroll() {
-        if (this.data.currentView !== 'feed' || this.data.feedLoading) return;
-        const el = document.getElementById('view-feed');
-        if (el.scrollTop + el.clientHeight >= el.scrollHeight - 300) this.loadMoreStandard();
-    },
-
+    // Infinite Scroll
+    checkStandardScroll() { if (this.data.currentView !== 'feed' || this.data.feedLoading) return; const el = document.getElementById('view-feed'); if (el.scrollTop + el.clientHeight >= el.scrollHeight - 300) this.loadMoreStandard(); },
     async loadMoreStandard() {
-        if(this.data.feedLoading) return;
-        this.data.feedLoading = true;
-        document.getElementById('feed-loader').classList.remove('hidden');
-        setTimeout(() => {
-            const newItems = [];
-            for(let i=0; i<5; i++) newItems.push(this.generateFeedItem());
-            this.data.news = [...this.data.news, ...newItems];
-            this.renderStandardFeed(newItems);
-            this.data.feedLoading = false;
-            document.getElementById('feed-loader').classList.add('hidden');
-        }, 800);
+        this.data.feedLoading = true; document.getElementById('feed-loader').classList.remove('hidden');
+        setTimeout(() => { const n=[]; for(let i=0;i<4;i++) n.push(this.generateFeedItem()); this.data.news=[...this.data.news,...n]; this.renderStandardFeed(n); this.data.feedLoading=false; document.getElementById('feed-loader').classList.add('hidden'); }, 800);
     },
-
     renderStandardFeed(items) {
         const container = document.getElementById('standard-feed-container');
         const html = items.map(n => `
-            <div onclick="app.openReader('${n.id}')" class="bg-fuch-card hover:bg-zinc-800 border border-fuch-border hover:border-fuch-accent/50 rounded-xl p-5 cursor-pointer transition-all group">
-                <div class="flex justify-between mb-2"><span class="text-xs font-bold text-fuch-accent bg-fuch-accent/10 px-2 py-1 rounded">${n.tag}</span><span class="text-xs text-gray-500">${n.date}</span></div>
-                <h3 class="text-lg font-bold text-white group-hover:text-fuch-accent transition mb-2">${n.title}</h3>
-                <p class="text-sm text-gray-400 line-clamp-2">${n.body}</p>
+            <div onclick="app.openReader('${n.id}')" class="bg-fuch-card hover:bg-zinc-800 border border-fuch-border hover:border-fuch-accent/50 rounded-xl overflow-hidden cursor-pointer transition-all group flex flex-col h-full">
+                <div class="h-48 overflow-hidden relative">
+                    <img src="${n.image}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                    <div class="absolute top-3 left-3 bg-black/60 backdrop-blur px-2 py-1 rounded text-xs font-bold text-white">${n.tag}</div>
+                </div>
+                <div class="p-5 flex flex-col flex-grow">
+                    <h3 class="text-xl font-bold text-white group-hover:text-fuch-accent transition mb-2 leading-snug">${n.title}</h3>
+                    <p class="text-sm text-gray-400 line-clamp-3 mb-4 flex-grow">${n.body}</p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 mt-auto pt-4 border-t border-white/5">
+                        <span>${n.source}</span>
+                        <span>${n.date}</span>
+                    </div>
+                </div>
             </div>
         `).join('');
         container.insertAdjacentHTML('beforeend', html);
     },
-
-    checkEssenceScroll(device) {
-        if (this.data.currentView !== 'essence' || this.data.essenceLoading) return;
-        const el = document.getElementById(`essence-${device}`);
-        const isEnd = device === 'mobile' ? el.scrollLeft + el.clientWidth >= el.scrollWidth - 300 : el.scrollTop + el.clientHeight >= el.scrollHeight - 300;
-        if (isEnd) this.loadMoreEssence();
-    },
-
+    checkEssenceScroll(device) { if (this.data.currentView !== 'essence' || this.data.essenceLoading) return; const el = document.getElementById(`essence-${device}`); const isEnd = device === 'mobile' ? el.scrollLeft + el.clientWidth >= el.scrollWidth - 300 : el.scrollTop + el.clientHeight >= el.scrollHeight - 300; if (isEnd) this.loadMoreEssence(); },
     async loadMoreEssence() {
-        if(this.data.essenceLoading) return;
         this.data.essenceLoading = true;
-        document.getElementById('essence-loader').classList.remove('hidden');
-        setTimeout(() => {
-            const newItems = [];
-            for(let i=0; i<5; i++) newItems.push(this.generateEssenceItem());
-            this.data.essenceFeed = [...this.data.essenceFeed, ...newItems];
-            this.renderEssenceChunk(newItems);
-            this.data.essenceLoading = false;
-            document.getElementById('essence-loader').classList.add('hidden');
-        }, 800);
+        setTimeout(() => { const n=[]; for(let i=0;i<3;i++) n.push(this.generateEssenceItem()); this.data.essenceFeed=[...this.data.essenceFeed,...n]; this.renderEssenceChunk(n); this.data.essenceLoading=false; }, 800);
     },
-
     renderEssenceChunk(items) {
-        const mContainer = document.getElementById('essence-mobile');
-        const dContainer = document.getElementById('essence-desktop');
+        const mC = document.getElementById('essence-mobile'); const dC = document.getElementById('essence-desktop');
         const grads = ['from-orange-900 to-black', 'from-amber-900 to-black', 'from-yellow-900 to-black'];
         const html = items.map(i => {
-            const liked = this.data.likes[i.id];
             const g = grads[Math.abs(String(i.id).split('').reduce((a,b)=>a+b.charCodeAt(0),0)) % grads.length];
-            const inner = `
-                <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent pointer-events-none z-10"></div>
-                <div class="absolute top-4 right-4 flex gap-2 z-20">
-                    <button onclick="event.stopPropagation(); app.toggleLike(this, '${i.id}')" class="w-12 h-12 rounded-full bg-white/10 backdrop-blur flex items-center justify-center ${liked?'text-red-500':'text-white/80'} transition active:scale-90 border border-white/10"><i class="${liked?'fas':'far'} fa-heart text-lg"></i></button>
-                </div>
-                <div class="relative z-20 h-full flex flex-col justify-end p-6 cursor-pointer" onclick="app.openReader('${i.id}', true)">
-                    <div class="flex items-center gap-2 mb-3"><span class="px-2 py-0.5 rounded bg-fuch-essence/20 backdrop-blur text-[10px] font-bold text-fuch-essence uppercase tracking-wide border border-fuch-essence/30">#${i.tag}</span><span class="text-white/60 text-xs font-medium">${i.date}</span></div>
-                    <h2 class="text-2xl font-bold text-white leading-tight mb-3 drop-shadow-md">${i.title}</h2>
-                    <div class="bg-black/40 backdrop-blur-sm p-4 rounded-xl border border-white/10 mb-4">
-                        <div class="text-fuch-essence text-xs font-bold uppercase mb-2 flex items-center gap-1"><i class="fas fa-bolt"></i> Выжимка</div>
-                        <p class="text-sm text-gray-200 whitespace-pre-line leading-snug">${i.summary}</p>
-                    </div>
-                    <div class="mt-auto">
-                        <a href="${i.sourceUrl}" target="_blank" onclick="event.stopPropagation()" class="block w-full py-4 rounded-xl font-bold text-center text-base bg-fuch-essence text-black hover:bg-orange-400 transition active:scale-95 no-underline">Читать источник <i class="fas fa-external-link-alt ml-2 text-xs"></i></a>
-                    </div>
-                </div>
-            `;
-            const mCard = `<div class="essence-card-mobile bg-gradient-to-br ${g} shadow-2xl group">${inner}</div>`;
-            const dCard = `<div class="essence-card-desktop bg-gradient-to-br ${g} shadow-xl group hover:shadow-2xl hover:border-fuch-essence">${inner}</div>`;
-            return { mCard, dCard };
+            const inner = `<div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-10"></div><div class="relative z-20 h-full flex flex-col justify-end p-6 cursor-pointer" onclick="app.openReader('${i.id}', true)"><div class="flex items-center gap-2 mb-3"><span class="px-2 py-0.5 rounded bg-fuch-essence/20 text-[10px] font-bold text-fuch-essence uppercase border border-fuch-essence/30">#${i.tag}</span></div><h2 class="text-2xl font-bold text-white mb-3">${i.title}</h2><div class="bg-black/40 backdrop-blur p-4 rounded-xl border border-white/10 mb-4"><p class="text-sm text-gray-200 whitespace-pre-line">${i.summary}</p></div><div class="mt-auto"><span class="block w-full py-3 rounded-xl font-bold text-center text-base bg-fuch-essence text-black">Источник</span></div></div>`;
+            mC.insertAdjacentHTML('beforeend', `<div class="essence-card-mobile bg-gradient-to-br ${g}">${inner}</div>`);
+            dC.insertAdjacentHTML('beforeend', `<div class="essence-card-desktop bg-gradient-to-br ${g}">${inner}</div>`);
         });
-        mContainer.insertAdjacentHTML('beforeend', html.map(h => h.mCard).join(''));
-        dContainer.insertAdjacentHTML('beforeend', html.map(h => h.dCard).join(''));
     },
-
     addNews() {
-        const t=document.getElementById('new-title').value, b=document.getElementById('new-body').value, type=document.getElementById('new-tag').value;
-        if(!t||!b) return alert('Заполните');
-        const n={id:this.generateUniqueID(), title:t, body:b.substring(0,150)+'...', full:`<p>${b.replace(/\n/g,'</p><p>')}</p>`, tag:type==='idea'?'Мнение':'Новости', source:'Автор', date:'Сейчас', isPost:type==='idea', sourceUrl:'#'};
-        if(type==='idea') { this.data.posts.unshift(n); localStorage.setItem('ip_posts_v14',JSON.stringify(this.data.posts)); this.renderIdeas(); }
-        else { this.data.news.unshift(n); this.renderStandardFeed([n]); }
-        alert('OK'); this.nav(type==='idea'?'ideas':'feed');
+        const b=document.getElementById('new-body').value; if(!b) return;
+        const n={id:this.generateUniqueID(), title:"Новая идея", body:b, full:`<p>${b}</p>`, tag:"Мнение", source:'Автор', date:'Сейчас', isPost:true};
+        this.data.posts.unshift(n); localStorage.setItem('ip_posts_v15',JSON.stringify(this.data.posts)); this.renderIdeas(); this.nav('ideas');
     },
-    renderIdeas() { 
-        document.getElementById('ideas-list').innerHTML = this.data.posts.map(p => `
-            <div onclick="app.openReader('${p.id}')" class="bg-fuch-card p-6 rounded-2xl border border-fuch-border active:scale-95 transition cursor-pointer hover:border-purple-500/50 group">
-                <div class="text-xs text-purple-400 font-bold mb-3 uppercase tracking-wider flex items-center gap-2"><i class="fas fa-pen-nib"></i> Мнение • ${p.date}</div>
-                <h3 class="text-xl font-bold mb-3 group-hover:text-purple-400 transition">${p.title}</h3>
-                <p class="text-sm text-gray-400 line-clamp-3 leading-relaxed">${p.body}</p>
-            </div>
-        `).join(''); 
-    }
+    renderIdeas() { document.getElementById('ideas-list').innerHTML = this.data.posts.map(p => `<div onclick="app.openReader('${p.id}')" class="bg-fuch-card p-6 rounded-2xl border border-fuch-border cursor-pointer hover:border-purple-500/50"><div class="text-xs text-purple-400 font-bold mb-3 uppercase">Мнение • ${p.date}</div><h3 class="text-xl font-bold mb-3">${p.title}</h3><p class="text-sm text-gray-400">${p.body}</p></div>`).join(''); }
 };
 
 document.addEventListener('DOMContentLoaded', () => app.init());
